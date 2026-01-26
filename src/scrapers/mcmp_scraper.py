@@ -20,6 +20,7 @@ class MCMPScraper:
         self.events = []
         self.people = []
         self.research = []
+        self.general = []
 
     def scrape_events(self):
         """Scrapes multiple sources for event links."""
@@ -140,47 +141,101 @@ class MCMPScraper:
             return []
 
     def scrape_research(self):
-        """Scrapes the research projects."""
+        """Scrapes the research projects, including subpages."""
         log_info(f"Starting scrape of {self.RESEARCH_URL}")
         try:
+            # 1. Scrape main research page
             response = requests.get(self.RESEARCH_URL)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Projects seem to be listed under headers or specific sections
-            # We'll look for generic project indicators or scrape the text structure
-            
-            # Simplified approach: Look for headers and following text blocks
-            main_content = soup.find('div', id='r-main') or soup.find('main')
-            if main_content:
-                headers = main_content.find_all(['h2', 'h3'])
-                for header in headers:
-                    title = header.get_text(strip=True)
-                    # Get the description (next sibling elements until next header)
-                    description = ""
-                    curr = header.find_next_sibling()
-                    while curr and curr.name not in ['h2', 'h3']:
-                        description += curr.get_text(separator=' ', strip=True) + "\n"
-                        curr = curr.find_next_sibling()
-                    
-                    if len(description) > 50: # Only keep significant blocks
-                         # Create a unique URL using anchor if possible, or fallback
-                         anchor = title.lower().replace(" ", "-")
-                         unique_url = f"{self.RESEARCH_URL}#{anchor}"
-                         
-                         self.research.append({
-                            "title": title,
-                            "description": description.strip(),
-                            "url": unique_url, # Unique URL per project
-                            "type": "research",
-                            "scraped_at": datetime.now().isoformat()
-                        })
-            
-            log_info(f"Found {len(self.research)} research items.")
+            # Find links to specific research subpages
+            subpage_links = set()
+            for link in soup.find_all('a', href=True):
+                href = link['href']
+                if "/research/" in href and href != self.RESEARCH_URL:
+                     # Filter out non-content links if possible, or just strict path checking
+                     # The ML page is .../mcmp/en/research/philosophy-of-machine-learning/
+                     if "/mcmp/en/research/" in href and "publications" not in href:
+                         full_url = href if href.startswith("http") else f"{self.BASE_URL}{href}"
+                         subpage_links.add(full_url)
+
+            # Ensure the specific ML page requested is included even if discovery fails
+            ml_page = f"{self.BASE_URL}/mcmp/en/research/philosophy-of-machine-learning/"
+            subpage_links.add(ml_page)
+
+            # 2. Scrape each subpage
+            for url in subpage_links:
+                try:
+                    self._scrape_single_research_page(url)
+                except Exception as e:
+                    log_error(f"Failed to scrape research subpage {url}: {e}")
+
+            log_info(f"Found {len(self.research)} research items/pages.")
             return self.research
         except Exception as e:
             log_error(f"Error scraping research: {e}")
             return []
+
+    def _scrape_single_research_page(self, url):
+        """Helper to scrape a specific research page."""
+        response = requests.get(url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Get title
+        title_elem = soup.find('h1')
+        title = title_elem.get_text(strip=True) if title_elem else "Research Project"
+        
+        # Get main content
+        main_content = soup.find('div', id='r-main') or soup.find('main')
+        if main_content:
+            text = main_content.get_text(separator=' ', strip=True)
+            # Remove navigation noise if possible (simple heuristic: takes long text)
+            
+            self.research.append({
+                "title": title,
+                "description": text[:5000], # Limit length to avoid massive context
+                "url": url,
+                "type": "research",
+                "scraped_at": datetime.now().isoformat()
+            })
+
+    def scrape_general(self):
+        """Scrapes the home page for general info (About, History)."""
+        home_url = f"{self.BASE_URL}/mcmp/en/index.html"
+        log_info(f"Starting scrape of {home_url}")
+        try:
+            response = requests.get(home_url)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            main_content = soup.find('div', id='r-main') or soup.find('main')
+            if main_content:
+                # Extract sections like "About the MCMP", "Our history"
+                headers = main_content.find_all(['h2'])
+                for header in headers:
+                    section_title = header.get_text(strip=True)
+                    if any(x in section_title.lower() for x in ['about', 'history', 'aims', 'profile']):
+                        content = ""
+                        curr = header.find_next_sibling()
+                        while curr and curr.name not in ['h2', 'h1']:
+                            content += curr.get_text(separator=' ', strip=True) + "\n"
+                            curr = curr.find_next_sibling()
+                        
+                        if content.strip():
+                            self.general.append({
+                                "title": f"General: {section_title}",
+                                "description": content.strip(),
+                                "url": home_url,
+                                "type": "general",
+                                "scraped_at": datetime.now().isoformat()
+                            })
+            
+            return self.general
+        except Exception as e:
+             log_error(f"Error scraping general info: {e}")
+             return []
 
     def save_to_json(self):
         """Saves scraped data to JSON files."""
@@ -194,12 +249,16 @@ class MCMPScraper:
             
         with open("data/research.json", 'w', encoding='utf-8') as f:
             json.dump(self.research, f, indent=4, ensure_ascii=False)
+
+        with open("data/general.json", 'w', encoding='utf-8') as f:
+            json.dump(self.general, f, indent=4, ensure_ascii=False)
             
-        log_info(f"Saved {len(self.events)} events, {len(self.people)} people, {len(self.research)} research items.")
+        log_info(f"Saved {len(self.events)} events, {len(self.people)} people, {len(self.research)} research items, {len(self.general)} general items.")
 
 if __name__ == "__main__":
     scraper = MCMPScraper()
     scraper.scrape_events()
     scraper.scrape_people()
     scraper.scrape_research()
+    scraper.scrape_general()
     scraper.save_to_json()
