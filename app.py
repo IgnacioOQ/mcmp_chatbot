@@ -76,7 +76,7 @@ def main():
         layout="centered"
     )
 
-    st.title("MCMP Intelligence")
+    st.title("MCMP Chatbot")
     st.markdown("Ask me anything about the Munich Center for Mathematical Philosophy: our research, people, history, and upcoming events.")
 
     # Auto-refresh check
