@@ -91,6 +91,26 @@ def main():
                     save_feedback(name, feedback)
                     st.success("Thank you for your feedback!")
 
+        with st.expander("Admin Access"):
+            password = st.text_input("Admin Password", type="password")
+            if password == "mcmp2026": # Simple password for demo
+                feedback_file = "data/feedback.json"
+                if os.path.exists(feedback_file):
+                    with open(feedback_file, 'r', encoding='utf-8') as f:
+                        feedback_data = json.load(f)
+                    
+                    st.write(f"Total Feedback: {len(feedback_data)}")
+                    st.dataframe(feedback_data)
+                    
+                    st.download_button(
+                        label="Download Feedback JSON",
+                        data=json.dumps(feedback_data, indent=4),
+                        file_name="feedback.json",
+                        mime="application/json"
+                    )
+                else:
+                    st.info("No feedback received yet.")
+
     # Initialize RAG Engine
     if "engine" not in st.session_state:
         st.session_state.engine = RAGEngine(provider="gemini")
