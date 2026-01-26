@@ -20,12 +20,20 @@ def save_feedback(name, feedback):
             client = gspread.authorize(creds)
             
             # Open the sheet
-            # Uses 'sheet_name' from secrets if available, else defaults to "MCMP Feedback"
-            sheet_name = st.secrets["gcp_service_account"].get("sheet_name", "MCMP Feedback")
-            
-            try:
-                sheet = client.open(sheet_name).sheet1
-            except gspread.SpreadsheetNotFound:
+            # 1. Try by ID (most robust)
+            sheet_id = st.secrets["gcp_service_account"].get("sheet_id")
+            if sheet_id:
+                try:
+                    sheet = client.open_by_key(sheet_id).sheet1
+                except Exception as e:
+                     log_error(f"Failed to open by ID {sheet_id}: {e}")
+                     raise
+            else:
+                # 2. Fallback to Name
+                sheet_name = st.secrets["gcp_service_account"].get("sheet_name", "MCMP Feedback")
+                try:
+                    sheet = client.open(sheet_name).sheet1
+                except gspread.SpreadsheetNotFound:
                 # Optional: create if not found, but requires Drive write scope/logic
                 log_error(f"Google Sheet '{sheet_name}' not found. Fallback to JSON.")
                 raise
