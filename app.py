@@ -13,6 +13,29 @@ def main():
     st.title("MCMP Activity Chatbot")
     st.markdown("Ask me anything about the Munich Center for Mathematical Philosophy's upcoming talks, workshops, and events.")
 
+    # Auto-refresh check
+    RAW_DATA_PATH = "data/raw_events.json"
+    needs_refresh = False
+    if not os.path.exists(RAW_DATA_PATH):
+        needs_refresh = True
+    else:
+        # If older than 24 hours
+        mtime = os.path.getmtime(RAW_DATA_PATH)
+        if (datetime.now().timestamp() - mtime) > 86400:
+            needs_refresh = True
+
+    if needs_refresh and "auto_refreshed" not in st.session_state:
+        with st.status("Initializing knowledge base..."):
+            from src.scrapers.mcmp_scraper import MCMPScraper
+            from src.core.vector_store import VectorStore
+            scraper = MCMPScraper()
+            scraper.scrape_events()
+            scraper.save_to_json()
+            vs = VectorStore()
+            vs.add_events()
+            st.session_state.auto_refreshed = True
+            st.rerun()
+
     # Sidebar for configuration
     with st.sidebar:
         st.header("Settings")

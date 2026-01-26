@@ -10,6 +10,8 @@ class MCMPScraper:
     EVENT_SOURCES = [
         f"{BASE_URL}/mcmp/en/latest-news/events-overview/index.html",
         f"{BASE_URL}/mcmp/en/events/index.html",
+        f"{BASE_URL}/mcmp/en/events/reading_groups/index.html", # Reading groups
+        f"{BASE_URL}/mcmp/en/research/reading_groups/index.html", # Research reading groups
         f"{BASE_URL}/mcmp/en/index.html"
     ]
 
@@ -31,10 +33,11 @@ class MCMPScraper:
                     text = link.get_text(strip=True)
                     
                     is_event_link = False
-                    # Look for links that contain "/event/" or specifically name an event
+                    # Look for links that contain "/event/" or specifically name an activity
+                    lower_href = href.lower()
                     if "/event/" in href:
                         is_event_link = True
-                    elif "talk-" in href.lower() or "workshop-" in href.lower() or "conference-" in href.lower():
+                    elif any(kw in lower_href for kw in ["talk-", "workshop-", "conference-", "colloquium-", "seminar-", "reading-group"]):
                         if ".html" in href:
                             is_event_link = True
 
