@@ -30,7 +30,14 @@ class RAGEngine:
         context_docs = results['documents'][0]
         context_metadatas = results['metadatas'][0]
         
-        context_text = "\n\n---\n\n".join(context_docs)
+        # Combine docs with their metadata (specifically URL)
+        formatted_context = []
+        for doc, meta in zip(context_docs, context_metadatas):
+            source_url = meta.get('url', 'No URL available')
+            formatted_entry = f"{doc}\nSource URL: {source_url}"
+            formatted_context.append(formatted_entry)
+            
+        context_text = "\n\n---\n\n".join(formatted_context)
         
         prompt = f"""You are the official Munich Center for Mathematical Philosophy (MCMP) Intelligence Assistant. 
 
