@@ -62,10 +62,12 @@ ANSWER:"""
                 )
                 return response.content[0].text
             elif self.provider == "gemini":
-                import google.generativeai as genai
-                genai.configure(api_key=self.api_key)
-                model = genai.GenerativeModel('gemini-1.5-flash')
-                response = model.generate_content(prompt)
+                from google import genai
+                client = genai.Client(api_key=self.api_key)
+                response = client.models.generate_content(
+                    model='gemini-2.0-flash',
+                    contents=prompt
+                )
                 return response.text
         except Exception as e:
             log_error(f"Error generating response: {e}")
