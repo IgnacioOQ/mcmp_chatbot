@@ -35,11 +35,15 @@ The application is built with **Streamlit** for the frontend, uses **ChromaDB** 
    Create a `.streamlit/secrets.toml` file with your API keys.
 
    **For Google Gemini (Recommended):**
+   - Get your API key from [Google AI Studio](https://aistudio.google.com/).
    ```toml
    GEMINI_API_KEY = "your-google-gemini-key"
    ```
 
    **For Cloud Feedback (Google Sheets):**
+   - Create a project in [Google Cloud Console](https://console.cloud.google.com/).
+   - Enable the [Google Sheets API](https://console.cloud.google.com/apis/library/sheets.googleapis.com) and [Google Drive API](https://console.cloud.google.com/apis/library/drive.googleapis.com).
+   - Create a Service Account and download the JSON key.
    ```toml
    [gcp_service_account]
    type = "service_account"
