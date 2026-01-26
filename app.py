@@ -1,8 +1,34 @@
 import streamlit as st
 import os
+import json
 from datetime import datetime
 from src.core.engine import RAGEngine
 from src.utils.logger import log_info
+
+def save_feedback(name, feedback):
+    """Saves user feedback to a JSON file."""
+    feedback_file = "data/feedback.json"
+    os.makedirs("data", exist_ok=True)
+    
+    entry = {
+        "timestamp": datetime.now().isoformat(),
+        "name": name,
+        "feedback": feedback
+    }
+    
+    if os.path.exists(feedback_file):
+        with open(feedback_file, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                data = []
+    else:
+        data = []
+        
+    data.append(entry)
+    
+    with open(feedback_file, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
 def main():
     st.set_page_config(
@@ -54,6 +80,16 @@ def main():
                 vs = VectorStore()
                 vs.add_events()
                 st.success("Data refreshed!")
+
+        st.markdown("---")
+        with st.expander("Give Feedback"):
+            with st.form("feedback_form"):
+                name = st.text_input("Name (optional)")
+                feedback = st.text_area("Your Feedback", help="Let us know what you think!")
+                submitted = st.form_submit_button("Submit")
+                if submitted and feedback:
+                    save_feedback(name, feedback)
+                    st.success("Thank you for your feedback!")
 
     # Initialize RAG Engine
     if "engine" not in st.session_state:
