@@ -10,7 +10,6 @@ class MCMPScraper:
     EVENT_SOURCES = [
         f"{BASE_URL}/mcmp/en/latest-news/events-overview/index.html",
         f"{BASE_URL}/mcmp/en/events/index.html",
-        f"{BASE_URL}/mcmp/en/events/reading_groups/index.html", # Reading groups
         f"{BASE_URL}/mcmp/en/index.html"
     ]
     PEOPLE_URL = f"{BASE_URL}/mcmp/en/people/index.html"
@@ -237,6 +236,77 @@ class MCMPScraper:
              log_error(f"Error scraping general info: {e}")
              return []
 
+    def scrape_reading_groups(self):
+        """Scrapes reading groups from the events page."""
+        url = f"{self.BASE_URL}/mcmp/en/events/index.html"
+        log_info(f"Starting scrape of reading groups from {url}")
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Reading groups seem to be in an accordion or headers under "Reading groups" section
+            # We look for the "Reading groups" header and then parse subsequent content
+            
+            main_content = soup.find('div', id='r-main') or soup.find('main')
+            if main_content:
+                # Find the "Reading groups" header
+                header = main_content.find(lambda tag: tag.name in ['h2', 'h1'] and "Reading groups" in tag.get_text())
+                
+                if header:
+                    # Iterate through siblings to find groups
+                    # Structure might be: Header -> p/div (content) -> Header -> ...
+                    curr = header.find_next_sibling()
+                    current_group = {}
+                    
+                    while curr:
+                        # Stop if we hit a new major section (e.g. "Event policy")
+                        if curr.name in ['h1', 'h2'] and "Reading groups" not in curr.get_text():
+                            break
+                        
+                        # In the observed chunk, group titles were links or text followed by description
+                        # e.g. [Philosophy of machine learning]... We meet...
+                        
+                        text = curr.get_text(separator=' ', strip=True)
+                        if text:
+                            # Heuristic: If it looks like a title (short, maybe has link)
+                            is_title = False
+                            link = curr.find('a')
+                            if link and len(text) < 100:
+                                is_title = True
+                            
+                            if is_title:
+                                # Save previous if exists
+                                if current_group:
+                                    self.general.append(current_group)
+                                
+                                title = text
+                                link_url = link['href'] if link else url
+                                if not link_url.startswith("http"):
+                                    link_url = f"{self.BASE_URL}{link_url}"
+                                    
+                                current_group = {
+                                    "title": f"Reading Group: {title}",
+                                    "description": "",
+                                    "url": link_url,
+                                    "type": "reading_group",
+                                    "scraped_at": datetime.now().isoformat()
+                                }
+                            elif current_group:
+                                current_group["description"] += "\n" + text
+                        
+                        curr = curr.find_next_sibling()
+                    
+                    # Append the last one
+                    if current_group:
+                         self.general.append(current_group)
+
+            log_info(f"Scraped reading groups into general/events.")
+            return self.general
+        except Exception as e:
+            log_error(f"Error scraping reading groups: {e}")
+            return []
+
     def save_to_json(self):
         """Saves scraped data to JSON files."""
         os.makedirs("data", exist_ok=True)
@@ -261,4 +331,5 @@ if __name__ == "__main__":
     scraper.scrape_people()
     scraper.scrape_research()
     scraper.scrape_general()
+    scraper.scrape_reading_groups()
     scraper.save_to_json()
