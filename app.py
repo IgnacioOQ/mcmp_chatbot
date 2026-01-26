@@ -6,12 +6,41 @@ from src.core.engine import RAGEngine
 from src.utils.logger import log_info
 
 def save_feedback(name, feedback):
-    """Saves user feedback to a JSON file."""
+    """Saves user feedback to Google Sheets (if configured) or local JSON."""
+    timestamp = datetime.now().isoformat()
+    
+    # 1. Try Google Sheets
+    if "gcp_service_account" in st.secrets:
+        try:
+            import gspread
+            from google.oauth2.service_account import Credentials
+            
+            scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+            creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
+            client = gspread.authorize(creds)
+            
+            # Open the sheet (assumes name is "MCMP Feedback" or config)
+            sheet_name = "MCMP Feedback"
+            try:
+                sheet = client.open(sheet_name).sheet1
+            except gspread.SpreadsheetNotFound:
+                # Optional: create if not found, but requires Drive write scope/logic
+                log_error(f"Google Sheet '{sheet_name}' not found. Fallback to JSON.")
+                raise
+                
+            sheet.append_row([timestamp, name, feedback])
+            log_info(f"Feedback saved to Google Sheet: {sheet_name}")
+            return
+        except Exception as e:
+            log_error(f"Failed to save to Google Sheets: {e}")
+            # Fall through to JSON
+
+    # 2. Local JSON Fallback
     feedback_file = "data/feedback.json"
     os.makedirs("data", exist_ok=True)
     
     entry = {
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": timestamp,
         "name": name,
         "feedback": feedback
     }
