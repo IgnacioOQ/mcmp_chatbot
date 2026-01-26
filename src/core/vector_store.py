@@ -2,6 +2,7 @@ import chromadb
 from chromadb.utils import embedding_functions
 import json
 import os
+import hashlib
 from src.utils.logger import log_info, log_error
 
 class VectorStore:
@@ -15,48 +16,72 @@ class VectorStore:
             embedding_function=self.ef
         )
 
-    def add_events(self, events_json_path="data/raw_events.json"):
-        """Indexes events from a JSON file into ChromaDB."""
-        if not os.path.exists(events_json_path):
-            log_error(f"JSON file not found: {events_json_path}")
-            return
+    def _generate_id(self, url):
+        """Generates a stable ID based on the URL."""
+        return hashlib.md5(url.encode('utf-8')).hexdigest()
 
-        with open(events_json_path, 'r', encoding='utf-8') as f:
-            events = json.load(f)
-
+    def add_events(self):
+        """Indexes all scraped data (events, people, research) into ChromaDB with persistence."""
+        
+        # Load all data sources
+        data_files = {
+            "event": "data/raw_events.json",
+            "person": "data/people.json",
+            "research": "data/research.json"
+        }
+        
         ids = []
         documents = []
         metadatas = []
 
-        for i, event in enumerate(events):
-            # Create a unique ID based on URL or index
-            event_id = str(i)
-            ids.append(event_id)
+        for type_label, filepath in data_files.items():
+            if not os.path.exists(filepath):
+                continue
+                
+            with open(filepath, 'r', encoding='utf-8') as f:
+                items = json.load(f)
             
-            # Combine title and description for indexing
-            doc_content = f"Title: {event['title']}\n\nDescription: {event.get('description', 'No description available')}"
-            documents.append(doc_content)
-            
-            # Store original URL and metadata for retrieval
-            metadata = {
-                "title": event['title'],
-                "url": event['url'],
-                "scraped_at": event['scraped_at']
-            }
-            # Add event-specific metadata if available
-            if 'metadata' in event:
-                for k, v in event['metadata'].items():
-                    metadata[f"meta_{k.replace(' ', '_')}"] = str(v)
-            
-            metadatas.append(metadata)
+            for item in items:
+                url = item.get('url', '')
+                if not url:
+                    continue
+                    
+                # Stable ID
+                doc_id = self._generate_id(url)
+                ids.append(doc_id)
+                
+                # Content formatting based on type
+                if type_label == "event":
+                    content = f"Event: {item['title']}\nDescription: {item.get('description', '')}"
+                elif type_label == "person":
+                    content = f"Person: {item['name']}\nProfile: {url}"
+                elif type_label == "research":
+                    content = f"Research Project: {item['title']}\nDescription: {item.get('description', '')}"
+                
+                documents.append(content)
+                
+                # Metadata
+                meta = {
+                    "type": type_label,
+                    "title": item.get('title') or item.get('name'),
+                    "url": url,
+                    "scraped_at": item.get('scraped_at', '')
+                }
+                # Flatten extra metadata
+                if 'metadata' in item:
+                    for k, v in item['metadata'].items():
+                        meta[f"meta_{k}"] = str(v)
+                
+                metadatas.append(meta)
 
         if ids:
+            # upsert updates existing IDs and inserts new ones
             self.collection.upsert(
                 ids=ids,
                 documents=documents,
                 metadatas=metadatas
             )
-            log_info(f"Indexed {len(ids)} events into vector store.")
+            log_info(f"Upserted {len(ids)} items into vector store (History preserved).")
 
     def query(self, text, n_results=3):
         """Queries the vector store for relevant events."""

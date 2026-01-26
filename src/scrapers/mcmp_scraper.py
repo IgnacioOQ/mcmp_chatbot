@@ -11,12 +11,15 @@ class MCMPScraper:
         f"{BASE_URL}/mcmp/en/latest-news/events-overview/index.html",
         f"{BASE_URL}/mcmp/en/events/index.html",
         f"{BASE_URL}/mcmp/en/events/reading_groups/index.html", # Reading groups
-        f"{BASE_URL}/mcmp/en/research/reading_groups/index.html", # Research reading groups
         f"{BASE_URL}/mcmp/en/index.html"
     ]
+    PEOPLE_URL = f"{BASE_URL}/mcmp/en/people/index.html"
+    RESEARCH_URL = f"{BASE_URL}/mcmp/en/research/index.html"
 
     def __init__(self):
         self.events = []
+        self.people = []
+        self.research = []
 
     def scrape_events(self):
         """Scrapes multiple sources for event links."""
@@ -103,14 +106,100 @@ class MCMPScraper:
         except Exception as e:
             log_error(f"Error scraping event details for {event['url']}: {e}")
 
-    def save_to_json(self, filepath="data/raw_events.json"):
-        """Saves the scraped events to a JSON file."""
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        with open(filepath, 'w', encoding='utf-8') as f:
+    def scrape_people(self):
+        """Scrapes the people directory."""
+        log_info(f"Starting scrape of {self.PEOPLE_URL}")
+        try:
+            response = requests.get(self.PEOPLE_URL)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Based on the view_content_chunk, people are listed with links to contact pages
+            # We look for links inside the academic staff section (or general list)
+            # A good heuristic is links containing "/people/contact-page/"
+            
+            person_links = soup.find_all('a', href=True)
+            for link in person_links:
+                href = link['href']
+                if "/people/contact-page/" in href or "/faculty/" in href or "/staff/" in href:
+                    full_url = href if href.startswith("http") else f"{self.BASE_URL}{href}"
+                    name = link.get_text(strip=True)
+                    
+                    if full_url not in [p['url'] for p in self.people] and name:
+                        self.people.append({
+                            "name": name,
+                            "url": full_url,
+                            "type": "person",
+                            "scraped_at": datetime.now().isoformat()
+                        })
+            
+            log_info(f"Found {len(self.people)} people profiles.")
+            return self.people
+        except Exception as e:
+            log_error(f"Error scraping people: {e}")
+            return []
+
+    def scrape_research(self):
+        """Scrapes the research projects."""
+        log_info(f"Starting scrape of {self.RESEARCH_URL}")
+        try:
+            response = requests.get(self.RESEARCH_URL)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Projects seem to be listed under headers or specific sections
+            # We'll look for generic project indicators or scrape the text structure
+            
+            # Simplified approach: Look for headers and following text blocks
+            main_content = soup.find('div', id='r-main') or soup.find('main')
+            if main_content:
+                headers = main_content.find_all(['h2', 'h3'])
+                for header in headers:
+                    title = header.get_text(strip=True)
+                    # Get the description (next sibling elements until next header)
+                    description = ""
+                    curr = header.find_next_sibling()
+                    while curr and curr.name not in ['h2', 'h3']:
+                        description += curr.get_text(separator=' ', strip=True) + "\n"
+                        curr = curr.find_next_sibling()
+                    
+                    if len(description) > 50: # Only keep significant blocks
+                         # Create a unique URL using anchor if possible, or fallback
+                         anchor = title.lower().replace(" ", "-")
+                         unique_url = f"{self.RESEARCH_URL}#{anchor}"
+                         
+                         self.research.append({
+                            "title": title,
+                            "description": description.strip(),
+                            "url": unique_url, # Unique URL per project
+                            "type": "research",
+                            "scraped_at": datetime.now().isoformat()
+                        })
+            
+            log_info(f"Found {len(self.research)} research items.")
+            return self.research
+        except Exception as e:
+            log_error(f"Error scraping research: {e}")
+            return []
+
+    def save_to_json(self):
+        """Saves scraped data to JSON files."""
+        os.makedirs("data", exist_ok=True)
+        
+        with open("data/raw_events.json", 'w', encoding='utf-8') as f:
             json.dump(self.events, f, indent=4, ensure_ascii=False)
-        log_info(f"Saved {len(self.events)} events to {filepath}")
+        
+        with open("data/people.json", 'w', encoding='utf-8') as f:
+            json.dump(self.people, f, indent=4, ensure_ascii=False)
+            
+        with open("data/research.json", 'w', encoding='utf-8') as f:
+            json.dump(self.research, f, indent=4, ensure_ascii=False)
+            
+        log_info(f"Saved {len(self.events)} events, {len(self.people)} people, {len(self.research)} research items.")
 
 if __name__ == "__main__":
     scraper = MCMPScraper()
     scraper.scrape_events()
+    scraper.scrape_people()
+    scraper.scrape_research()
     scraper.save_to_json()
