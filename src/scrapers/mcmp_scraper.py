@@ -215,7 +215,8 @@ class MCMPScraper:
                 headers = main_content.find_all(['h2'])
                 for header in headers:
                     section_title = header.get_text(strip=True)
-                    if any(x in section_title.lower() for x in ['about', 'history', 'aims', 'profile', 'institutional']):
+                    # "Insitutional" is a typo on their website, so we must include it
+                    if any(x in section_title.lower() for x in ['about', 'history', 'aims', 'profile', 'institutional', 'insitutional']):
                         content = ""
                         curr = header.find_next_sibling()
                         while curr and curr.name not in ['h2', 'h1']:

@@ -32,5 +32,12 @@ print(f"\nAttempting to open by Key (ID): '{sheet_id}'...")
 try:
     sh = client.open_by_key(sheet_id)
     print(f"✅ Success! Opened by key '{sheet_id}'. Title: {sh.title}")
+    
+    print("Attempting to WRITE a test row...")
+    try:
+        sh.sheet1.append_row(["Test", "Connection", "Success"])
+        print("✅ Success! Wrote test row to sheet.")
+    except Exception as e:
+        print(f"❌ Failed to WRITE to sheet: {e}")
 except Exception as e:
     print(f"❌ Failed to open by key: {e}")
