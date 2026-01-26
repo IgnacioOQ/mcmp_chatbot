@@ -11,8 +11,8 @@ def main():
         layout="centered"
     )
 
-    st.title("MCMP Activity Chatbot")
-    st.markdown("Ask me anything about the Munich Center for Mathematical Philosophy's upcoming talks, workshops, and events.")
+    st.title("MCMP Intelligence")
+    st.markdown("Ask me anything about the Munich Center for Mathematical Philosophy: our research, people, history, and upcoming events.")
 
     # Auto-refresh check
     RAW_DATA_PATH = "data/raw_events.json"
