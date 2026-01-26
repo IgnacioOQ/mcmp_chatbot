@@ -9,3 +9,4 @@ venv/
 data/
 mcmp_chatbot.log
 .DS_Store
+.streamlit/secrets.toml
