@@ -34,9 +34,9 @@ def save_feedback(name, feedback):
                 try:
                     sheet = client.open(sheet_name).sheet1
                 except gspread.SpreadsheetNotFound:
-                # Optional: create if not found, but requires Drive write scope/logic
-                log_error(f"Google Sheet '{sheet_name}' not found. Fallback to JSON.")
-                raise
+                    # Optional: create if not found, but requires Drive write scope/logic
+                    log_error(f"Google Sheet '{sheet_name}' not found. Fallback to JSON.")
+                    raise
                 
             sheet.append_row([timestamp, name, feedback])
             log_info(f"Feedback saved to Google Sheet: {sheet_name}")
