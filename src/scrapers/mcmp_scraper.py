@@ -211,17 +211,20 @@ class MCMPScraper:
             
             main_content = soup.find('div', id='r-main') or soup.find('main')
             if main_content:
-                # Extract sections like "About the MCMP", "Our history"
+                # Extract sections like "About the MCMP", "Our history", etc.
+                # CAPTURE ALL SECTIONS regardless of typo in title
                 headers = main_content.find_all(['h2'])
                 for header in headers:
                     section_title = header.get_text(strip=True)
-                    # "Insitutional" is a typo on their website, so we must include it
-                    if any(x in section_title.lower() for x in ['about', 'history', 'aims', 'profile', 'institutional', 'insitutional']):
-                        content = ""
-                        curr = header.find_next_sibling()
-                        while curr and curr.name not in ['h2', 'h1']:
-                            content += curr.get_text(separator=' ', strip=True) + "\n"
-                            curr = curr.find_next_sibling()
+                    # Skip empty titles or navigation elements if necessary
+                    if len(section_title) < 3: 
+                        continue
+
+                    content = ""
+                    curr = header.find_next_sibling()
+                    while curr and curr.name not in ['h2', 'h1']:
+                        content += curr.get_text(separator=' ', strip=True) + "\n"
+                        curr = curr.find_next_sibling()
                         
                         if content.strip():
                             self.general.append({
