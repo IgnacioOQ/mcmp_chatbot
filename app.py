@@ -3,7 +3,7 @@ import os
 import json
 from datetime import datetime
 from src.core.engine import RAGEngine
-from src.utils.logger import log_info
+from src.utils.logger import log_info, log_error
 
 def save_feedback(name, feedback):
     """Saves user feedback to Google Sheets (if configured) or local JSON."""
