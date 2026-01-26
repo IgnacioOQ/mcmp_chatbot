@@ -48,7 +48,15 @@ class VectorStore:
                     continue
                     
                 # Stable ID
-                doc_id = self._generate_id(url)
+                base_id = self._generate_id(url)
+                doc_id = base_id
+                
+                # Handle duplicates in the current batch
+                counter = 1
+                while doc_id in ids:
+                    doc_id = f"{base_id}_{counter}"
+                    counter += 1
+                
                 ids.append(doc_id)
                 
                 # Content formatting based on type

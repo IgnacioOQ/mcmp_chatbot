@@ -40,22 +40,24 @@ def main():
     # Sidebar for configuration
     with st.sidebar:
         st.header("Settings")
-        provider = st.radio("LLM Provider", ["gemini", "openai", "anthropic"])
         if st.button("Refresh Data"):
             with st.spinner("Scraping and indexing latest events..."):
                 from src.scrapers.mcmp_scraper import MCMPScraper
                 from src.core.vector_store import VectorStore
                 scraper = MCMPScraper()
                 scraper.scrape_events()
+                scraper.scrape_people()
+                scraper.scrape_research()
+                scraper.scrape_general()
+                scraper.scrape_reading_groups()
                 scraper.save_to_json()
                 vs = VectorStore()
                 vs.add_events()
                 st.success("Data refreshed!")
 
     # Initialize RAG Engine
-    if "engine" not in st.session_state or st.session_state.provider != provider:
-        st.session_state.engine = RAGEngine(provider=provider)
-        st.session_state.provider = provider
+    if "engine" not in st.session_state:
+        st.session_state.engine = RAGEngine(provider="gemini")
 
     # Chat history
     if "messages" not in st.session_state:

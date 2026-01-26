@@ -284,7 +284,12 @@ class MCMPScraper:
                                 link_url = link['href'] if link else url
                                 if not link_url.startswith("http"):
                                     link_url = f"{self.BASE_URL}{link_url}"
-                                    
+                                
+                                # Ensure uniqueness if multiple groups share the same base URL (e.g. no specific anchor)
+                                if link_url == url or link_url.endswith("/events/index.html"):
+                                     slug = title.lower().replace(" ", "-").replace(":", "")[:30]
+                                     link_url = f"{link_url}#{slug}"
+
                                 current_group = {
                                     "title": f"Reading Group: {title}",
                                     "description": "",
