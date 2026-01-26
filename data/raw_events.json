@@ -1,0 +1,29 @@
+[
+    {
+        "title": "Talk: Carl Hoefer (Barcelona)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-carl-hoefer-barcelona.html",
+        "scraped_at": "2026-01-26T16:56:24.141016",
+        "description": "You are in the following website hierarchy:\nHome\nLatest news\nEvents overview\nYou are here:\nEvent\n28\nJan\nTalk: Carl Hoefer (Barcelona)\nDate:\nWed:\n4:00 pm\n28 January 2026\nLocation:\nLudwigstr. 31\nGround floor, room 021\n80539 MÃ¼nchen\nTitle:\nNatural kinds, laws, and necessities: lessons from post-Twin-Earth science and philosophy\nAbstract:\nIn a paper co-authored by Genoveva MartÃ­, we defended the Kripke-Putnam thesis that water is necessarily composed of H2O molecules, i.e., that there is no world in which the substance we call âwaterâ exists but is not composed mostly of H2O molecules. But we agree with Putnam that it can be hard to know what to say about imagined possible worlds in which the physical (and hence chemical) laws are different in certain ways. In this talk I will explore some of the speculative ways in which physicists investigate what would be the case in such counternomic worlds, and how these speculations interact with the nature of water and other natural kinds, as well as with powers, dispositions, and other denizens of philosophy-folk physics and chemistry. I will use these explorations to motivate some lessons for debates about the modal status of laws and physical natural\nup\nShare\nTo share copy\nLink\nShare on\nFacebook\nShare on\nX\nShare on\nLinkedIn",
+        "metadata": {
+            "wed": "4:00 pm"
+        }
+    },
+    {
+        "title": "Talk (Work in Progress): Mario Hubert (LMU)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-mario-hubert-lmu.html",
+        "scraped_at": "2026-01-26T16:56:24.141043",
+        "description": "You are in the following website hierarchy:\nHome\nLatest news\nEvents overview\nYou are here:\nEvent\n29\nJan\nTalk (Work in Progress): Mario Hubert (LMU)\nDate:\nThu:\n12:00 pm\n29 January 2026\nLocation:\nLudwigstr. 31\nGround floor, room 021\n80539 MÃ¼nchen\nTitle:\nCredence without Probability\nAbstract:\nI develop the Typicality Principle of Expectations (TPE), a novel rationality principle that links typicality-based probabilistic explanations with expectations about the future. I argue that TPE offers a more coherent foundation in the context of typicality-based probabilistic explanations for expectations than traditional rationality principles, including Cournot's Principle, Locke's Principle of Proportionality and Lewis's Principal Principle. The framework of the TPE will ultimately reject a fundamental assumption about probability, namely, its Janus-faced dual nature, as representing objective chance and credences. Thus, I advocate a monistic account of probability: probabilities reflect purely statistical patterns and do not directly map to credences.\nup\nShare\nTo share copy\nLink\nShare on\nFacebook\nShare on\nX\nShare on\nLinkedIn",
+        "metadata": {
+            "thu": "12:00 pm"
+        }
+    },
+    {
+        "title": "Talk: Ivano Ciardelli (Padova)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-ivano-ciardelli-padova.html",
+        "scraped_at": "2026-01-26T16:56:24.141053",
+        "description": "You are in the following website hierarchy:\nHome\nLatest news\nEvents overview\nYou are here:\nEvent\n29\nJan\nTalk: Ivano Ciardelli (Padova)\nDate:\nThu:\n4:00 pm\n29 January 2026\nLocation:\nLudwigstr. 31\nGround floor, room 021\n80539 MÃ¼nchen\nTitle:\nDependence and arbitrariness\nAbstract:\nIn previous work, I have proposed an analysis of dependence claims as strict conditionals whose antecedent and consequent are questions: âQ1 determines Q2â is true if, within a certain range of possibilities, any answer to Q1 implies some answer to Q2.\nIn this talk, I consider dependence statements in mathematics, such as (1).\n(1) The number of sides of a polygon determines the sum of its internal angles.\nI argue that (1) fits the general analysis provided we take an indefinite like âa polygon xâ to introduce a range of possibilities, one for each permissible value of x. Within this range of possibilities, an answer to the question \"how many sides does x have\" yields an answer to the question \"what is the sum of the internal angles of x\". Thus, the semantics of dependence statements like (1) involves a kind of intensionality that has its source in arbitrary reference.\nI implement this idea in a team-based extension of first-order logic that comprises (i) an operator [x] which introduces an arbitrary referent and (ii) questions concerning the value of this referent. In this logic, the above dependence claim can be regimented as follows:\n(2) [x]( polygon(x) -> ( value-of(num-sides(x)) -> value-of(sum-angles(x)) )\nI then study how, and to what extent, such intensional claims can be reduced to extensional claims in first-order logic, such as (3):\n(3) âxây( polygon(x) & polygon(y) -> ( num-sides(x)=num-sides(y) -> sum-angles(x)=sum-angles(y))\nAs I will show, the relation between the two ways of expressing dependencies is far from straightforward.\nIf time permits, I will also consider a modal extension of the logic and discuss how it offers a unified analysis of different varieties of supervenience.\nup\nShare\nTo share copy\nLink\nShare on\nFacebook\nShare on\nX\nShare on\nLinkedIn",
+        "metadata": {
+            "thu": "4:00 pm"
+        }
+    }
+]
