@@ -19,8 +19,10 @@ def save_feedback(name, feedback):
             creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
             client = gspread.authorize(creds)
             
-            # Open the sheet (assumes name is "MCMP Feedback" or config)
-            sheet_name = "MCMP Feedback"
+            # Open the sheet
+            # Uses 'sheet_name' from secrets if available, else defaults to "MCMP Feedback"
+            sheet_name = st.secrets["gcp_service_account"].get("sheet_name", "MCMP Feedback")
+            
             try:
                 sheet = client.open(sheet_name).sheet1
             except gspread.SpreadsheetNotFound:
