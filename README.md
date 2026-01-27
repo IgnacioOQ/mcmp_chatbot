@@ -16,6 +16,7 @@ The application is built with **Streamlit** for the frontend, uses **ChromaDB** 
 - **RAG Architecture**: Uses vector embeddings to retrieve relevant context for accurate answers.
 - **Cloud Database (Feedback)**: User feedback is automatically saved to a Google Sheet for persistent, cloud-based storage (with a local JSON fallback).
 - **Multi-LLM Support**: Configured to work seamlessly with **Google Gemini**, but also supports OpenAI and Anthropic.
+- **Smart Retrieval (Query Decomposition)**: automatically breaks down complex multi-part questions into simpler sub-queries for more complete answers.
 - **Agentic Workflow**: Follows the `AGENTS.md` and `MD_CONVENTIONS.md` protocols for AI-assisted development.
 
 ## RAG Architecture Explained
@@ -34,6 +35,13 @@ While the system stores data in JSON files (raw material), it uses **Embeddings*
 - **JSONs**: Store the text.
 - **Embeddings**: Convert that text into vectors (lists of numbers) using a small LLM (Sentence Transformers).
 This allows the system to find relevant information based on *meaning* (semantic search) rather than just keyword matching.
+This allows the system to find relevant information based on *meaning* (semantic search) rather than just keyword matching.
+
+### Advanced: Query Decomposition
+For complex questions (e.g., *"Who is Mario Hubert and what is his talk about?"*), a single search often fails to find all necessary context. This project implements **Query Decomposition**:
+1.  **Decompose**: The LLM breaks the user's complex question into distinct sub-queries (e.g., *"Who is Mario Hubert?"* and *"What is Mario Hubert's talk?"*).
+2.  **Parallel Retrieval**: The system executes searches for *each* sub-query independently.
+3.  **Synthesis**: All retrieved context chunks are combined and deduplicated before generating the final answer.
 
 ## Setup
 
