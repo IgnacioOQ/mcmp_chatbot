@@ -18,6 +18,17 @@ The application is built with **Streamlit** for the frontend, uses **ChromaDB** 
 - **Multi-LLM Support**: Configured to work seamlessly with **Google Gemini**, but also supports OpenAI and Anthropic.
 - **Agentic Workflow**: Follows the `AGENTS.md` and `MD_CONVENTIONS.md` protocols for AI-assisted development.
 
+## RAG Architecture Explained
+
+This project is a definitive implementation of **Retrieval-Augmented Generation (RAG)**.
+
+1.  **Retrieval**: The system uses `src/scrapers` to fetch data from the MCMP website, chunks it, and stores embeddings in `ChromaDB`. When a user asks a question, the system *retrieves* the most relevant chunks.
+2.  **Augmentation**: These chunks are passed as context to the LLM (Gemini) via `src/core/engine.py`.
+3.  **Generation**: The LLM *generates* a response based on the augmented prompt, ensuring accuracy grounded in the retrieved data.
+
+> [!NOTE]
+> For a general definition of RAG, see [data/WHAT_IS_RAG.md](data/WHAT_IS_RAG.md).
+
 ## Setup
 
 1. **Clone the repository**:
