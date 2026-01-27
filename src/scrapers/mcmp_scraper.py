@@ -12,7 +12,8 @@ class MCMPScraper:
         f"{BASE_URL}/mcmp/en/events/index.html",
         f"{BASE_URL}/mcmp/en/index.html"
     ]
-    PEOPLE_URL = f"{BASE_URL}/mcmp/en/people/index.html"
+    # Fallback if file not found, but we prefer reading from file
+    PEOPLE_URLS = [f"{BASE_URL}/mcmp/en/people/index.html"] 
     RESEARCH_URL = f"{BASE_URL}/mcmp/en/research/index.html"
 
     def __init__(self):
@@ -20,6 +21,21 @@ class MCMPScraper:
         self.people = []
         self.research = []
         self.general = []
+        self.important_urls = self.load_important_urls()
+
+    def load_important_urls(self):
+        """Loads important URLs from data/important_urls.txt."""
+        urls = []
+        try:
+            with open("data/important_urls.txt", "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        urls.append(line)
+            log_info(f"Loaded {len(urls)} important URLs from file.")
+        except FileNotFoundError:
+            log_error("data/important_urls.txt not found. Using defaults.")
+        return urls
 
     def scrape_events(self):
         """Scrapes multiple sources for event links."""
@@ -107,37 +123,97 @@ class MCMPScraper:
             log_error(f"Error scraping event details for {event['url']}: {e}")
 
     def scrape_people(self):
-        """Scrapes the people directory."""
-        log_info(f"Starting scrape of {self.PEOPLE_URL}")
+        """Scrapes the people directory and individual profiles."""
+        # Use important URLs if available, otherwise default
+        sources = [u for u in self.important_urls if "people" in u]
+        if not sources:
+            sources = self.PEOPLE_URLS
+
+        for people_url in sources:
+            log_info(f"Starting scrape of people from {people_url}")
+            try:
+                response = requests.get(people_url)
+                response.raise_for_status()
+                soup = BeautifulSoup(response.text, 'html.parser')
+                
+                person_links = soup.find_all('a', href=True)
+                profiles_to_visit = set()
+
+                for link in person_links:
+                    href = link['href']
+                    # Heuristic for people profiles
+                    # The links observed are relative like "contact-page/..."
+                    if "contact-page/" in href or "/faculty/" in href or "/staff/" in href:
+                         # Exclude the index page itself
+                         if href.endswith("people/index.html") or href == people_url:
+                             continue
+
+                         if href.startswith("http"):
+                             full_url = href
+                         elif href.startswith("/"):
+                             full_url = f"{self.BASE_URL}{href}"
+                         else:
+                             # Relative to the people_url (which should end in / or /index.html)
+                             if people_url.endswith("index.html"):
+                                 base = people_url.rsplit('/', 1)[0]
+                             elif people_url.endswith("/"):
+                                 base = people_url.rstrip('/')
+                             else:
+                                 base = people_url
+                             
+                             full_url = f"{base}/{href}"
+
+                         profiles_to_visit.add(full_url)
+                
+                log_info(f"Found {len(profiles_to_visit)} potential people profiles to scrape.")
+
+                for url in profiles_to_visit:
+                     self._scrape_single_person_page(url)
+
+            except Exception as e:
+                log_error(f"Error scraping people index {people_url}: {e}")
+        
+        return self.people
+
+    def _scrape_single_person_page(self, url):
+        """Scrapes a single person's profile page."""
         try:
-            response = requests.get(self.PEOPLE_URL)
+            if url in [p['url'] for p in self.people]:
+                return
+
+            response = requests.get(url)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Based on the view_content_chunk, people are listed with links to contact pages
-            # We look for links inside the academic staff section (or general list)
-            # A good heuristic is links containing "/people/contact-page/"
+            # Name usually in H1
+            name_elem = soup.find('h1')
+            name = name_elem.get_text(strip=True) if name_elem else "Unknown Person"
             
-            person_links = soup.find_all('a', href=True)
-            for link in person_links:
-                href = link['href']
-                if "/people/contact-page/" in href or "/faculty/" in href or "/staff/" in href:
-                    full_url = href if href.startswith("http") else f"{self.BASE_URL}{href}"
-                    name = link.get_text(strip=True)
-                    
-                    if full_url not in [p['url'] for p in self.people] and name:
-                        self.people.append({
-                            "name": name,
-                            "url": full_url,
-                            "type": "person",
-                            "scraped_at": datetime.now().isoformat()
-                        })
-            
-            log_info(f"Found {len(self.people)} people profiles.")
-            return self.people
+            # Main content
+            main_content = soup.find('div', id='r-main') or soup.find('main')
+            description = ""
+            metadata = {}
+
+            if main_content:
+                description = main_content.get_text(separator=' ', strip=True)
+                
+                # Extract contact info if available (often in 'address' or specific divs)
+                # This is a basic extraction, can be refined based on actual HTML structure
+                emails = [a.get_text() for a in main_content.find_all('a') if "@" in a.get_text()]
+                if emails:
+                    metadata['email'] = emails[0] # Take the first one found
+                
+            self.people.append({
+                "name": name,
+                "url": url,
+                "description": description[:5000],
+                "metadata": metadata,
+                "type": "person",
+                "scraped_at": datetime.now().isoformat()
+            })
+            # avoid spamming requests too fast if needed, but for now simple sync
         except Exception as e:
-            log_error(f"Error scraping people: {e}")
-            return []
+            log_error(f"Error scraping person {url}: {e}")
 
     def scrape_research(self):
         """Scrapes the research projects, including subpages."""
