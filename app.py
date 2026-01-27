@@ -77,7 +77,7 @@ def main():
     )
 
     st.title("MCMP Chatbot")
-    st.markdown("Ask me anything about the Munich Center for Mathematical Philosophy: our research, people, history, and upcoming events.\n\nThis is basically Retrieval-Augmented Generation (RAG)")
+    st.markdown("Ask me anything about the Munich Center for Mathematical Philosophy: our research, people, history, and upcoming events.\n\nThis is basically Retrieval-Augmented Generation (RAG).")
 
     # Auto-refresh check
     RAW_DATA_PATH = "data/raw_events.json"
