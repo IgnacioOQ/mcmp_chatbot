@@ -4,6 +4,7 @@ from src.core.vector_store import VectorStore
 from src.utils.logger import log_info, log_error
 import openai
 from anthropic import Anthropic
+from datetime import datetime
 
 load_dotenv()
 
@@ -47,7 +48,11 @@ class RAGEngine:
             
         context_text = "\n\n---\n\n".join(formatted_context)
         
+        current_date = datetime.now().strftime("%A, %B %d, %Y")
+
         prompt = f"""You are the official Munich Center for Mathematical Philosophy (MCMP) Intelligence Assistant. 
+        
+Current Date: {current_date} 
 
 Your goal is to serve as a comprehensive guide to the MCMP. You can answer questions about:
 - **Research**: Ongoing projects, philosophy of AI/ML, logic, and philosophy of science.

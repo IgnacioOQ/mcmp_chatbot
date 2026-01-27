@@ -21,7 +21,36 @@ class MCMPScraper:
         self.people = []
         self.research = []
         self.general = []
+        self.general = []
         self.important_urls = self.load_important_urls()
+
+    def _clean_text(self, text):
+        """Removes common noise from scraped text."""
+        if not text:
+            return ""
+            
+        lines = text.split('\n')
+        cleaned_lines = []
+        skip_mode = False
+        
+        # Heuristics to skip navigation and footer
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Skip breadcrumbs start
+            if "You are in the following website hierarchy" in line or "You are here:" in line:
+                continue
+            if line in ["Home", "Latest news", "Events overview", "Event", "up", "Share", "To share copy", "Link", "Share on"]:
+                continue
+            # Skip footer links
+            if line in ["Facebook", "X", "LinkedIn", "Instagram"]:
+                continue
+            
+            cleaned_lines.append(line)
+            
+        return "\n".join(cleaned_lines)
 
     def load_important_urls(self):
         """Loads important URLs from data/important_urls.txt."""
@@ -107,6 +136,9 @@ class MCMPScraper:
                 event['description'] = main_content.get_text(separator='\n', strip=True)
             else:
                 event['description'] = soup.get_text(separator='\n', strip=True)
+            
+            # Clean up the description
+            event['description'] = self._clean_text(event['description'])
             
             # Try to find specific metadata (Date, Time, Location)
             # This often lives in specific dl/dt/dd tags or tables
