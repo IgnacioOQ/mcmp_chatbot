@@ -28,7 +28,8 @@ class VectorStore:
             "event": "data/raw_events.json",
             "person": "data/people.json",
             "research": "data/research.json",
-            "general": "data/general.json"
+            "general": "data/general.json",
+            "knowledge": "data/knowledge.json"
         }
         
         ids = []
@@ -68,6 +69,8 @@ class VectorStore:
                     content = f"Research Project: {item['title']}\nDescription: {item.get('description', '')}"
                 elif type_label == "general":
                     content = f"{item['title']}\n{item.get('description', '')}"
+                elif type_label == "knowledge":
+                    content = f"Concept: {item['title']}\n{item.get('description', '')}"
                 
                 documents.append(content)
                 
