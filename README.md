@@ -29,6 +29,12 @@ This project is a definitive implementation of **Retrieval-Augmented Generation 
 > [!NOTE]
 > For a general definition of RAG, see [data/WHAT_IS_RAG.md](data/WHAT_IS_RAG.md).
 
+### Why Embeddings? (vs. just JSON)
+While the system stores data in JSON files (raw material), it uses **Embeddings** as the search mechanism.
+- **JSONs**: Store the text.
+- **Embeddings**: Convert that text into vectors (lists of numbers) using a small LLM (Sentence Transformers).
+This allows the system to find relevant information based on *meaning* (semantic search) rather than just keyword matching.
+
 ## Setup
 
 1. **Clone the repository**:
