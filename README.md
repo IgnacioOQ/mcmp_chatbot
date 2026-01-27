@@ -100,6 +100,8 @@ mcmp_chatbot/
 │   ├── scrapers/         # Scrapers for MCMP website
 │   └── utils/            # Helper functions (logging, etc.)
 ├── data/                 # Local data storage (JSONs, Vector DB)
+├── docs/                 # Project documentation and proposals
+│   └── rag_improvements.md
 ├── AGENTS.md             # Guidelines for AI Agents
 ├── MD_CONVENTIONS.md     # Markdown conventions for the project
 └── requirements.txt      # Python dependencies

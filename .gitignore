@@ -7,6 +7,10 @@ venv/
 
 # Project specific
 data/
+*.log
 mcmp_chatbot.log
+debug_env.py
+scripts/test_*.py
+scripts/verify_*.py
 .DS_Store
 .streamlit/secrets.toml

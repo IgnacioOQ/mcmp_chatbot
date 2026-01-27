@@ -30,20 +30,98 @@ class RAGEngine:
             log_error(error_msg)
             raise ValueError(error_msg)
 
+    def decompose_query(self, user_question):
+        """
+        Decomposes a complex question into simpler sub-queries.
+        """
+        decomposition_prompt = f"""Given this question about MCMP (Munich Center for Mathematical Philosophy):
+"{user_question}"
+
+Break it into 1-3 simple search queries that would help find relevant information.
+Return ONLY the queries, one per line, no numbering or bullets.
+If the question is already simple, just return it as-is."""
+
+        try:
+            if self.provider == "gemini":
+                from google import genai
+                client = genai.Client(api_key=self.api_key)
+                response = client.models.generate_content(
+                    model='gemini-flash-latest',
+                    contents=decomposition_prompt
+                )
+                text = response.text
+            elif self.provider == "openai":
+                client = openai.OpenAI(api_key=self.api_key)
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo", # Use cheaper model for decomposition
+                    messages=[{"role": "user", "content": decomposition_prompt}],
+                    temperature=0
+                )
+                text = response.choices[0].message.content
+            elif self.provider == "anthropic":
+                client = Anthropic(api_key=self.api_key)
+                response = client.messages.create(
+                    model="claude-3-haiku-20240307", # Use cheaper model
+                    max_tokens=200,
+                    messages=[{"role": "user", "content": decomposition_prompt}]
+                )
+                text = response.content[0].text
+            else:
+                return [user_question]
+
+            queries = [q.strip() for q in text.strip().split('\n') if q.strip()]
+            # Ensure original is included if list is empty or logical
+            if user_question not in queries:
+                queries.insert(0, user_question)
+            
+            return queries[:4]
+
+        except Exception as e:
+            log_error(f"Error in decomposition: {e}")
+            return [user_question]
+
+    def retrieve_with_decomposition(self, user_question, top_k=3):
+        """
+        Retrieve relevant chunks using query decomposition.
+        """
+        queries = self.decompose_query(user_question)
+        log_info(f"Decomposed queries: {queries}")
+        
+        all_chunks = []
+        seen_ids = set()
+        
+        for query in queries:
+            results = self.vs.query(query, n_results=top_k)
+            
+            # VectorStore.query returns dictionary with lists
+            # We need to handle potential empty results
+            if not results['ids'] or not results['ids'][0]:
+                continue
+
+            for i, doc_id in enumerate(results['ids'][0]):
+                if doc_id not in seen_ids:
+                    seen_ids.add(doc_id)
+                    all_chunks.append({
+                        'text': results['documents'][0][i],
+                        'metadata': results['metadatas'][0][i] if results['metadatas'] else {},
+                        'source_query': query
+                    })
+        
+        return all_chunks
+
     def generate_response(self, query):
         """Retrieves relevant events and generates a response using the selected LLM provider."""
         log_info(f"Generating response for query: {query}")
         
         # 1. Retrieve context
-        results = self.vs.query(query, n_results=3)
-        context_docs = results['documents'][0]
-        context_metadatas = results['metadatas'][0]
+        # 1. Retrieve context with decomposition
+        context_chunks = self.retrieve_with_decomposition(query)
         
-        # Combine docs with their metadata (specifically URL)
+        # Combine docs with their metadata
         formatted_context = []
-        for doc, meta in zip(context_docs, context_metadatas):
-            source_url = meta.get('url', 'No URL available')
-            formatted_entry = f"{doc}\nSource URL: {source_url}"
+        for chunk in context_chunks:
+            source_url = chunk['metadata'].get('url', 'No URL available')
+            formatted_entry = f"{chunk['text']}\nSource URL: {source_url}"
             formatted_context.append(formatted_entry)
             
         context_text = "\n\n---\n\n".join(formatted_context)
