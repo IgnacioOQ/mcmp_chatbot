@@ -39,6 +39,8 @@ The application is built with **Streamlit** for the frontend, uses **ChromaDB** 
    ```toml
    GEMINI_API_KEY = "your-google-gemini-key"
    ```
+   > [!NOTE]
+   > The `GEMINI_API_KEY` determines where the LLM usage is billed. This is often a different Google Cloud project (e.g., `gen-lang-client...`) than the Service Account used for Sheets. To consolidate billing, link your API key to the `mcmp-chatbot` project in Google AI Studio.
 
    **For Cloud Feedback (Google Sheets):**
    - Create a project in [Google Cloud Console](https://console.cloud.google.com/).
