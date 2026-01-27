@@ -150,9 +150,11 @@ def main():
                 else:
                     st.info("No feedback received yet.")
 
-    # Initialize RAG Engine
+    # Initialize RAGEngine
     if "engine" not in st.session_state:
-        st.session_state.engine = RAGEngine(provider="gemini")
+        # Try to get key from secrets, otherwise RAGEngine will fallback to os.getenv
+        api_key = st.secrets.get("GEMINI_API_KEY") 
+        st.session_state.engine = RAGEngine(provider="gemini", api_key=api_key)
 
     # Chat history
     if "messages" not in st.session_state:

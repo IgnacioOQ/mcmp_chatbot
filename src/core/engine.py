@@ -8,18 +8,26 @@ from anthropic import Anthropic
 load_dotenv()
 
 class RAGEngine:
-    def __init__(self, provider="openai"):
+    def __init__(self, provider="openai", api_key=None):
         self.vs = VectorStore()
         self.provider = provider
-        if provider == "openai":
-            self.api_key = os.getenv("OPENAI_API_KEY")
-        elif provider == "anthropic":
-            self.api_key = os.getenv("ANTHROPIC_API_KEY")
-        elif provider == "gemini":
-            self.api_key = os.getenv("GEMINI_API_KEY")
+        
+        # 1. Try passed key
+        self.api_key = api_key
+        
+        # 2. Try environment variables if not passed
+        if not self.api_key:
+            if provider == "openai":
+                self.api_key = os.getenv("OPENAI_API_KEY")
+            elif provider == "anthropic":
+                self.api_key = os.getenv("ANTHROPIC_API_KEY")
+            elif provider == "gemini":
+                self.api_key = os.getenv("GEMINI_API_KEY")
         
         if not self.api_key:
-            log_error(f"API Key for {provider} not found in environment variables.")
+            error_msg = f"API Key for {provider} not found. Please set it in .env or pass it explicitly."
+            log_error(error_msg)
+            raise ValueError(error_msg)
 
     def generate_response(self, query):
         """Retrieves relevant events and generates a response using the selected LLM provider."""
