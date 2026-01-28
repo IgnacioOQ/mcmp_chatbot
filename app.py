@@ -126,9 +126,27 @@ def main():
                 try:
                     event_date = datetime.strptime(date_str, "%Y-%m-%d").date()
                     if start_of_week <= event_date <= end_of_week:
+                        # Enhanced speaker extraction
+                        speaker = meta.get("speaker")
+                        title = event.get("title", "Untitled")
+                        
+                        if not speaker or speaker == "Unknown Speaker":
+                            # Heuristic: "Talk: [Speaker Name]" or "Talk (Info): [Speaker Name]"
+                            if "Talk" in title and ":" in title:
+                                try:
+                                    # Split by first colon and strip
+                                    parts = title.split(":", 1)
+                                    if len(parts) > 1:
+                                        speaker = parts[1].strip()
+                                except:
+                                    pass
+                        
+                        if not speaker:
+                             speaker = "Unknown Speaker"
+
                         events_this_week.append({
-                            "title": event.get("title", "Untitled"),
-                            "speaker": meta.get("speaker", "Unknown Speaker"),
+                            "title": title,
+                            "speaker": speaker,
                             "date": event_date,
                             "time": meta.get("time_start", "Time TBA"),
                             "url": event.get("url", "#")
