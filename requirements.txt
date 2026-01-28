@@ -10,3 +10,4 @@ pytest
 google-genai
 gspread
 google-auth
+streamlit-calendar

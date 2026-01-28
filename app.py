@@ -104,6 +104,35 @@ def main():
 
     # Sidebar for configuration
     with st.sidebar:
+        st.header("Calendar")
+        
+        # Load events for calendar
+        try:
+            with open("data/raw_events.json", "r") as f:
+                raw_events = json.load(f)
+            
+            from src.utils.calendar_utils import prepare_calendar_events
+            from streamlit_calendar import calendar
+            
+            cal_events = prepare_calendar_events(raw_events)
+            
+            # Simple calendar view
+            calendar_options = {
+                "initialView": "dayGridMonth",
+                "headerToolbar": {
+                    "left": "prev,next",
+                    "center": "title",
+                    "right": ""
+                },
+                "height": 400,
+            }
+            
+            calendar(events=cal_events, options=calendar_options)
+            
+        except Exception as e:
+            st.error(f"Could not load calendar: {e}")
+
+        st.markdown("---")
         with st.expander("Give Feedback"):
             with st.form("feedback_form"):
                 name = st.text_input("Name (optional)")
