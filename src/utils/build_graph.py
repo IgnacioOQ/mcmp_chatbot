@@ -30,7 +30,6 @@ def extract_role(description):
     
     roles = [
         "co-director",
-        "chair",
         "assistant professor",
         "postdoctoral researcher",
         "postdoctoral fellow",
@@ -43,7 +42,8 @@ def extract_role(description):
         "secretary",
         "administration",
         "student assistant",
-        "emeritus"
+        "emeritus",
+        "chair", # Moved to bottom to avoid matching "Chair of X" when a more specific role exists
     ]
     
     for r in roles:
@@ -138,7 +138,14 @@ def run():
             })
             
             # If they are The Chair (Role=Chair), also add 'leads' edge
-            if role == "Chair" or role == "Chair & Co-Director":
+            # "Chair" in role usually means they are the Chair Holder (Professor) if we fixed the extraction.
+            # But we need to be careful. "Chair & Co-Director" is safe.
+            # "Chair" role might still be ambiguous if my extraction isn't perfect, but let's assume I fix extract_role.
+            
+            # Additional heuristic: Only Professors lead Chairs.
+            is_prof = "prof." in raw_name.lower() or "professor" in description.lower()
+            
+            if (role == "Chair" or role == "Chair & Co-Director") and is_prof:
                  edges.append({
                     "source": pid,
                     "target": cid,
