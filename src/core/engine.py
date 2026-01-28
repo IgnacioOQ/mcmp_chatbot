@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from src.core.vector_store import VectorStore
+from src.core.graph_utils import GraphUtils
 from src.utils.logger import log_info, log_error
 import openai
 from anthropic import Anthropic
@@ -11,6 +12,7 @@ load_dotenv()
 class RAGEngine:
     def __init__(self, provider="openai", api_key=None):
         self.vs = VectorStore()
+        self.graph_utils = GraphUtils()
         self.provider = provider
         
         # 1. Try passed key
@@ -126,6 +128,14 @@ If the question is already simple, just return it as-is."""
             
         context_text = "\n\n---\n\n".join(formatted_context)
         
+        context_text = "\n\n---\n\n".join(formatted_context)
+        
+        # 2. Retrieve graph context
+        graph_data = self.graph_utils.get_subgraph(query)
+        graph_context_text = self.graph_utils.to_natural_language(graph_data)
+        if not graph_context_text:
+            graph_context_text = "No specific institutional relationships found."
+        
         current_date = datetime.now().strftime("%A, %B %d, %Y")
 
         prompt = f"""You are the official Munich Center for Mathematical Philosophy (MCMP) Intelligence Assistant. 
@@ -144,6 +154,9 @@ Your goal is to serve as a comprehensive guide to the MCMP. You can answer quest
 3. **Tone**: Be professional, scholarly, yet accessible.
 4. **Citations & Links**: **ALWAYS** link back to the source using Markdown format `[Link Text](URL)`. If a URL is provided in the context, use it to create a clickable link in your answer.
 
+---
+### INSTITUTIONAL CONTEXT (GRAPH):
+{graph_context_text}
 ---
 ### CONTEXT FROM MCMP WEBSITE:
 {context_text}
