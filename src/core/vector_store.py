@@ -33,6 +33,7 @@ class VectorStore:
         }
         
         ids = []
+        used_ids = set()
         documents = []
         metadatas = []
 
@@ -54,11 +55,12 @@ class VectorStore:
                 
                 # Handle duplicates in the current batch
                 counter = 1
-                while doc_id in ids:
+                while doc_id in used_ids:
                     doc_id = f"{base_id}_{counter}"
                     counter += 1
                 
                 ids.append(doc_id)
+                used_ids.add(doc_id)
                 
                 # Content formatting based on type
                 if type_label == "event":
