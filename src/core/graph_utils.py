@@ -3,12 +3,14 @@ import re
 import json
 from typing import Optional, List, Dict
 from pathlib import Path
+from collections import defaultdict
 
 class GraphUtils:
     def __init__(self, graph_path: str = "data/graph/mcmp_graph.md"):
         self.graph_path = Path(graph_path)
         self.nodes = []
         self.edges = []
+        self.adj_list = defaultdict(list)
         self._load_graph()
 
     def _load_graph(self):
@@ -21,6 +23,17 @@ class GraphUtils:
 
         self.nodes = self._parse_table(content, "Nodes")
         self.edges = self._parse_table(content, "Edges")
+        self._build_adjacency_list()
+
+    def _build_adjacency_list(self):
+        """Builds an adjacency list for O(1) neighbor lookup."""
+        self.adj_list.clear()
+        for edge in self.edges:
+            source = edge.get('source')
+            target = edge.get('target')
+            if source and target:
+                self.adj_list[source].append(target)
+                self.adj_list[target].append(source)
 
     def _parse_table(self, content: str, section_name: str) -> List[Dict]:
         """Parses a markdown table from a specific section."""
@@ -77,11 +90,8 @@ class GraphUtils:
                 next_layer = set()
                 for node_id in current_layer:
                     # Find edges connected to this node
-                    for edge in self.edges:
-                        if edge.get('source') == node_id:
-                            next_layer.add(edge.get('target'))
-                        elif edge.get('target') == node_id:
-                            next_layer.add(edge.get('source'))
+                    if node_id in self.adj_list:
+                        next_layer.update(self.adj_list[node_id])
                 
                 # Add found neighbors to relevant set
                 relevant_nodes.update(next_layer)
