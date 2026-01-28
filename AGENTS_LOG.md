@@ -9,6 +9,31 @@ Most recent event comes first
 - status: active
 <!-- content -->
 
+### Task: Housekeeping Re-execution
+- status: active
+<!-- content -->
+**Date:** 2026-01-28
+**AI Assistant:** Antigravity
+**Summary:** Re-executed Housekeeping Protocol to verify system state after adding unit tests.
+- **Actions:**
+    - Re-ran scrapers (data refreshed).
+    - Executed new unit test suite (9/9 passed).
+    - Verified `HOUSEKEEPING.md` report accuracy and owner field.
+- **Files Modified:** `HOUSEKEEPING.md`.
+
+### Task: Housekeeping & Dependency Update
+- status: active
+<!-- content -->
+**Date:** 2026-01-28
+**AI Assistant:** Antigravity
+**Summary:** Executed the standard Housekeeping protocol, updated dependencies, and identified missing test suite.
+- **Actions:**
+    - Analyzed codebase and updated `HOUSEKEEPING.md` dependency network.
+    - Ran `mcmp_scraper.py` and `update_knowledge.py` to refresh local knowledge base.
+    - Verified functionality of `vector_store.py` and Google Sheets connection.
+    - **Finding**: Discovered that `tests/` and `notebooks/` directories are missing from the workspace.
+- **Files Modified:** `HOUSEKEEPING.md`, `data/` (json files).
+
 ### Feature: Remove Metadata Tool
 - status: active
 <!-- content -->
