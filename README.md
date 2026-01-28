@@ -18,7 +18,7 @@ The application is built with **Streamlit** for the frontend, uses **ChromaDB** 
 - **Cloud Database (Feedback)**: User feedback is automatically saved to a Google Sheet for persistent, cloud-based storage (with a local JSON fallback).
 - **Multi-LLM Support**: Configured to work seamlessly with **Google Gemini**, but also supports OpenAI and Anthropic.
 - **Smart Retrieval (Query Decomposition)**: automatically breaks down complex multi-part questions into simpler sub-queries for more complete answers.
-- **Institutional Graph**: Uses a graph-based layer (`data/graph`) to understand organizational structure (Chairs, Leadership) and relationships between people.
+- **Institutional Graph**: Uses a graph-based layer (`data/graph`) to understand organizational structure (Chairs, Leadership) while linking people to hierarchical **Research Topics**.
 - **Agentic Workflow**: Follows the `AGENTS.md` and `docs/MD_CONVENTIONS.md` protocols for AI-assisted development.
 
 ## Performance Optimization
@@ -119,14 +119,14 @@ The core logic (`src/core/engine.py`) connects to the **Gemini API** (or others)
 ### 4. Data Model & Relationships
 The system connects four key data types to answer complex questions:
 1.  **People** (`data/people.json`): Raw profiles of researchers, including their bio, contact info, and roles.
-2.  **Research** (`data/research.json`): Descriptions of projects and research areas.
+2.  **Research** (`data/research.json`): Hierarchical structure of research areas (e.g., Logic, Philosophy of Science) and their subtopics, with automated linking to people.
 3.  **Events** (`data/raw_events.json`): Upcoming talks and workshops.
 4.  **Institutional Graph** (`data/graph/mcmp_graph.md`): A knowledge graph that links **People** to **Organizational Units** (Chairs) and defines hierarchy (e.g., who leads a chair, who supervises whom). 
 
 **How they interact:**
 - When a user asks "Who works at the Chair of Philosophy of Science?", the **Graph** identifies the Chair entity and its `affiliated_with` edges.
 - The system then retrieves detailed profiles from **People** data.
-- If the user asks "What does Ignacio Ojea research?", the system checks his **People** profile and relates it to relevant **Research** projects.
+- If the user asks "What does Ignacio Ojea research?", the system checks his **People** profile, which is now automatically linked to relevant **Research Topics** (e.g., "Philosophy of Science") and specific projects.
 
 ## Project Structure
 
