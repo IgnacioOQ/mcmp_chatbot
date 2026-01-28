@@ -13,6 +13,7 @@ The application is built with **Streamlit** for the frontend, uses **ChromaDB** 
 
 - **Activity QA**: Ask about upcoming talks, reading groups, and events.
 - **Automated Scraping**: Keeps data fresh by scraping the MCMP website.
+- **Hybrid Search**: Combines semantic vector search with structured metadata filtering (e.g., filter by year, role, or funding).
 - **RAG Architecture**: Uses vector embeddings to retrieve relevant context for accurate answers.
 - **Cloud Database (Feedback)**: User feedback is automatically saved to a Google Sheet for persistent, cloud-based storage (with a local JSON fallback).
 - **Multi-LLM Support**: Configured to work seamlessly with **Google Gemini**, but also supports OpenAI and Anthropic.
@@ -99,7 +100,8 @@ python scripts/update_dataset.py
 This script will:
 1.  Scrape the MCMP website (Events, People, Research).
 2.  Update JSON datasets (`data/*.json`).
-3.  Rebuild the Institutional Graph (`data/graph/mcmp_graph.md` and `mcmp_jgraph.json`).
+3.  **Enrich Metadata**: Run internal utilities to extract structured metadata (dates, roles) from text descriptions.
+4.  Rebuild the Institutional Graph (`data/graph/mcmp_graph.md` and `mcmp_jgraph.json`).
 
 ## Technical Architecture
 

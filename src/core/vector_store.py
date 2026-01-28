@@ -79,14 +79,21 @@ class VectorStore:
                 # Metadata
                 meta = {
                     "type": type_label,
-                    "title": item.get('title') or item.get('name'),
+                    "title": item.get('title') or item.get('name') or "Untitled",
                     "url": url,
                     "scraped_at": item.get('scraped_at', '')
                 }
+                
                 # Flatten extra metadata
                 if 'metadata' in item:
                     for k, v in item['metadata'].items():
-                        meta[f"meta_{k}"] = str(v)
+                        # ChromaDB supports str, int, float, bool. 
+                        # We convert others to str, but keep supported types as is data-wise.
+                        key_name = f"meta_{k}"
+                        if isinstance(v, (str, int, float, bool)):
+                            meta[key_name] = v
+                        else:
+                            meta[key_name] = str(v)
                 
                 metadatas.append(meta)
 
@@ -99,14 +106,22 @@ class VectorStore:
             )
             log_info(f"Upserted {len(ids)} items into vector store (History preserved).")
 
-    def query(self, query_texts, n_results=3):
-        """Queries the vector store for relevant events. Can accept a single string or a list of strings."""
+    def query(self, query_texts, n_results=3, where=None):
+        """
+        Queries the vector store for relevant events.
+        
+        Args:
+            query_texts: str or list of str query
+            n_results: number of results to return
+            where: dict, metadata filter for ChromaDB (e.g. {"type": "event"})
+        """
         if isinstance(query_texts, str):
             query_texts = [query_texts]
 
         results = self.collection.query(
             query_texts=query_texts,
-            n_results=n_results
+            n_results=n_results,
+            where=where
         )
         return results
 
