@@ -25,7 +25,7 @@ def test_graph_retrieval():
     
     assert "Hannes Leitgeb" in text
     assert "Chair of Logic" in text
-    assert "LEADS" in text
+    assert "leads" in text
 
     # Test retrieval for "Philosophy of Science"
     query = "Tell me about the Chair of Philosophy of Science"
