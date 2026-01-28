@@ -32,8 +32,7 @@ This project is a definitive implementation of **Retrieval-Augmented Generation 
 2.  **Augmentation**: These chunks are passed as context to the LLM (Gemini) via `src/core/engine.py`.
 3.  **Generation**: The LLM *generates* a response based on the augmented prompt, ensuring accuracy grounded in the retrieved data.
 
-> [!NOTE]
-> For a general definition of RAG, see [data/WHAT_IS_RAG.md](data/WHAT_IS_RAG.md).
+
 
 ### Why Embeddings? (vs. just JSON)
 While the system stores data in JSON files (raw material), it uses **Embeddings** as the search mechanism.
@@ -136,12 +135,16 @@ mcmp_chatbot/
 ├── src/
 │   ├── core/             # RAG engine (Gemini) and Vector Store (Chroma)
 │   ├── scrapers/         # Scrapers for MCMP website
+│   ├── ui/               # Streamlit UI components
 │   └── utils/            # Helper functions (logging, etc.)
 ├── data/                 # Local data storage (JSONs, Vector DB)
 ├── docs/                 # Project documentation and proposals
 │   ├── rag_improvements.md
 │   ├── HOUSEKEEPING.md   # Maintenance protocols
 │   └── MD_CONVENTIONS.md # Markdown conventions
+├── scripts/              # Maintenance and update scripts
+│   └── update_dataset.py # Main data update script
+├── tests/                # Unit and integration tests
 ├── AGENTS.md             # Guidelines for AI Agents
 └── requirements.txt      # Python dependencies
 ```
