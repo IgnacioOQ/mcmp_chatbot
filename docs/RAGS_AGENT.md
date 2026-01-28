@@ -980,6 +980,40 @@ def parse_tool_call(text: str) -> tuple[str, dict] | None:
     return None
 ```
 
+## Latency Optimization
+- status: active
+- type: plan
+- id: rags-agent.latency
+<!-- content -->
+Strategies to reduce end-to-end response time.
+
+### Batch Querying
+- status: active
+- type: task
+- id: rags-agent.latency.batching
+- priority: high
+- estimate: 30m
+<!-- content -->
+When performing multiple vector searches (e.g., from Query Decomposition), execute them in a single batch request to the vector store instead of a loop.
+
+**Why**: Vector stores like ChromaDB are optimized for batch operations. Loop-based querying incurs significant network/IO overhead for each call.
+
+**Impact**: Can reduce retrieval time by 80%+ (e.g., 430ms -> 70ms for 10 queries).
+
+**Implementation**:
+Instead of:
+```python
+results = []
+for q in queries:
+    results.append(vs.query(q))
+```
+Use:
+```python
+# Pass all queries at once
+batch_results = vs.query(query_texts=queries)
+# batch_results['ids'] is a list of lists: [[ids_for_q1], [ids_for_q2]]
+```
+
 ## Cost Optimization
 - status: active
 - type: plan
