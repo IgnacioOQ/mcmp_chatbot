@@ -68,3 +68,24 @@ def test_query(temp_db_path):
     results = vs.query("logic", n_results=1)
     assert len(results['ids'][0]) == 1
     assert results['ids'][0][0] == "id1"
+
+def test_query_batch(temp_db_path):
+    vs = VectorStore(db_path=temp_db_path, collection_name="test_collection_batch")
+
+    # Manually add data to collection
+    vs.collection.add(
+        ids=["id1", "id2"],
+        documents=["Logic document", "Ethics document"],
+        metadatas=[{"title": "Logic"}, {"title": "Ethics"}]
+    )
+
+    # Test batch query
+    queries = ["Logic", "Ethics"]
+    results = vs.query(queries, n_results=1)
+
+    # Chroma returns lists of lists
+    assert len(results['ids']) == 2
+    assert len(results['ids'][0]) == 1
+    assert results['ids'][0][0] == "id1"
+    assert len(results['ids'][1]) == 1
+    assert results['ids'][1][0] == "id2"

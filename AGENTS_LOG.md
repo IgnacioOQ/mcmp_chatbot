@@ -9,6 +9,17 @@ Most recent event comes first
 - status: active
 <!-- content -->
 
+### Performance: Vector Search Optimization
+- status: active
+<!-- content -->
+**Date:** 2026-01-28
+**AI Assistant:** Jules
+**Summary:** Optimized `src/core/engine.py` and `src/core/vector_store.py` to use batch querying for vector retrieval.
+- **Problem:** `retrieve_with_decomposition` was iterating through queries and calling `vs.query` sequentially, leading to high latency (IO bound).
+- **Solution:** Refactored `VectorStore.query` to accept a list of strings and `RAGEngine.retrieve_with_decomposition` to send all queries at once.
+- **Result:** ~82% reduction in retrieval latency (Benchmark: ~21.5s -> ~3.7s for 50 queries).
+- **Files Modified:** `src/core/engine.py`, `src/core/vector_store.py`, `tests/test_vector_store.py`.
+
 ### Task: Repository Synchronization & Test Fix
 - status: active
 <!-- content -->

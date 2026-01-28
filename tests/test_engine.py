@@ -31,20 +31,23 @@ def test_retrieve_with_decomposition(engine, mock_vector_store):
     engine.decompose_query = MagicMock(return_value=["q1", "q2"])
     
     # Mock vector store query results
-    # Structure: {'ids': [['id1']], 'documents': [['doc1']], 'metadatas': [[{'url': 'u1'}]]}
+    # Structure: {'ids': [['id1'], ['id2']], ...} for batch query
     mock_vector_store.query.return_value = {
-        'ids': [['id1']], 
-        'documents': [['doc1']], 
-        'metadatas': [[{'url': 'u1'}]]
+        'ids': [['id1'], ['id2']],
+        'documents': [['doc1'], ['doc2']],
+        'metadatas': [[{'url': 'u1'}], [{'url': 'u2'}]]
     }
     
     chunks = engine.retrieve_with_decomposition("Question")
     
-    # Should be called twice (for q1 and q2)
-    assert mock_vector_store.query.call_count == 2
-    # Should deduplicate if same id returned
-    assert len(chunks) == 1 
+    # Should be called once with list
+    assert mock_vector_store.query.call_count == 1
+    mock_vector_store.query.assert_called_with(["q1", "q2"], n_results=3)
+
+    # Should contain both results
+    assert len(chunks) == 2
     assert chunks[0]['text'] == 'doc1'
+    assert chunks[1]['text'] == 'doc2'
 
 def test_generate_response_openai(engine):
     with patch('src.core.engine.openai.OpenAI') as mock_openai:

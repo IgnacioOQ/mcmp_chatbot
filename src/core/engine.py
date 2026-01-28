@@ -92,21 +92,25 @@ If the question is already simple, just return it as-is."""
         all_chunks = []
         seen_ids = set()
         
-        for query in queries:
-            results = self.vs.query(query, n_results=top_k)
-            
-            # VectorStore.query returns dictionary with lists
-            # We need to handle potential empty results
-            if not results['ids'] or not results['ids'][0]:
+        if not queries:
+            return []
+
+        results = self.vs.query(queries, n_results=top_k)
+
+        # Iterate over each query's results
+        for q_idx, query_ids in enumerate(results['ids']):
+            if not query_ids:
                 continue
 
-            for i, doc_id in enumerate(results['ids'][0]):
+            query_text = queries[q_idx]
+
+            for i, doc_id in enumerate(query_ids):
                 if doc_id not in seen_ids:
                     seen_ids.add(doc_id)
                     all_chunks.append({
-                        'text': results['documents'][0][i],
-                        'metadata': results['metadatas'][0][i] if results['metadatas'] else {},
-                        'source_query': query
+                        'text': results['documents'][q_idx][i],
+                        'metadata': results['metadatas'][q_idx][i] if results['metadatas'] else {},
+                        'source_query': query_text
                     })
         
         return all_chunks
