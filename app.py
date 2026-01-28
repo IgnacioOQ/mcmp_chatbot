@@ -104,23 +104,6 @@ def main():
 
     # Sidebar for configuration
     with st.sidebar:
-        st.header("Settings")
-        if st.button("Refresh Data"):
-            with st.spinner("Scraping and indexing latest events..."):
-                from src.scrapers.mcmp_scraper import MCMPScraper
-                from src.core.vector_store import VectorStore
-                scraper = MCMPScraper()
-                scraper.scrape_events()
-                scraper.scrape_people()
-                scraper.scrape_research()
-                scraper.scrape_general()
-                scraper.scrape_reading_groups()
-                scraper.save_to_json()
-                vs = VectorStore()
-                vs.add_events()
-                st.success("Data refreshed!")
-
-        st.markdown("---")
         with st.expander("Give Feedback"):
             with st.form("feedback_form"):
                 name = st.text_input("Name (optional)")
@@ -129,26 +112,6 @@ def main():
                 if submitted and feedback:
                     save_feedback(name, feedback)
                     st.success("Thank you for your feedback!")
-
-        with st.expander("Admin Access"):
-            password = st.text_input("Admin Password", type="password")
-            if password == "mcmp2026": # Simple password for demo
-                feedback_file = "data/feedback.json"
-                if os.path.exists(feedback_file):
-                    with open(feedback_file, 'r', encoding='utf-8') as f:
-                        feedback_data = json.load(f)
-                    
-                    st.write(f"Total Feedback: {len(feedback_data)}")
-                    st.dataframe(feedback_data)
-                    
-                    st.download_button(
-                        label="Download Feedback JSON",
-                        data=json.dumps(feedback_data, indent=4),
-                        file_name="feedback.json",
-                        mime="application/json"
-                    )
-                else:
-                    st.info("No feedback received yet.")
 
     # Initialize RAGEngine
     if "engine" not in st.session_state:
