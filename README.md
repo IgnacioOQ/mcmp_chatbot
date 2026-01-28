@@ -111,6 +111,18 @@ The core logic (`src/core/engine.py`) connects to the **Gemini API** (or others)
 - **Markdown Graph**: Institutional relationships are stored in `data/graph/mcmp_graph.md` and parsed by `src/core/graph_utils.py` for context injection.
 - **Cloud Feedback**: User feedback is pushed to **Google Sheets** via the Google Drive API, acting as a cloud database for ongoing user data collection.
 
+### 4. Data Model & Relationships
+The system connects four key data types to answer complex questions:
+1.  **People** (`data/people.json`): Raw profiles of researchers, including their bio, contact info, and roles.
+2.  **Research** (`data/research.json`): Descriptions of projects and research areas.
+3.  **Events** (`data/raw_events.json`): Upcoming talks and workshops.
+4.  **Institutional Graph** (`data/graph/mcmp_graph.md`): A knowledge graph that links **People** to **Organizational Units** (Chairs) and defines hierarchy (e.g., who leads a chair, who supervises whom). 
+
+**How they interact:**
+- When a user asks "Who works at the Chair of Philosophy of Science?", the **Graph** identifies the Chair entity and its `affiliated_with` edges.
+- The system then retrieves detailed profiles from **People** data.
+- If the user asks "What does Ignacio Ojea research?", the system checks his **People** profile and relates it to relevant **Research** projects.
+
 ## Project Structure
 
 ```
