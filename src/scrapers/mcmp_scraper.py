@@ -235,12 +235,22 @@ class MCMPScraper:
             if main_content:
                 description = main_content.get_text(separator=' ', strip=True)
                 
-                # Extract contact info if available (often in 'address' or specific divs)
-                # This is a basic extraction, can be refined based on actual HTML structure
+                # Extract contact info
                 emails = [a.get_text() for a in main_content.find_all('a') if "@" in a.get_text()]
                 if emails:
-                    metadata['email'] = emails[0] # Take the first one found
+                    metadata['email'] = emails[0]
                 
+                # Extract Research Interests specifically
+                # Look for "Research interests" header
+                ri_header = main_content.find(lambda tag: tag.name in ['h2', 'h3'] and "Research interests" in tag.get_text())
+                if ri_header:
+                    interests_text = ""
+                    curr = ri_header.find_next_sibling()
+                    while curr and curr.name not in ['h1', 'h2', 'h3']:
+                        interests_text += curr.get_text(separator=' ', strip=True) + " "
+                        curr = curr.find_next_sibling()
+                    metadata['research_interests_text'] = interests_text.strip()
+
             self.people.append({
                 "name": name,
                 "url": url,
@@ -249,70 +259,111 @@ class MCMPScraper:
                 "type": "person",
                 "scraped_at": datetime.now().isoformat()
             })
-            # avoid spamming requests too fast if needed, but for now simple sync
         except Exception as e:
             log_error(f"Error scraping person {url}: {e}")
 
     def scrape_research(self):
-        """Scrapes the research projects, including subpages."""
+        """Scrapes the research projects and structures them."""
         log_info(f"Starting scrape of {self.RESEARCH_URL}")
         try:
-            # 1. Scrape main research page
+            self.research = [] # Reset
+            
+            # Defined High-Level Categories (Chairs/Areas)
+            # We will try to bin scraped pages into these
+            categories = {
+                "logic": {"name": "Logic and Philosophy of Language", "keywords": ["logic", "language", "semantic", "truth"], "items": []},
+                "philsc": {"name": "Philosophy of Science", "keywords": ["science", "physics", "biology", "explanation"], "items": []},
+                "decision": {"name": "Decision Theory", "keywords": ["decision", "game theory", "rationality", "choice"], "items": []},
+                "structure": {"name": "Mathematical Philosophy", "keywords": ["mathematical", "formal"], "items": []} # Fallback
+            }
+
             response = requests.get(self.RESEARCH_URL)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Find links to specific research subpages
             subpage_links = set()
             for link in soup.find_all('a', href=True):
                 href = link['href']
                 if "/research/" in href and href != self.RESEARCH_URL:
-                     # Filter out non-content links if possible, or just strict path checking
-                     # The ML page is .../mcmp/en/research/philosophy-of-machine-learning/
                      if "/mcmp/en/research/" in href and "publications" not in href:
                          full_url = href if href.startswith("http") else f"{self.BASE_URL}{href}"
                          subpage_links.add(full_url)
-
-            # Ensure the specific ML page requested is included even if discovery fails
+            
+            # Ensure the specific ML page requested is included
             ml_page = f"{self.BASE_URL}/mcmp/en/research/philosophy-of-machine-learning/"
             subpage_links.add(ml_page)
 
-            # 2. Scrape each subpage
+            scraped_items = []
             for url in subpage_links:
                 try:
-                    self._scrape_single_research_page(url)
+                    item = self._scrape_single_research_page(url)
+                    if item:
+                        scraped_items.append(item)
                 except Exception as e:
                     log_error(f"Failed to scrape research subpage {url}: {e}")
 
-            log_info(f"Found {len(self.research)} research items/pages.")
+            # Categorize items
+            for item in scraped_items:
+                title_lower = item['title'].lower()
+                desc_lower = item['description'].lower()
+                
+                assigned = False
+                for cat_id, cat_data in categories.items():
+                    if any(k in title_lower for k in cat_data['keywords']):
+                        cat_data['items'].append(item)
+                        assigned = True
+                        break
+                
+                if not assigned:
+                    # Fallback to general or mapped to content keywords
+                    categories['structure']['items'].append(item)
+
+            # Transform to new hierarchical structure for research.json
+            final_structure = []
+            for cat_id, cat_data in categories.items():
+                # Always include the core categories so TopicMatcher can use them
+                # Extract subtopics names from items
+                subtopics = [i['title'] for i in cat_data['items']]
+                
+                final_structure.append({
+                    "id": cat_id,
+                    "name": cat_data['name'],
+                    "description": f"Research area focusing on {cat_data['name']}",
+                    "subtopics": subtopics,
+                    "projects": cat_data['items'], # Keep full details nested
+                    "url": self.RESEARCH_URL
+                })
+            
+            self.research = final_structure
+            log_info(f"Structured research into {len(self.research)} categories.")
             return self.research
+            
         except Exception as e:
             log_error(f"Error scraping research: {e}")
             return []
 
     def _scrape_single_research_page(self, url):
-        """Helper to scrape a specific research page."""
-        response = requests.get(url)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Get title
-        title_elem = soup.find('h1')
-        title = title_elem.get_text(strip=True) if title_elem else "Research Project"
-        
-        # Get main content
-        main_content = soup.find('div', id='r-main') or soup.find('main')
-        if main_content:
-            text = main_content.get_text(separator=' ', strip=True)
-            # Remove navigation noise if possible (simple heuristic: takes long text)
+        """Helper to scrape a specific research page. Returns dict or None."""
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
             
-            self.research.append({
-                "title": title,
-                "description": text[:5000], # Limit length to avoid massive context
-                "url": url,
-                "type": "research",
-                "scraped_at": datetime.now().isoformat()
-            })
+            title_elem = soup.find('h1')
+            title = title_elem.get_text(strip=True) if title_elem else "Research Project"
+            
+            main_content = soup.find('div', id='r-main') or soup.find('main')
+            if main_content:
+                text = main_content.get_text(separator=' ', strip=True)
+                return {
+                    "title": title,
+                    "description": text[:5000],
+                    "url": url,
+                    "type": "research_project",
+                    "scraped_at": datetime.now().isoformat()
+                }
+        except Exception as e:
+            return None
 
     def scrape_general(self):
         """Scrapes the home page for general info (About, History)."""
