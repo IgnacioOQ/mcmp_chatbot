@@ -144,6 +144,21 @@ def main():
                         if not speaker:
                              speaker = "Unknown Speaker"
 
+                        # Enhanced title extraction from description
+                        description = event.get("description", "")
+                        if "Title:\n" in description:
+                            try:
+                                # Extract text after "Title:\n"
+                                part_after = description.split("Title:\n", 1)[1]
+                                # Stop at "Abstract"
+                                if "Abstract" in part_after:
+                                    real_title = part_after.split("Abstract", 1)[0].strip()
+                                    # Clean up newlines if it spans multiple lines
+                                    if real_title:
+                                        title = real_title.replace("\n", " ")
+                            except:
+                                pass
+
                         events_this_week.append({
                             "title": title,
                             "speaker": speaker,
