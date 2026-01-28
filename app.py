@@ -1,7 +1,7 @@
 import streamlit as st
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from src.core.engine import RAGEngine
 from src.utils.logger import log_info, log_error
 
@@ -104,33 +104,52 @@ def main():
 
     # Sidebar for configuration
     with st.sidebar:
-        st.header("Calendar")
+        st.header("Events this Week")
         
-        # Load events for calendar
+        # Load and filter events
         try:
             with open("data/raw_events.json", "r") as f:
                 raw_events = json.load(f)
             
-            from src.utils.calendar_utils import prepare_calendar_events
-            from streamlit_calendar import calendar
+            today = datetime.now().date()
+            start_of_week = today - timedelta(days=today.weekday())
+            end_of_week = start_of_week + timedelta(days=6)
             
-            cal_events = prepare_calendar_events(raw_events)
+            events_this_week = []
             
-            # Simple calendar view
-            calendar_options = {
-                "initialView": "dayGridMonth",
-                "headerToolbar": {
-                    "left": "prev,next",
-                    "center": "title",
-                    "right": ""
-                },
-                "height": 400,
-            }
+            for event in raw_events:
+                meta = event.get("metadata", {})
+                date_str = meta.get("date")
+                if not date_str:
+                    continue
+                    
+                try:
+                    event_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                    if start_of_week <= event_date <= end_of_week:
+                        events_this_week.append({
+                            "title": event.get("title", "Untitled"),
+                            "speaker": meta.get("speaker", "Unknown Speaker"),
+                            "date": event_date,
+                            "time": meta.get("time_start", "Time TBA"),
+                            "url": event.get("url", "#")
+                        })
+                except ValueError:
+                    continue
             
-            calendar(events=cal_events, options=calendar_options)
+            events_this_week.sort(key=lambda x: x["date"])
+            
+            if not events_this_week:
+                st.info("No events scheduled for this week.")
+            else:
+                for ev in events_this_week:
+                    date_fmt = ev["date"].strftime("%A, %d")
+                    st.markdown(f"**{ev['speaker']}**")
+                    st.markdown(f"[{ev['title']}]({ev['url']})")
+                    st.caption(f"📅 {date_fmt} at {ev['time']}")
+                    st.markdown("---")
             
         except Exception as e:
-            st.error(f"Could not load calendar: {e}")
+            st.error(f"Could not load events: {e}")
 
         st.markdown("---")
         with st.expander("Give Feedback"):
