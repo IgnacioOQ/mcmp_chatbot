@@ -1,4 +1,5 @@
 import os
+import functools
 from dotenv import load_dotenv
 from src.core.vector_store import VectorStore
 from src.core.graph_utils import GraphUtils
@@ -32,6 +33,7 @@ class RAGEngine:
             log_error(error_msg)
             raise ValueError(error_msg)
 
+    @functools.lru_cache(maxsize=128)
     def decompose_query(self, user_question):
         """
         Decomposes a complex question into simpler sub-queries.
