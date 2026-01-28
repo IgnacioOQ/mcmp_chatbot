@@ -44,6 +44,7 @@
     *   If you need to change the logic of an agent or the model, you must create a **new version** (e.g., a subclass or a new file) rather than modifying the existing classes in place.
 2.  **Consistency:** Ensure any modifications or new additions remain as consistent as possible with the logic and structure of the `main` branch.
 3.  **Coding Conventions:** Always keep the coding conventions pristine.
+4.  **Performance:** When interacting with databases (Vector DB, Graph) or APIs, **always prefer batch operations** over sequential loops. (e.g., use `vs.query([q1, q2])` instead of looping `vs.query(q1)`).
 
 ## CONTEXT FINE-TUNING
 - status: active

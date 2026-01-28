@@ -97,10 +97,13 @@ class VectorStore:
             )
             log_info(f"Upserted {len(ids)} items into vector store (History preserved).")
 
-    def query(self, text, n_results=3):
-        """Queries the vector store for relevant events."""
+    def query(self, query_texts, n_results=3):
+        """Queries the vector store for relevant events. Can accept a single string or a list of strings."""
+        if isinstance(query_texts, str):
+            query_texts = [query_texts]
+
         results = self.collection.query(
-            query_texts=[text],
+            query_texts=query_texts,
             n_results=n_results
         )
         return results
