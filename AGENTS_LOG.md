@@ -9,6 +9,20 @@ Most recent event comes first
 - status: active
 <!-- content -->
 
+### Task: Housekeeping & Fixes
+- status: active
+<!-- content -->
+**Date:** 2026-01-28
+**AI Assistant:** Jules
+**Summary:** Executed Housekeeping Protocol, installed dependencies, and fixed graph generation.
+- **Actions:**
+    - Installed `requirements.txt` (including `chromadb`).
+    - Fixed `src/utils/build_graph.py` to create `data/graph` directory if missing.
+    - Ran `scripts/update_dataset.py` successfully.
+    - Verified all tests passed (`tests/` suite).
+    - Updated `HOUSEKEEPING.md` with successful report.
+- **Files Modified:** `src/utils/build_graph.py`, `docs/HOUSEKEEPING.md`, `data/` (json & graph).
+
 ### Performance: Vector Search Optimization
 - status: active
 <!-- content -->

@@ -227,14 +227,18 @@ def run():
     for e in edges:
         md_lines.append(f"| {e['source']} | {e['target']} | {e['relationship']} | {e['properties']} |")
         
-    md_path = base_dir / "data/graph/mcmp_graph.md"
+    # Ensure directory exists
+    graph_dir = base_dir / "data/graph"
+    graph_dir.mkdir(parents=True, exist_ok=True)
+
+    md_path = graph_dir / "mcmp_graph.md"
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write("\n".join(md_lines))
         
     print(f"Graph MD written to {md_path}")
     
     # JSON Output
-    json_path = base_dir / "data/graph/mcmp_jgraph.json"
+    json_path = graph_dir / "mcmp_jgraph.json"
     graph_json = {
         "nodes": [n for n in nodes if n['id'] in seen_nodes], # reuse deduped
         "edges": edges
