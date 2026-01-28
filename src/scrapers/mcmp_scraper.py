@@ -3,7 +3,13 @@ from bs4 import BeautifulSoup
 import json
 import os
 from datetime import datetime
+
 from src.utils.logger import log_info, log_error
+try:
+    from src.utils import build_graph
+except ImportError:
+    # Fallback/warnings if needed, but assuming structure holds
+    import src.utils.build_graph as build_graph
 
 class MCMPScraper:
     BASE_URL = "https://www.philosophie.lmu.de"
@@ -441,6 +447,14 @@ class MCMPScraper:
             json.dump(self.general, f, indent=4, ensure_ascii=False)
             
         log_info(f"Saved {len(self.events)} events, {len(self.people)} people, {len(self.research)} research items, {len(self.general)} general items.")
+        
+        # Auto-update Graph
+        try:
+             log_info("Updating institutional graph...")
+             build_graph.run()
+             log_info("Graph updated successfully.")
+        except Exception as e:
+             log_error(f"Failed to update graph: {e}")
 
 if __name__ == "__main__":
     scraper = MCMPScraper()

@@ -87,6 +87,17 @@ For complex questions (e.g., *"Who is Mario Hubert and what is his talk about?"*
    streamlit run app.py
    ```
 
+## Data Maintenance
+To keep the chatbot up to date with the latest MCMP events and personnel, run the update protocol:
+
+```bash
+python scripts/update_dataset.py
+```
+This script will:
+1.  Scrape the MCMP website (Events, People, Research).
+2.  Update JSON datasets (`data/*.json`).
+3.  Rebuild the Institutional Graph (`data/graph/mcmp_graph.md` and `mcmp_jgraph.json`).
+
 ## Technical Architecture
 
 ### 1. Frontend: Streamlit
