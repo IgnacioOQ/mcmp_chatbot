@@ -1,7 +1,7 @@
 # MCMP Chatbot
 
 - status: active
-- context_dependencies: {"agents": "AGENTS.md", "conventions": "MD_CONVENTIONS.md"}
+- context_dependencies: {"agents": "AGENTS.md", "conventions": "docs/MD_CONVENTIONS.md"}
 
 <!-- content -->
 
@@ -18,7 +18,7 @@ The application is built with **Streamlit** for the frontend, uses **ChromaDB** 
 - **Multi-LLM Support**: Configured to work seamlessly with **Google Gemini**, but also supports OpenAI and Anthropic.
 - **Smart Retrieval (Query Decomposition)**: automatically breaks down complex multi-part questions into simpler sub-queries for more complete answers.
 - **Institutional Graph**: Uses a graph-based layer (`data/graph`) to understand organizational structure (Chairs, Leadership) and relationships between people.
-- **Agentic Workflow**: Follows the `AGENTS.md` and `MD_CONVENTIONS.md` protocols for AI-assisted development.
+- **Agentic Workflow**: Follows the `AGENTS.md` and `docs/MD_CONVENTIONS.md` protocols for AI-assisted development.
 
 ## RAG Architecture Explained
 
@@ -122,9 +122,10 @@ mcmp_chatbot/
 │   └── utils/            # Helper functions (logging, etc.)
 ├── data/                 # Local data storage (JSONs, Vector DB)
 ├── docs/                 # Project documentation and proposals
-│   └── rag_improvements.md
+│   ├── rag_improvements.md
+│   ├── HOUSEKEEPING.md   # Maintenance protocols
+│   └── MD_CONVENTIONS.md # Markdown conventions
 ├── AGENTS.md             # Guidelines for AI Agents
-├── MD_CONVENTIONS.md     # Markdown conventions for the project
 └── requirements.txt      # Python dependencies
 ```
 
@@ -132,5 +133,4 @@ mcmp_chatbot/
 
 This project uses a structured workflow for AI agents.
 - **AGENTS.md**: Read this first if you are an AI assistant.
-- **MD_CONVENTIONS.md**: Defines the schema for Markdown files and task management.
-- **IMPLEMENTATION_PLAN.md**: Tracks current development goals.
+- **docs/MD_CONVENTIONS.md**: Defines the schema for Markdown files and task management.
