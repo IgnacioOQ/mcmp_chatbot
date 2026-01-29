@@ -4,6 +4,7 @@ import json
 from dotenv import load_dotenv
 from src.core.vector_store import VectorStore
 from src.core.graph_utils import GraphUtils
+from src.core.personality import load_personality
 from src.mcp.server import MCPServer
 from src.utils.logger import log_info, log_error
 import openai
@@ -149,23 +150,15 @@ If the question is already simple, just return it as-is."""
             graph_context_text = "No specific institutional relationships found."
         
         current_date = datetime.now().strftime("%A, %B %d, %Y")
-
-        system_instruction = f"""You are the official Munich Center for Mathematical Philosophy (MCMP) Intelligence Assistant. 
         
-Current Date: {current_date} 
+        # Load static personality from file
+        personality = load_personality()
 
-Your goal is to serve as a comprehensive guide to the MCMP. You can answer questions about:
-- **Research**: Ongoing projects, philosophy of AI/ML, logic, and philosophy of science.
-- **People**: Faculty, fellows, and researchers.
-- **Events**: Upcoming talks, workshops, and reading groups.
-- **General Info**: History, aims, and institutional details.
+        # Compose system instruction: static personality + dynamic context
+        system_instruction = f"""{personality}
 
-### Guidelines:
-1. **Context-First**: Use the provided context to answer. If the context contains details like speaker names, dates, locations, or abstracts, include them in your response.
-2. **Handle Uncertainty**: If the provided context does not contain the answer, politely inform the user that you don't have that specific information yet. However, briefly mention what the MCMP is (a world-leading hub for formal philosophy) to remain helpful.
-3. **Tone**: Be professional, scholarly, yet accessible.
-4. **Citations & Links**: **ALWAYS** link back to the source using Markdown format `[Link Text](URL)`. If a URL is provided in the context, use it to create a clickable link in your answer.
-
+---
+Current Date: {current_date}
 ---
 ### INSTITUTIONAL CONTEXT (GRAPH):
 {graph_context_text}

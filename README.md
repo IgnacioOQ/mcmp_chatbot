@@ -20,6 +20,7 @@ The application is built with **Streamlit** for the frontend, uses **ChromaDB** 
 - **Smart Retrieval (Query Decomposition)**: automatically breaks down complex multi-part questions into simpler sub-queries for more complete answers.
 - **Institutional Graph**: Uses a graph-based layer (`data/graph`) to understand organizational structure (Chairs, Leadership) while linking people to hierarchical **Research Topics**.
 - **Structured Data Tools (MCP)**: Implements an in-process Model Context Protocol (MCP) server that exposes `people.json`, `research.json`, and `raw_events.json` as structured tools. This allows the LLM to perform precise queries (e.g., "List all events next week", "Who researches Logic?") rather than relying solely on semantic retrieval.
+- **Configurable Personality (Leopold)**: The chatbot's personality is defined in `prompts/personality.md`, separating tone and identity from code. Edit the file to adjust behavior without touching the engine.
 - **Agentic Workflow**: Follows the `AGENTS.md` and `docs/MD_CONVENTIONS.md` protocols for AI-assisted development.
 
 ## Performance Optimization
@@ -140,15 +141,18 @@ The system connects four key data types to answer complex questions:
 mcmp_chatbot/
 ├── app.py                # Main Streamlit application entry point
 ├── src/
-│   ├── core/             # RAG engine (Gemini) and Vector Store (Chroma)
+│   ├── core/             # RAG engine (Gemini), Vector Store (Chroma), Personality loader
 │   ├── mcp/              # MCP Tools and Server implementation
 │   ├── scrapers/         # Scrapers for MCMP website
 │   ├── ui/               # Streamlit UI components
 │   └── utils/            # Helper functions (logging, etc.)
+├── prompts/              # Chatbot personality configuration
+│   └── personality.md    # Leopold's identity, tone, and guidelines
 ├── data/                 # Local data storage (JSONs, Vector DB)
 ├── docs/                 # Project documentation and proposals
 │   ├── rag_improvements.md
 │   ├── HOUSEKEEPING.md   # Maintenance protocols
+│   ├── PERSONALITY_AGENT.md # Agent skill for personality design
 │   └── MD_CONVENTIONS.md # Markdown conventions
 ├── scripts/              # Maintenance and update scripts
 │   └── update_dataset.py # Main data update script
