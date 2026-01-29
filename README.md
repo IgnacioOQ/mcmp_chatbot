@@ -19,6 +19,7 @@ The application is built with **Streamlit** for the frontend, uses **ChromaDB** 
 - **Multi-LLM Support**: Configured to work seamlessly with **Google Gemini**, but also supports OpenAI and Anthropic.
 - **Smart Retrieval (Query Decomposition)**: automatically breaks down complex multi-part questions into simpler sub-queries for more complete answers.
 - **Institutional Graph**: Uses a graph-based layer (`data/graph`) to understand organizational structure (Chairs, Leadership) while linking people to hierarchical **Research Topics**.
+- **Structured Data Tools (MCP)**: Implements an in-process Model Context Protocol (MCP) server that exposes `people.json`, `research.json`, and `raw_events.json` as structured tools. This allows the LLM to perform precise queries (e.g., "List all events next week", "Who researches Logic?") rather than relying solely on semantic retrieval.
 - **Agentic Workflow**: Follows the `AGENTS.md` and `docs/MD_CONVENTIONS.md` protocols for AI-assisted development.
 
 ## Performance Optimization
@@ -115,6 +116,12 @@ The core logic (`src/core/engine.py`) connects to the **Gemini API** (or others)
 - **Markdown Graph**: Institutional relationships are stored in `data/graph/mcmp_graph.md` and parsed by `src/core/graph_utils.py` for context injection.
 - **Cloud Feedback**: User feedback is pushed to **Google Sheets** via the Google Drive API, acting as a cloud database for ongoing user data collection.
 
+### 5. MCP Integration (Structured Data)
+To handle specific queries that require structured data access (e.g., "Which events are happening between date X and Y?"), the system implements a lightweight **MCP Server** (`src/mcp/`).
+- **Tools**: Exposes Python functions (`search_people`, `search_research`, `get_events`) as tools to the LLM.
+- **Hybrid Execution**: The RAG engine first retrieves semantic context, then offers these tools to the LLM. If the LLM determines it needs precise data, it calls the tool, and the result is fed back for the final answer.
+- **Toggle**: This feature is optional and can be enabled/disabled via the Streamlit sidebar to manage latency and costs.
+
 ### 4. Data Model & Relationships
 The system connects four key data types to answer complex questions:
 1.  **People** (`data/people.json`): Raw profiles of researchers, including their bio, contact info, and roles.
@@ -134,6 +141,7 @@ mcmp_chatbot/
 ├── app.py                # Main Streamlit application entry point
 ├── src/
 │   ├── core/             # RAG engine (Gemini) and Vector Store (Chroma)
+│   ├── mcp/              # MCP Tools and Server implementation
 │   ├── scrapers/         # Scrapers for MCMP website
 │   ├── ui/               # Streamlit UI components
 │   └── utils/            # Helper functions (logging, etc.)
