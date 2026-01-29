@@ -104,18 +104,6 @@ def main():
 
     # Sidebar for configuration
     with st.sidebar:
-        st.header("Configuration")
-        use_mcp_tools = st.toggle("Enable Structured Data Tools (MCP)", value=False, help="Allows the AI to search specific databases for people, research, and events.")
-        
-        # Model Selection
-        model_choice = st.radio(
-            "Select Model",
-            options=["gemini-2.0-flash", "gemini-2.0-flash-lite"],
-            format_func=lambda x: "Gemini 2.0 Flash (Balanced)" if x == "gemini-2.0-flash" else "Gemini 2.0 Flash-Lite (Economy)",
-            help="Flash is better for complex queries. Flash-Lite is cheaper but still powerful."
-        )
-        st.markdown("---")
-
         st.header("Events this Week")
         
         # Load and filter events
@@ -205,6 +193,19 @@ def main():
                 if submitted and feedback:
                     save_feedback(name, feedback)
                     st.success("Thank you for your feedback!")
+
+        st.markdown("---")
+        st.header("Configuration")
+        use_mcp_tools = st.toggle("Enable Structured Data Tools (MCP)", value=True, help="Allows the AI to search specific databases for people, research, and events.")
+        
+        # Model Selection
+        model_choice = st.radio(
+            "Select Model",
+            options=["gemini-2.0-flash", "gemini-2.0-flash-lite"],
+            index=1,
+            format_func=lambda x: "Gemini 2.0 Flash (Balanced)" if x == "gemini-2.0-flash" else "Gemini 2.0 Flash-Lite (Economy)",
+            help="Flash is better for complex queries. Flash-Lite is cheaper but still powerful."
+        )
 
     # Initialize RAGEngine
     if "engine" not in st.session_state:
