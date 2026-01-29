@@ -125,9 +125,11 @@ If the question is already simple, just return it as-is."""
         
         return all_chunks
 
-    def generate_response(self, query, use_mcp_tools=False):
-        """Retrieves relevant events and generates a response using the selected LLM provider."""
-        log_info(f"Generating response for query: {query}. Tools enabled: {use_mcp_tools}")
+    def generate_response(self, query, use_mcp_tools=False, model_name="gemini-2.0-flash"):
+        """
+        Generates a response using the configured LLM provider.
+        """
+        log_info(f"Generating response for query: {query}. Tools enabled: {use_mcp_tools}. Model: {model_name}")
         
         # 1. Retrieve context with decomposition
         context_chunks = self.retrieve_with_decomposition(query)
@@ -271,7 +273,7 @@ Your goal is to serve as a comprehensive guide to the MCMP. You can answer quest
                 # Actually newer genai client supports system_instruction='...'
                 
                 chat = client.chats.create(
-                    model='gemini-2.0-flash',
+                    model=model_name,
                     config=types.GenerateContentConfig(
                         system_instruction=system_instruction,
                         tools=tools,

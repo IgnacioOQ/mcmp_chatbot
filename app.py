@@ -106,6 +106,14 @@ def main():
     with st.sidebar:
         st.header("Configuration")
         use_mcp_tools = st.toggle("Enable Structured Data Tools (MCP)", value=False, help="Allows the AI to search specific databases for people, research, and events.")
+        
+        # Model Selection
+        model_choice = st.radio(
+            "Select Model",
+            options=["gemini-2.0-flash", "gemini-2.0-flash-lite"],
+            format_func=lambda x: "Gemini 2.0 Flash (Balanced)" if x == "gemini-2.0-flash" else "Gemini 2.0 Flash-Lite (Economy)",
+            help="Flash is better for complex queries. Flash-Lite is cheaper but still powerful."
+        )
         st.markdown("---")
 
         st.header("Events this Week")
@@ -220,7 +228,7 @@ def main():
 
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                response = st.session_state.engine.generate_response(prompt, use_mcp_tools=use_mcp_tools)
+                response = st.session_state.engine.generate_response(prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
 
