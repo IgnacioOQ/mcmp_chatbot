@@ -271,7 +271,7 @@ Your goal is to serve as a comprehensive guide to the MCMP. You can answer quest
                 # Actually newer genai client supports system_instruction='...'
                 
                 chat = client.chats.create(
-                    model='gemini-2.0-flash-exp', # using 2.0 flash for better tool use
+                    model='gemini-2.0-flash',
                     config=types.GenerateContentConfig(
                         system_instruction=system_instruction,
                         tools=tools,
