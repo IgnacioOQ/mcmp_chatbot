@@ -104,6 +104,10 @@ def main():
 
     # Sidebar for configuration
     with st.sidebar:
+        st.header("Configuration")
+        use_mcp_tools = st.toggle("Enable Structured Data Tools (MCP)", value=False, help="Allows the AI to search specific databases for people, research, and events.")
+        st.markdown("---")
+
         st.header("Events this Week")
         
         # Load and filter events
@@ -198,7 +202,7 @@ def main():
     if "engine" not in st.session_state:
         # Try to get key from secrets, otherwise RAGEngine will fallback to os.getenv
         api_key = st.secrets.get("GEMINI_API_KEY") 
-        st.session_state.engine = RAGEngine(provider="gemini", api_key=api_key)
+        st.session_state.engine = RAGEngine(provider="gemini", api_key=api_key, use_mcp=True)
 
     # Chat history
     if "messages" not in st.session_state:
@@ -216,7 +220,7 @@ def main():
 
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                response = st.session_state.engine.generate_response(prompt)
+                response = st.session_state.engine.generate_response(prompt, use_mcp_tools=use_mcp_tools)
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
 

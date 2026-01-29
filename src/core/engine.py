@@ -1,8 +1,10 @@
 import os
 import functools
+import json
 from dotenv import load_dotenv
 from src.core.vector_store import VectorStore
 from src.core.graph_utils import GraphUtils
+from src.mcp.server import MCPServer
 from src.utils.logger import log_info, log_error
 import openai
 from anthropic import Anthropic
@@ -11,10 +13,16 @@ from datetime import datetime
 load_dotenv()
 
 class RAGEngine:
-    def __init__(self, provider="openai", api_key=None):
+    def __init__(self, provider="openai", api_key=None, use_mcp=True):
         self.vs = VectorStore()
         self.graph_utils = GraphUtils()
         self.provider = provider
+        self.use_mcp = use_mcp
+        
+        if self.use_mcp:
+            self.mcp_server = MCPServer()
+        else:
+            self.mcp_server = None
         
         # 1. Try passed key
         self.api_key = api_key
@@ -117,23 +125,19 @@ If the question is already simple, just return it as-is."""
         
         return all_chunks
 
-    def generate_response(self, query):
+    def generate_response(self, query, use_mcp_tools=False):
         """Retrieves relevant events and generates a response using the selected LLM provider."""
-        log_info(f"Generating response for query: {query}")
+        log_info(f"Generating response for query: {query}. Tools enabled: {use_mcp_tools}")
         
-        # 1. Retrieve context
         # 1. Retrieve context with decomposition
         context_chunks = self.retrieve_with_decomposition(query)
         
-        # Combine docs with their metadata
         formatted_context = []
         for chunk in context_chunks:
             source_url = chunk['metadata'].get('url', 'No URL available')
             formatted_entry = f"{chunk['text']}\nSource URL: {source_url}"
             formatted_context.append(formatted_entry)
             
-        context_text = "\n\n---\n\n".join(formatted_context)
-        
         context_text = "\n\n---\n\n".join(formatted_context)
         
         # 2. Retrieve graph context
@@ -144,7 +148,7 @@ If the question is already simple, just return it as-is."""
         
         current_date = datetime.now().strftime("%A, %B %d, %Y")
 
-        prompt = f"""You are the official Munich Center for Mathematical Philosophy (MCMP) Intelligence Assistant. 
+        system_instruction = f"""You are the official Munich Center for Mathematical Philosophy (MCMP) Intelligence Assistant. 
         
 Current Date: {current_date} 
 
@@ -167,47 +171,128 @@ Your goal is to serve as a comprehensive guide to the MCMP. You can answer quest
 ### CONTEXT FROM MCMP WEBSITE:
 {context_text}
 ---
-
-### USER QUESTION:
-{query}
-
-### YOUR RESPONSE:"""
+"""
+        
+        # Prepare tools if enabled and available
+        tools = []
+        if use_mcp_tools and self.mcp_server:
+            # For Gemini, we pass the python functions
+            if self.provider == "gemini":
+                tools = list(self.mcp_server.tools.values())
+            # For OpenAI, we pass the schemas
+            elif self.provider == "openai":
+                tools = []
+                for tool_def in self.mcp_server.list_tools():
+                    tools.append({
+                        "type": "function",
+                        "function": {
+                            "name": tool_def["name"],
+                            "description": tool_def["description"],
+                            "parameters": tool_def["input_schema"]
+                        }
+                    })
 
         try:
             if self.provider == "openai":
                 client = openai.OpenAI(api_key=self.api_key)
-                response = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0
-                )
-                return response.choices[0].message.content
+                
+                messages = [
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": query}
+                ]
+                
+                # First Call
+                completion_args = {
+                    "model": "gpt-4o",
+                    "messages": messages,
+                    "temperature": 0
+                }
+                if tools:
+                    completion_args["tools"] = tools
+
+                response = client.chat.completions.create(**completion_args)
+                message = response.choices[0].message
+                
+                # Check for tool calls
+                if message.tool_calls:
+                    messages.append(message) # Add assistant's tool-call message
+                    
+                    for tool_call in message.tool_calls:
+                        function_name = tool_call.function.name
+                        arguments = json.loads(tool_call.function.arguments)
+                        log_info(f"Executing Tool: {function_name} with args {arguments}")
+                        
+                        result = self.mcp_server.call_tool(function_name, arguments)
+                        
+                        messages.append({
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "content": json.dumps(result)
+                        })
+                    
+                    # Second Call (with tool results)
+                    response = client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=messages,
+                        temperature=0
+                    )
+                    return response.choices[0].message.content
+                else:
+                    return message.content
+
             elif self.provider == "anthropic":
+                # Basic implementation without tools for now to keep it safe
                 client = Anthropic(api_key=self.api_key)
                 response = client.messages.create(
                     model="claude-3-5-sonnet-20240620",
                     max_tokens=1024,
-                    messages=[{"role": "user", "content": prompt}]
+                    system=system_instruction,
+                    messages=[{"role": "user", "content": query}]
                 )
                 return response.content[0].text
+
             elif self.provider == "gemini":
                 from google import genai
+                from google.genai import types
+                
                 client = genai.Client(api_key=self.api_key)
-                response = client.models.generate_content(
-                    model='gemini-flash-latest',
-                    contents=prompt
+                
+                config = {}
+                if tools:
+                    config['tools'] = tools
+                
+                # We need to construct the chat history manually to include system instruction context
+                # Gemini doesn't support 'system' role in chat history often, usually config.
+                # simpler to just prepend context to user message or use system_instruction argument
+                
+                # Note: 'gemini-flash-latest' might accept system_instruction in config or init.
+                # Let's try passing it in config if possible, or contents.
+                
+                # Actually newer genai client supports system_instruction='...'
+                
+                chat = client.chats.create(
+                    model='gemini-2.0-flash-exp', # using 2.0 flash for better tool use
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_instruction,
+                        tools=tools,
+                        automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                            disable=False,
+                            maximum_remote_calls=3
+                        )
+                    )
                 )
+                
+                response = chat.send_message(query)
                 return response.text
+
         except Exception as e:
             log_error(f"Error generating response: {e}")
             return f"Error: {e}"
 
 if __name__ == "__main__":
-    engine = RAGEngine()
+    engine = RAGEngine(use_mcp=True)
     # Mock run if API key is missing
     if not os.getenv("OPENAI_API_KEY"):
-        print("OPENAI_API_KEY not set. Retrieval test only:")
-        vs = VectorStore()
-        print(vs.query("Carl Hoefer"))
+       pass
     else:
-        print(engine.generate_response("Tell me about Carl Hoefer's talk."))
+        print(engine.generate_response("List all upcoming events", use_mcp_tools=True))
