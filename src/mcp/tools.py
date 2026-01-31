@@ -72,7 +72,7 @@ def search_research(topic: Optional[str] = None) -> List[Dict[str, Any]]:
             
     return results
 
-def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None, query: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Get upcoming events.
     
@@ -81,6 +81,7 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
         type_filter: Optional type filter (e.g., "talk", "workshop").
         start_date: Optional start date in "YYYY-MM-DD" format.
         end_date: Optional end date in "YYYY-MM-DD" format.
+        query: Optional keyword search in title, abstract, or description.
     """
     events = load_data("raw_events.json")
     results = []
@@ -105,11 +106,21 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
             end_dt = end_dt.replace(hour=23, minute=59, second=59)
         except ValueError:
             pass
+            
+    query_lower = query.lower() if query else None
 
     for event in events:
         title = event.get("title", "")
         meta = event.get("metadata", {})
         date_str = meta.get("date")
+        abstract = event.get("abstract", "")
+        description = event.get("description", "")
+        
+        # Filter by content query
+        if query_lower:
+            text_content = (title + " " + abstract + " " + description).lower()
+            if query_lower not in text_content:
+                continue
         
         # Filter by type
         if type_filter and type_filter.lower() not in title.lower():

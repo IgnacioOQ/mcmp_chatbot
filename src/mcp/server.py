@@ -62,6 +62,10 @@ class MCPServer:
                             "enum": ["upcoming", "today", "this_week"],
                             "description": "Preset relative time range. Default is 'upcoming'. Ignored if specific dates are provided."
                         },
+                        "query": {
+                            "type": "string",
+                            "description": "Keyword to search for in event title, abstract, or description. Useful for topic-specific event searches (e.g. 'events about quantum mechanics')."
+                        },
                         "start_date": {
                             "type": "string",
                             "description": "Start date for filtering events (format: YYYY-MM-DD). Useful for queries like 'events after Oct 5th' or 'events in December'."
