@@ -2,7 +2,6 @@
 - status: active
 - type: plan
 - id: unified-nexus
-- context_dependencies: {"conventions": "MD_CONVENTIONS.md", "rag_agent": "RAGS_AGENT.md"}
 - last_checked: 2025-01-27
 <!-- content -->
 This document proposes an architecture that unifies **RAG (Retrieval-Augmented Generation)** for unstructured data with **Data Warehouse + Text2SQL** for structured data. The result is a system that can answer questions requiring both semantic understanding and precise computation.
@@ -69,6 +68,46 @@ The unified system has three retrieval paths that feed into a single LLM for ans
                           └─────────────────────────────────────┘
 ```
 
+### Current Implementation (Simplified Nexus)
+- status: active
+- type: context
+- id: unified-nexus.architecture.simplified_diagram
+<!-- content -->
+While the full vision includes a text-to-SQL engine (DuckDB), the current implementation simplifies this by using **MCP Tools** to query structured JSON data.
+
+```mermaid
+graph TD
+    UserQuery[User Question] --> Router{Query Router}
+    
+    subgraph "Unstructured Path (RAG)"
+        Router -- "Semantic/Context" --> VectorStore[(ChromaDB)]
+        VectorStore --> chunks[Text Chunks]
+    end
+    
+    subgraph "Structured Path (MCP)"
+        Router -- "Precise/Data" --> Tools[MCP Tools]
+        Tools -->|Query| DataSources[(JSON Files)]
+        DataSources -->|Results| structured_data[Structured Data]
+    end
+    
+    subgraph "Institutional Knowledge"
+        Router -- "Relationships" --> Graph[(Graph DB)]
+        Graph --> relations[Relationships]
+    end
+
+    chunks --> Aggregator{Context Assembler}
+    structured_data --> Aggregator
+    relations --> Aggregator
+    
+    Aggregator --> LLM[LLM Generator]
+    LLM --> Answer[Final Answer]
+
+    style VectorStore fill:#e3f2fd,stroke:#1565c0
+    style DataSources fill:#e8f5e9,stroke:#2e7d32
+    style Graph fill:#f3e5f5,stroke:#7b1fa2
+    style LLM fill:#fff3e0,stroke:#ef6c00
+```
+
 ### Component Summary
 - status: active
 - type: context
@@ -83,6 +122,36 @@ The unified system has three retrieval paths that feed into a single LLM for ans
 | **Text2SQL Engine** | LLM + schema context | Generate SQL from natural language |
 | **Hybrid Executor** | Custom orchestrator | Combine SQL results with semantic search |
 | **Answer Generator** | LLM (quality model) | Synthesize final response |
+
+### Vector Store Alternatives
+- status: active
+- type: context
+- id: unified-nexus.architecture.vector-alternatives
+- last_checked: 2026-01-29
+<!-- content -->
+ChromaDB was selected for this implementation, but these alternatives are documented for future reference:
+
+| Option | Pros | Cons | When to Use |
+|:-------|:-----|:-----|:------------|
+| **ChromaDB** ⭐ | Local, lightweight, Python-native | Single-node only | Default choice, prototyping |
+| **LanceDB** | Columnar, fast, embedded | Newer ecosystem | High-volume analytics |
+| **pgvector** | SQL integration, familiar | Requires PostgreSQL | Consolidating to Postgres |
+| **Pinecone** | Managed, scalable, reliable | Cloud-only, costs money | Enterprise scale |
+| **Pinecone** | Managed, scalable, reliable | Cloud-only, costs money | Enterprise scale |
+| **Weaviate** | GraphQL, rich features | Heavier setup | Complex schema needs |
+
+### System Resilience & Error Handling
+- status: active
+- type: protocol
+- id: unified-nexus.architecture.resilience
+<!-- content -->
+> [!WARNING]
+> **Internal Blocking Risk**: In a unified system, a failure in one component (e.g., VectorStore initialization) must not crash the entire application. 
+> 
+> **Architectural Constraint**: 
+> - Lazy loading is preferred for heavy components.
+> - **Initialization Retries**: The UI must handle "soft failures" by allowing components to re-initialize on subsequent interactions rather than caching a permanent `None` state.
+> - **Isolated Scope**: Component errors should be trapped at the component boundary to prevent propagating effectively "blocking" states to the UI event loop.
 
 ## Implementation Plan
 - status: active
@@ -1222,7 +1291,6 @@ Examples of using the unified system.
 - id: unified_local_nexus_rag_data_warehouse_architecture.usage_examples.basic_usage
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 
@@ -1234,7 +1302,6 @@ import google.generativeai as genai
 - id: configure_llm
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 genai.configure(api_key="your-api-key")
@@ -1244,7 +1311,6 @@ llm = genai.GenerativeModel('gemini-1.5-flash')
 - id: initialize_unified_engine
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 engine = UnifiedEngine(
@@ -1257,14 +1323,12 @@ engine = UnifiedEngine(
 - id: query_examples
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 # Structured query (routes to Text2SQL)
 - id: structured_query_routes_to_text2sql
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 result = engine.query("What were our total sales last month?")
@@ -1274,7 +1338,6 @@ print(result['answer'])
 - id: unstructured_query_routes_to_rag
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 result = engine.query("What is our refund policy?")
@@ -1284,7 +1347,6 @@ print(result['answer'])
 - id: hybrid_query_uses_both
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 result = engine.query("Which customers complained about shipping and have orders over $500?")
@@ -1295,7 +1357,6 @@ print(result['answer'])
 - id: hybrid_query_uses_both.document_ingestion
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 
@@ -1307,7 +1368,6 @@ from src.core.vector_store import VectorStore
 - id: initialize
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 vector_store = VectorStore("data/vectordb")
@@ -1317,7 +1377,6 @@ ingester = DocumentIngester(vector_store)
 - id: ingest_a_single_file
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 result = ingester.ingest_file("docs/company_policies.pdf")
@@ -1327,7 +1386,6 @@ print(f"Created {result['chunks_created']} chunks")
 - id: ingest_all_documents_in_a_directory
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 results = ingester.ingest_directory("docs/", extensions=['.pdf', '.md'])
@@ -1356,7 +1414,6 @@ from src.core.document_ingestion import DocumentIngester
 - id: sidebar_data_sources_section
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 with st.sidebar:
@@ -1399,7 +1456,6 @@ with st.sidebar:
 - id: chat_interface
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 if prompt := st.chat_input("Ask about your data or documents..."):
@@ -1756,7 +1812,6 @@ Represent graph state within your existing MD conventions. This integrates natur
 - id: chat_interface.entity_graph.nodes
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 | ID | Type | Name | Properties |
@@ -1770,7 +1825,6 @@ Represent graph state within your existing MD conventions. This integrates natur
 - id: chat_interface.entity_graph.edges
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 | Source | Relationship | Target | Properties |
@@ -1784,7 +1838,6 @@ Represent graph state within your existing MD conventions. This integrates natur
 - id: chat_interface.entity_graph.adjacency_summary
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 - **Alice Chen (P001)**: manages Bob Smith, leads Engineering
@@ -2550,7 +2603,6 @@ Update the unified engine to include a graph retrieval path.
 - id: add_to_queryrouter_class
 - status: active
 - type: context
-- context_dependencies: { "conventions": "MD_CONVENTIONS.md", "agents": "AGENTS.md", "project_root": "README.md" }
 - last_checked: 2026-01-27
 <!-- content -->
 

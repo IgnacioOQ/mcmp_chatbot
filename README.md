@@ -207,6 +207,7 @@ graph TD
     *   It calls the tool: `get_events(query="Hannes Leitgeb")`.
     *   The tool scans `data/raw_events.json` and returns: `[{"title": "Talk at LMU", "date": "2024-10-15", ...}]`.
 
+
 5.  **Final Synthesis**:
     > "Hannes Leitgeb is currently working on Logic and Probability... (from RAG). He leads the Chair of Logic and Philosophy of Language (from Graph). Regarding his schedule, he has an upcoming talk at LMU on October 15th (from MCP Tool)."
 
