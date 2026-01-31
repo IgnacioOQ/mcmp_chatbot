@@ -1,100 +1,118 @@
-# Event Scraper Implementation Plan
+# Event Scraper Implementation Guide
 - status: active
 - type: guideline
 <!-- content -->
 
-This document defines the implementation plan for enhancing the MCMP event scraper to perform exhaustive nested searches and extract complete event details including abstracts.
+This document defines the implementation patterns for the MCMP event scraper, including critical lessons learned from production usage.
+
+---
+
+## Critical: Dynamic Loading
+
+> [!CAUTION]
+> The events-overview page uses a **"Load more" button** to dynamically load events. Static `requests.get()` only captures 16 of 53+ events.
+
+### Problem
+- Initial page load shows ~16 events
+- Remaining events load via JavaScript when clicking "Load more"
+- Button class: `button.filterable-list__load-more`
+- Requires 4+ clicks to reveal all events
+
+### Solution: Selenium
+```python
+def _fetch_events_with_selenium(self, url):
+    driver = webdriver.Chrome(options=headless_options)
+    driver.get(url)
+    
+    # Click "Load more" until it disappears
+    while True:
+        try:
+            btn = driver.find_element(By.CSS_SELECTOR, "button.filterable-list__load-more")
+            if btn.is_displayed():
+                btn.click()
+                time.sleep(1)
+            else:
+                break
+        except NoSuchElementException:
+            break
+    
+    # Now extract all event links
+    links = driver.find_elements(By.CSS_SELECTOR, "a.filterable-list__list-item-link.is-events")
+```
+
+**Dependencies**: `selenium`, `webdriver-manager`
+
+---
 
 ## Website Structure
 
 ### Event Sources
-1. **Events Overview** (Primary): `https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/`
+1. **Events Overview** (Primary): `https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/` ⚠️ Dynamic
 2. **Events Page**: `https://www.philosophie.lmu.de/mcmp/en/events/`
 3. **Homepage**: `https://www.philosophie.lmu.de/mcmp/en/`
 
 ### DOM Structure
-- **Listing pages**: Events are in `<a>` tags with class `.filterable-list__list-item-link.is-events`
-- **No pagination**: All events load on a single page
-- **Individual event pages** contain structured sections:
-  - `<h1>` with speaker/event name (e.g., "Talk: Simon Saunders (Oxford)")
+- **Listing pages**: Events in `<a>` tags with class `.filterable-list__list-item-link.is-events`
+- **Individual event pages**:
+  - `<h1>` with speaker/event name
   - `<h2>` labels for "Date:", "Location:", "Title:", "Abstract:"
-  - Content in `.rte__content` divs or `<address>` tags
+  - Location in `<address>` tag
 
-## Implementation Details
+---
 
-### 1. Event Discovery
-Add the events-overview URL to sources:
-```python
-EVENT_SOURCES = [
-    f"{BASE_URL}/mcmp/en/latest-news/events-overview/index.html",
-    f"{BASE_URL}/mcmp/en/events/index.html",
-    f"{BASE_URL}/mcmp/en/index.html"
-]
-```
+## Implementation Patterns
 
-Use CSS class selector for reliable event detection:
-```python
-event_links = soup.select('a.filterable-list__list-item-link.is-events')
-```
-
-### 2. Deduplication
-Use URL as unique identifier:
+### 1. Deduplication (URL-based)
 ```python
 seen_urls = set()
 for link in event_links:
     url = self._normalize_url(link['href'])
     if url not in seen_urls:
         seen_urls.add(url)
-        # ... add event
 ```
 
-### 3. Event Details Extraction
-Parse structured fields from individual pages:
-
+### 2. Event Details Extraction
 ```python
-def scrape_event_details(self, event):
-    soup = BeautifulSoup(response.text, 'html.parser')
-    
-    # Find labeled sections
-    for h2 in soup.find_all('h2'):
-        label = h2.get_text(strip=True).rstrip(':').lower()
-        content_elem = h2.find_next_sibling()
-        
-        if label == 'title':
-            event['talk_title'] = content_elem.get_text(strip=True)
-        elif label == 'abstract':
-            event['abstract'] = self._extract_section_content(h2)
-        elif label == 'date':
-            event['metadata']['date'] = self._parse_date(content_elem)
-    
-    # Location from address tag
-    address = soup.find('address')
-    if address:
-        event['metadata']['location'] = address.get_text(' ', strip=True)
+# Labeled sections
+for h2 in soup.find_all('h2'):
+    label = h2.get_text(strip=True).rstrip(':').lower()
+    if label == 'abstract':
+        event['abstract'] = self._extract_section_content(h2)
+
+# Location from address tag
+address = soup.find('address')
+if address:
+    event['metadata']['location'] = address.get_text(' ', strip=True)
 ```
 
-### 4. Output Schema
+### 3. Date Parsing
+```python
+# "4 February 2026" → "2026-02-04"
+match = re.search(r'(\d{1,2})\s+(\w+)\s+(\d{4})', date_text)
+```
+
+---
+
+## Output Schema
 ```json
 {
     "title": "Talk: Simon Saunders (Oxford)",
     "url": "https://...",
-    "scraped_at": "2026-01-31T...",
     "talk_title": "Bell inequality violation is evidence for many worlds",
     "abstract": "Given two principles (a) no action-at-a-distance...",
     "metadata": {
         "date": "2026-02-04",
-        "year": 2026,
-        "month": "February",
         "time_start": "4:00 pm",
-        "location": "Ludwigstr. 31 Ground floor, room 021, 80539 München",
+        "location": "Ludwigstr. 31 Ground floor, room 021",
         "speaker": "Simon Saunders (Oxford)"
     }
 }
 ```
 
-## Verification Checklist
-- [ ] All events have `abstract` field (if available on source)
-- [ ] `talk_title` is separate from main `title`
-- [ ] `metadata.location` contains only address
-- [ ] No duplicate URLs
-- [ ] Dates parsed to ISO format
+---
+
+## Verification
+- [x] All 53+ events captured
+- [x] Abstracts extracted from individual pages
+- [x] No duplicate URLs
+- [x] Dates in ISO format
