@@ -3,8 +3,25 @@ from bs4 import BeautifulSoup
 import json
 import os
 from datetime import datetime
+import time
 
 from src.utils.logger import log_info, log_error
+
+# Optional Selenium imports for dynamic page loading
+try:
+    from selenium import webdriver
+    from selenium.webdriver.chrome.service import Service as ChromeService
+    from selenium.webdriver.chrome.options import Options as ChromeOptions
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.common.exceptions import TimeoutException, NoSuchElementException
+    from webdriver_manager.chrome import ChromeDriverManager
+    SELENIUM_AVAILABLE = True
+except ImportError:
+    SELENIUM_AVAILABLE = False
+    log_info("Selenium not available. Dynamic page loading will be limited.")
+
 try:
     from src.utils import build_graph
 except ImportError:
@@ -73,92 +90,277 @@ class MCMPScraper:
         return urls
 
     def scrape_events(self):
-        """Scrapes multiple sources for event links."""
+        """Scrapes multiple sources for event links with exhaustive nested search.
+        
+        Uses Selenium for pages with dynamic 'Load more' buttons (like events-overview).
+        Falls back to requests.get() for other pages.
+        """
+        seen_urls = set()  # URL-based deduplication
+        
+        # Events overview page needs dynamic loading (has "Load more" button)
+        events_overview_url = f"{self.BASE_URL}/mcmp/en/latest-news/events-overview/index.html"
+        
+        # First, scrape the events overview with Selenium (if available)
+        if SELENIUM_AVAILABLE:
+            log_info(f"Using Selenium to scrape {events_overview_url} (dynamic loading)")
+            try:
+                event_links = self._fetch_events_with_selenium(events_overview_url)
+                for url, title in event_links:
+                    if url not in seen_urls:
+                        seen_urls.add(url)
+                        self.events.append({
+                            "title": title,
+                            "url": url,
+                            "scraped_at": datetime.now().isoformat()
+                        })
+                log_info(f"Selenium found {len(self.events)} events from events-overview")
+            except Exception as e:
+                log_error(f"Selenium failed, falling back to static scraping: {e}")
+        
+        # Scrape remaining sources with requests (static pages)
         for source_url in self.EVENT_SOURCES:
-            log_info(f"Starting scrape of {source_url}")
+            # Skip events-overview if already scraped with Selenium
+            if "events-overview" in source_url and SELENIUM_AVAILABLE and len(self.events) > 0:
+                continue
+                
+            log_info(f"Starting static scrape of {source_url}")
             try:
                 response = requests.get(source_url)
                 response.raise_for_status()
                 soup = BeautifulSoup(response.text, 'html.parser')
                 
-                event_links = soup.find_all('a', href=True)
+                # Primary method: Use CSS class for event links
+                event_links = soup.select('a.filterable-list__list-item-link.is-events')
+                
+                # Fallback: Heuristic matching
+                if not event_links:
+                    event_links = [
+                        link for link in soup.find_all('a', href=True)
+                        if self._is_event_link(link['href'])
+                    ]
+                
                 for link in event_links:
-                    href = link['href']
+                    href = link.get('href', '')
                     text = link.get_text(strip=True)
+                    full_url = self._normalize_url(href, source_url)
                     
-                    is_event_link = False
-                    # Look for links that contain "/event/" or specifically name an activity
-                    lower_href = href.lower()
-                    if "/event/" in href:
-                        is_event_link = True
-                    elif any(kw in lower_href for kw in ["talk-", "workshop-", "conference-", "colloquium-", "seminar-", "reading-group"]):
-                        if ".html" in href:
-                            is_event_link = True
-
-                    if is_event_link:
-                        # Construct full URL correctly
-                        if href.startswith("http"):
-                            full_url = href
-                        elif href.startswith("/"):
-                            full_url = f"{self.BASE_URL}{href}"
-                        else:
-                            # Relative to the source URL
-                            base_path = source_url.rsplit('/', 1)[0]
-                            full_url = f"{base_path}/{href}".replace("/./", "/")
-                        
-                        if full_url not in [e['url'] for e in self.events]:
-                            title = text
-                            if not title:
-                                title = href.split('/')[-1].replace('.html', '').replace('-', ' ').title()
-                            
-                            self.events.append({
-                                "title": title,
-                                "url": full_url,
-                                "scraped_at": datetime.now().isoformat()
-                            })
+                    if full_url in seen_urls:
+                        continue
+                    seen_urls.add(full_url)
+                    
+                    title = text or href.split('/')[-1].replace('.html', '').replace('-', ' ').title()
+                    self.events.append({
+                        "title": title,
+                        "url": full_url,
+                        "scraped_at": datetime.now().isoformat()
+                    })
+                    
             except Exception as e:
                 log_error(f"Error scraping {source_url}: {e}")
         
         log_info(f"Found {len(self.events)} unique event links in total.")
         
         # Now scrape details for all found events
-        for event in self.events:
+        for i, event in enumerate(self.events):
+            log_info(f"Scraping event {i+1}/{len(self.events)}: {event['title']}")
             self.scrape_event_details(event)
             
         return self.events
+    
+    def _fetch_events_with_selenium(self, url):
+        """Uses Selenium to load all events from a page with 'Load more' button.
+        
+        Returns list of (url, title) tuples.
+        """
+        # Setup headless Chrome
+        chrome_options = ChromeOptions()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        
+        driver = None
+        event_links = []
+        
+        try:
+            driver = webdriver.Chrome(
+                service=ChromeService(ChromeDriverManager().install()),
+                options=chrome_options
+            )
+            driver.get(url)
+            
+            # Wait for initial content to load
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "a.filterable-list__list-item-link.is-events"))
+            )
+            
+            # Click "Load more" button repeatedly until it disappears
+            max_clicks = 10  # Safety limit
+            clicks = 0
+            while clicks < max_clicks:
+                try:
+                    load_more_btn = driver.find_element(By.CSS_SELECTOR, "button.filterable-list__load-more")
+                    if load_more_btn.is_displayed():
+                        driver.execute_script("arguments[0].scrollIntoView();", load_more_btn)
+                        driver.execute_script("arguments[0].click();", load_more_btn)
+                        time.sleep(1)  # Wait for new content
+                        clicks += 1
+                        log_info(f"Clicked 'Load more' button ({clicks} times)")
+                    else:
+                        break
+                except (NoSuchElementException, TimeoutException):
+                    break  # No more "Load more" button
+            
+            # Extract all event links
+            links = driver.find_elements(By.CSS_SELECTOR, "a.filterable-list__list-item-link.is-events")
+            for link in links:
+                try:
+                    href = link.get_attribute("href")
+                    title = link.text.strip()
+                    if href:
+                        event_links.append((href, title))
+                except Exception:
+                    pass
+            
+            log_info(f"Selenium extracted {len(event_links)} event links")
+            
+        finally:
+            if driver:
+                driver.quit()
+        
+        return event_links
+    
+    def _is_event_link(self, href):
+        """Checks if a URL looks like an event page."""
+        if not href:
+            return False
+        lower_href = href.lower()
+        if "/event/" in href:
+            return True
+        if any(kw in lower_href for kw in ["talk-", "workshop-", "conference-", "colloquium-", "seminar-", "reading-group"]):
+            return ".html" in href
+        return False
+    
+    def _normalize_url(self, href, source_url):
+        """Normalizes a URL to absolute form."""
+        if href.startswith("http"):
+            return href
+        elif href.startswith("/"):
+            return f"{self.BASE_URL}{href}"
+        else:
+            base_path = source_url.rsplit('/', 1)[0]
+            return f"{base_path}/{href}".replace("/./", "/")
 
     def scrape_event_details(self, event):
-        """Scrapes details for a single event."""
-        log_info(f"Scraping details for: {event['title']}")
+        """Scrapes details for a single event with structured field extraction."""
         try:
             response = requests.get(event['url'])
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Extract content - looking for main content area
-            main_content = soup.find('div', id='r-main') or soup.find('main')
-            if main_content:
-                # Remove navigation/unwanted parts if any
-                event['description'] = main_content.get_text(separator='\n', strip=True)
-            else:
-                event['description'] = soup.get_text(separator='\n', strip=True)
-            
-            # Clean up the description
-            event['description'] = self._clean_text(event['description'])
-            
-            # Try to find specific metadata (Date, Time, Location)
-            # This often lives in specific dl/dt/dd tags or tables
             metadata = {}
+            
+            # Extract speaker from main H1 (e.g., "Talk: Simon Saunders (Oxford)")
+            h1 = soup.find('h1')
+            if h1:
+                speaker_text = h1.get_text(strip=True)
+                # Parse speaker from title like "Talk: Name (Affiliation)"
+                if ':' in speaker_text:
+                    speaker_part = speaker_text.split(':', 1)[1].strip()
+                    metadata['speaker'] = speaker_part
+            
+            # Extract labeled sections (Title, Abstract, Date, Location)
+            for h2 in soup.find_all('h2'):
+                label = h2.get_text(strip=True).rstrip(':').lower()
+                
+                if label == 'title':
+                    event['talk_title'] = self._extract_section_content(h2)
+                elif label == 'abstract':
+                    event['abstract'] = self._extract_section_content(h2)
+                elif label == 'date':
+                    date_text = self._extract_section_content(h2)
+                    metadata.update(self._parse_date_time(date_text))
+            
+            # Extract location from address tag (most reliable)
+            address = soup.find('address')
+            if address:
+                location = address.get_text(' ', strip=True)
+                # Clean up location string
+                location = ' '.join(location.split())  # Normalize whitespace
+                metadata['location'] = location
+            
+            # Fallback: Try dl/dt/dd structure for any missing metadata
             for dl in soup.find_all('dl'):
                 for dt, dd in zip(dl.find_all('dt'), dl.find_all('dd')):
                     key = dt.get_text(strip=True).lower().replace(':', '')
-                    val = dd.get_text(strip=True)
-                    metadata[key] = val
+                    val = dd.get_text(' ', strip=True)
+                    if key and val and key not in metadata:
+                        metadata[key] = val
             
             event['metadata'] = metadata
             
+            # Build a clean description from abstract + title
+            desc_parts = []
+            if event.get('talk_title'):
+                desc_parts.append(f"Title: {event['talk_title']}")
+            if event.get('abstract'):
+                desc_parts.append(f"Abstract: {event['abstract']}")
+            if desc_parts:
+                event['description'] = '\n\n'.join(desc_parts)
+            else:
+                # Fallback to raw content
+                main_content = soup.find('div', id='r-main') or soup.find('main')
+                if main_content:
+                    event['description'] = self._clean_text(main_content.get_text(separator='\n', strip=True))
+            
         except Exception as e:
             log_error(f"Error scraping event details for {event['url']}: {e}")
+    
+    def _extract_section_content(self, header_elem):
+        """Extracts all text content following a header until the next header."""
+        content_parts = []
+        sibling = header_elem.find_next_sibling()
+        
+        while sibling and sibling.name not in ['h1', 'h2', 'h3']:
+            text = sibling.get_text(' ', strip=True)
+            if text:
+                content_parts.append(text)
+            sibling = sibling.find_next_sibling()
+        
+        return ' '.join(content_parts).strip()
+    
+    def _parse_date_time(self, date_text):
+        """Parses date/time string into structured metadata."""
+        import re
+        
+        result = {}
+        
+        # Try to extract ISO date (e.g., "4 February 2026")
+        date_match = re.search(r'(\d{1,2})\s+(\w+)\s+(\d{4})', date_text)
+        if date_match:
+            day, month_name, year = date_match.groups()
+            result['year'] = int(year)
+            result['month'] = month_name
+            
+            # Convert to ISO date
+            month_map = {
+                'january': '01', 'february': '02', 'march': '03', 'april': '04',
+                'may': '05', 'june': '06', 'july': '07', 'august': '08',
+                'september': '09', 'october': '10', 'november': '11', 'december': '12'
+            }
+            month_num = month_map.get(month_name.lower(), '01')
+            result['date'] = f"{year}-{month_num}-{int(day):02d}"
+        
+        # Try to extract time (e.g., "4:00 pm" or "10:00 am - 12:00 pm")
+        time_match = re.search(r'(\d{1,2}:\d{2}\s*[ap]m)', date_text, re.IGNORECASE)
+        if time_match:
+            result['time_start'] = time_match.group(1).strip()
+        
+        end_time_match = re.search(r'-\s*(\d{1,2}:\d{2}\s*[ap]m)', date_text, re.IGNORECASE)
+        if end_time_match:
+            result['time_end'] = end_time_match.group(1).strip()
+        
+        return result
 
     def scrape_people(self):
         """Scrapes the people directory and individual profiles."""
