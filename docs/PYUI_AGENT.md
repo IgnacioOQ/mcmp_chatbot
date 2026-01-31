@@ -214,3 +214,92 @@ for event in raw_events:
 ```
 
 Then conditionally add CSS classes or render buttons only for those days.
+
+### Native Streamlit Calendar Grid
+- status: active
+<!-- content -->
+Build calendars using native Streamlit components for proper interactivity:
+
+```python
+import calendar
+
+cal = calendar.Calendar(firstweekday=0)  # Monday start
+month_days = cal.monthdayscalendar(cal_year, cal_month)
+
+# Build calendar grid using native Streamlit columns
+for week in month_days:
+    cols = st.columns(7)
+    for i, day in enumerate(week):
+        with cols[i]:
+            if day == 0:
+                st.markdown("<div style='height: 36px;'></div>", unsafe_allow_html=True)
+            else:
+                has_event = day in event_days
+                if has_event:
+                    if st.button(f"{day}", key=f"cal_{year}_{month}_{day}", use_container_width=True):
+                        st.session_state.calendar_query_date = f"{year}-{month:02d}-{day:02d}"
+                else:
+                    st.button(f"{day}", key=f"cal_{year}_{month}_{day}", use_container_width=True, disabled=True)
+```
+
+### Button Alignment & Consistent Styling
+- status: active
+<!-- content -->
+Enabled and disabled buttons can have different default heights. Fix alignment with explicit CSS:
+
+```python
+st.markdown("""
+<style>
+/* Base style for ALL calendar buttons */
+[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button {
+    border: none !important;
+    background: transparent !important;
+    color: #ccd6f6 !important;
+    font-size: 13px !important;
+    padding: 8px 4px !important;
+    min-height: 36px !important;
+    height: 36px !important;          /* Fixed height for alignment */
+    line-height: 20px !important;     /* Consistent line-height */
+}
+/* Disabled buttons - visible but non-interactive */
+[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button:disabled {
+    opacity: 0.6 !important;
+    cursor: default !important;
+}
+/* Event day accent */
+.event-day-btn button {
+    background: rgba(100, 255, 218, 0.1) !important;
+    border: 1px solid rgba(100, 255, 218, 0.3) !important;
+    color: #64ffda !important;
+    opacity: 1 !important;
+}
+</style>
+""", unsafe_allow_html=True)
+```
+
+**Key CSS patterns:**
+- Use `height` AND `min-height` for consistent sizing
+- Scope selectors to container (e.g., `[data-testid="stSidebar"]`) to avoid affecting other buttons
+- Override opacity for styled buttons to prevent disabled-like appearance
+
+### HTML Links Do NOT Work for Interactivity
+- status: active
+<!-- content -->
+**Critical limitation**: HTML links (`<a href="...">`) in `st.markdown()` cannot trigger Python callbacks. They navigate to a new page or reload the app.
+
+**Attempted approaches that DON'T work:**
+1. Query parameters (`href="?event_day=..."`) - Opens in new window or reloads app
+2. JavaScript click handlers - Streamlit doesn't support inline JS execution
+3. Fragment links (`href="#..."`) - No way to detect in Python
+
+**The ONLY solution**: Use `st.button()` components. They are the sole mechanism for triggering Python code from user clicks in Streamlit.
+
+**Workaround pattern**: If visual design requires link-like appearance, style buttons to look like links:
+```css
+button {
+    background: transparent !important;
+    color: #64ffda !important;
+    text-decoration: underline !important;
+    cursor: pointer !important;
+}
+```
