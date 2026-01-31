@@ -130,10 +130,60 @@ The system connects four key data types to answer complex questions:
 3.  **Events** (`data/raw_events.json`): Upcoming talks and workshops.
 4.  **Institutional Graph** (`data/graph/mcmp_graph.md`): A knowledge graph that links **People** to **Organizational Units** (Chairs) and defines hierarchy (e.g., who leads a chair, who supervises whom). 
 
+
 **How they interact:**
 - When a user asks "Who works at the Chair of Philosophy of Science?", the **Graph** identifies the Chair entity and its `affiliated_with` edges.
 - The system then retrieves detailed profiles from **People** data.
 - If the user asks "What does Ignacio Ojea research?", the system checks his **People** profile, which is now automatically linked to relevant **Research Topics** (e.g., "Philosophy of Science") and specific projects.
+
+## Query Processing Pipeline
+
+This diagram illustrates how the system combines **RAG (Text)**, **Graph (Relationships)**, and **MCP (Structured Data)** to answer a user query.
+
+```mermaid
+graph TD
+    UserQuery[User Query] --> Decompose[Query Decomposition]
+    
+    subgraph "Phase 1: Retrieval (RAG)"
+        Decompose -->|Sub-queries| VectorDB[(ChromaDB)]
+        VectorDB -->|Retrieved Chunks| ContextAgg{Context Aggregator}
+        UserQuery -->|Direct Query| GraphDB[(Institutional Graph)]
+        GraphDB -->|Graph Relationships| ContextAgg
+    end
+    
+    subgraph "Phase 2: Generation & Tool Use (MCP)"
+        ContextAgg -->|System Instruction| LLM[LLM (Gemini/OpenAI)]
+        UserQuery --> LLM
+        
+        Tools[MCP Tools] -->|Defines: search_people, get_events| LLM
+        
+        LLM -- "Needs Structured Data?" --> ToolCall{Decision}
+        ToolCall -- Yes --> ExecuteTool[Execute Tool]
+        ExecuteTool -->|Query JSONs| JsonDB[(Data JSONs)]
+        JsonDB -->|Structured Result| LLM
+        ToolCall -- No/Done --> GenerateAnswer[Generate Answer]
+    end
+    
+    GenerateAnswer --> FinalResponse[Final Response]
+
+    style VectorDB fill:#e1f5fe,stroke:#01579b
+    style JsonDB fill:#e8f5e9,stroke:#1b5e20
+    style LLM fill:#fff3e0,stroke:#e65100
+    style GraphDB fill:#f3e5f5,stroke:#4a148c
+```
+
+### Explanation of the Flow
+1.  **Decomposition**: The complex user query is broken down into simpler sub-queries.
+2.  **Hybrid Retrieval**:
+    *   **Vector Search**: Finds relevant text chunks from the scraped website content (Vector DB).
+    *   **Graph Search**: Identifies institutional relationships (leads, supervises, member of).
+3.  **Context Construction**: The retrieved text and graph data are combined into a rich **System Instruction**.
+4.  **LLM Execution with Tools**:
+    *   The LLM receives the prompt and a list of available **MCP Tools** (e.g., `search_people`, `get_events`).
+    *   It evaluates if the retrieved text context is sufficient.
+    *   **Scenario A (Context Sufficient)**: The LLM answers directly using the RAG data.
+    *   **Scenario B (Needs Structured Data)**: The LLM calls a tool (e.g., "Get events for next week"). The system executes this against the **JSON Database** and feeds the precise result back to the LLM.
+5.  **Final Answer**: The LLM synthesizes the RAG context, Graph context, and Tool outputs into the final response.
 
 ## Project Structure
 
