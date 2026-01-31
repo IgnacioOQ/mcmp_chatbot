@@ -124,15 +124,143 @@ def main():
 
     # Sidebar for configuration
     with st.sidebar:
-        # 1. Calendar at the top
-        st.header("📅 Calendar")
-        selected_date = st.date_input(
-            "Select a date",
-            value=datetime.now().date(),
-            key="event_calendar",
-            label_visibility="collapsed"
-        )
-        st.caption(f"Selected: {selected_date.strftime('%B %d, %Y')}")
+        # 1. Monthly Calendar at the top
+        import calendar
+        
+        # Initialize calendar month/year in session state
+        if "cal_year" not in st.session_state:
+            st.session_state.cal_year = datetime.now().year
+        if "cal_month" not in st.session_state:
+            st.session_state.cal_month = datetime.now().month
+        
+        cal_year = st.session_state.cal_year
+        cal_month = st.session_state.cal_month
+        
+        # Navigation
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col1:
+            if st.button("◀", key="prev_month", use_container_width=True):
+                if cal_month == 1:
+                    st.session_state.cal_month = 12
+                    st.session_state.cal_year -= 1
+                else:
+                    st.session_state.cal_month -= 1
+                st.rerun()
+        with col2:
+            month_name = calendar.month_name[cal_month]
+            st.markdown(f"<h4 style='text-align: center; margin: 0; padding: 8px 0;'>{month_name} {cal_year}</h4>", unsafe_allow_html=True)
+        with col3:
+            if st.button("▶", key="next_month", use_container_width=True):
+                if cal_month == 12:
+                    st.session_state.cal_month = 1
+                    st.session_state.cal_year += 1
+                else:
+                    st.session_state.cal_month += 1
+                st.rerun()
+        
+        # Build calendar HTML
+        today = datetime.now().date()
+        cal = calendar.Calendar(firstweekday=0)  # Monday start
+        month_days = cal.monthdayscalendar(cal_year, cal_month)
+        
+        # Load events to highlight days with events
+        event_days = set()
+        try:
+            with open("data/raw_events.json", "r") as f:
+                raw_events = json.load(f)
+            for event in raw_events:
+                date_str = event.get("metadata", {}).get("date")
+                if date_str:
+                    try:
+                        ev_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                        if ev_date.year == cal_year and ev_date.month == cal_month:
+                            event_days.add(ev_date.day)
+                    except ValueError:
+                        pass
+        except:
+            pass
+        
+        calendar_html = """
+        <style>
+        .calendar-container {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 8px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .calendar-header {
+            text-align: center;
+            font-weight: 600;
+            font-size: 11px;
+            color: #8892b0;
+            padding: 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 10px 4px;
+            font-size: 13px;
+            color: #ccd6f6;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .calendar-day.empty {
+            color: transparent;
+        }
+        .calendar-day.today {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+        .calendar-day.has-event {
+            position: relative;
+        }
+        .calendar-day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            background: #64ffda;
+            border-radius: 50%;
+        }
+        </style>
+        <div class="calendar-container">
+            <div class="calendar-grid">
+                <div class="calendar-header">Mo</div>
+                <div class="calendar-header">Tu</div>
+                <div class="calendar-header">We</div>
+                <div class="calendar-header">Th</div>
+                <div class="calendar-header">Fr</div>
+                <div class="calendar-header">Sa</div>
+                <div class="calendar-header">Su</div>
+        """
+        
+        for week in month_days:
+            for day in week:
+                if day == 0:
+                    calendar_html += '<div class="calendar-day empty">·</div>'
+                else:
+                    classes = ["calendar-day"]
+                    if day == today.day and cal_month == today.month and cal_year == today.year:
+                        classes.append("today")
+                    if day in event_days:
+                        classes.append("has-event")
+                    calendar_html += f'<div class="{" ".join(classes)}">{day}</div>'
+        
+        calendar_html += "</div></div>"
+        
+        st.markdown(calendar_html, unsafe_allow_html=True)
         
         st.markdown("---")
         
