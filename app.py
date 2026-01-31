@@ -426,7 +426,7 @@ def main():
         del st.session_state.calendar_query_formatted
         
         # Generate the prompt silently
-        auto_prompt = f"What talks or events are scheduled for {query_formatted}? Please provide details about each event."
+        auto_prompt = f"What talks or events are scheduled for {query_formatted}? Please provide details about each event, including an abstract or description."
         
         # Add to chat history and generate response
         st.session_state.messages.append({"role": "user", "content": auto_prompt})

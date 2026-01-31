@@ -35,3 +35,8 @@
     - Switched default model in `app.py` from Lite (Index 1) to **Gemini 2.0 Flash** (Index 0).
     - Updated `src/mcp/server.py` tool schema to explicitly mention "speaker name" in the query description (as a best practice, though Lite still struggled).
 - **Outcome**: Default system now uses the more capable Flash model, which correctly calls tools and answers future event queries.
+
+### 2026-01-31: Enhance Calendar Prompt (Antigravity)
+- **Task**: Improve detail in calendar-triggered event queries.
+- **Change**: Updated the `auto_prompt` in `app.py` (triggered by calendar clicks) to explicitly request an "abstract or description".
+- **Goal**: Ensure the LLM provides more content about the talk, not just the title/time.
