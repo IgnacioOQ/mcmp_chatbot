@@ -183,7 +183,32 @@ graph TD
     *   It evaluates if the retrieved text context is sufficient.
     *   **Scenario A (Context Sufficient)**: The LLM answers directly using the RAG data.
     *   **Scenario B (Needs Structured Data)**: The LLM calls a tool (e.g., "Get events for next week"). The system executes this against the **JSON Database** and feeds the precise result back to the LLM.
+
 5.  **Final Answer**: The LLM synthesizes the RAG context, Graph context, and Tool outputs into the final response.
+
+### 3. Example Walkthrough
+
+**Query:** *"What is Hannes Leitgeb working on and what are his upcoming events?"*
+
+1.  **Decomposition**:
+    *   Sub-query 1: "Hannes Leitgeb research"
+    *   Sub-query 2: "Hannes Leitgeb upcoming events"
+
+2.  **RAG Retrieval**:
+    *   `src/scrapers` content about Hannes Leitgeb's profile and recent publications is retrieved from the **Vector DB**.
+    *   *Result*: Text chunks detailing his work on "Logic and Probability".
+
+3.  **Graph Retrieval**:
+    *   The **Graph** identifies Hannes Leitgeb as the *Chair of Logic and Philosophy of Language*.
+    *   *Result*: Context string: "Hannes Leitgeb LEADS Chair of Logic..."
+
+4.  **MCP Tool Execution**:
+    *   The LLM recognizes the second part of the question ("upcoming events") requires precise real-time data.
+    *   It calls the tool: `get_events(query="Hannes Leitgeb")`.
+    *   The tool scans `data/raw_events.json` and returns: `[{"title": "Talk at LMU", "date": "2024-10-15", ...}]`.
+
+5.  **Final Synthesis**:
+    > "Hannes Leitgeb is currently working on Logic and Probability... (from RAG). He leads the Chair of Logic and Philosophy of Language (from Graph). Regarding his schedule, he has an upcoming talk at LMU on October 15th (from MCP Tool)."
 
 ## Project Structure
 
