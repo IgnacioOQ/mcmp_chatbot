@@ -51,25 +51,26 @@ Based on codebase analysis (2026-01-28):
 - type: task
 - owner: Antigravity
 <!-- content -->
-**Execution Date:** 2026-01-28 (Antigravity)
+**Execution Date:** 2026-01-31 (Antigravity)
 
 **Status Checks:**
 1.  **Data Update (`src/scrapers/mcmp_scraper.py`)**: **Passed**.
-    - Scraper successfully updated. Output summary: "Scraped 3 events, 82 people, 2 research items, 7 general items."
-2.  **Vector Store (`src/core/vector_store.py`)**: **Failed**.
-    - Unit tests failed due to missing `chromadb` dependency.
-3.  **Connectivity (`scripts/test_sheets_connection.py`)**: **Skipped**.
-    - Secrets likely missing in environment.
+    - **Selenium Enabled**: Yes.
+    - Stats: **53 events** (Exhaustive scrape success), 82 people, 4 research items, 7 general items.
+2.  **Vector Store (`src/core/vector_store.py`)**: **Passed**.
+    - Unit tests (`tests/test_vector_store.py`) passed.
+3.  **Connectivity (`scripts/test_sheets_connection.py`)**: **Passed**.
+    - Google Sheets authentication and write test successful.
 4.  **Unit Tests**: **Mixed**.
+    - `tests/test_engine.py`: **Passed**.
+    - `tests/test_vector_store.py`: **Passed**.
     - `tests/test_scraper.py`: **Passed**.
-    - `tests/test_engine.py`: **Failed** (`ModuleNotFoundError: No module named 'chromadb'`).
-    - `tests/test_vector_store.py`: **Failed** (`ModuleNotFoundError: No module named 'chromadb'`).
-    - `tests/test_graph_manual.py`: **Failed** (`AssertionError: No nodes loaded`).
+    - `tests/test_graph_correctness.py`: **Passed**.
+    - `tests/test_mcp.py`: **Failed**.
+        - `test_search_people` failed: `search_people("Bonatti", role_filter="Doctoral fellow")` returned 0 results.
 
 **Summary:**
-System health check failed. Critical dependency `chromadb` is missing from the environment, causing core engine and vector store tests to fail. Graph retrieval also failed to load nodes. Scrapers are operational.
+Housekeeping successfully restored the exhaustive event scraper by installing missing Selenium dependencies. Database is now fully populated with 53 upcoming events. One minor regression remains in MCP role filtering.
 
 **Action Items:**
-- [ ] Install `chromadb`.
-- [ ] Debug `GraphUtils` node loading.
-- [ ] Provide `.streamlit/secrets.toml`.
+- [ ] Debug `search_people` in `src/mcp/tools.py` or check if "Bonatti" role data changed.

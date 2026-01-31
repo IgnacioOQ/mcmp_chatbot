@@ -2,7 +2,7 @@
     {
         "title": "Talk: Simon Saunders (Oxford)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-simon-saunders-oxford.html",
-        "scraped_at": "2026-01-31T12:47:16.393659",
+        "scraped_at": "2026-01-31T15:16:16.460796",
         "talk_title": "Bell inequality violation is evidence for many worlds",
         "abstract": "Given two principles (a) no action-at-a-distance, and (b) independence of measurement settings from the initial state, it follows from the observed violation of Bell inequalities that remote experiments do not have unique outcomes.",
         "metadata": {
@@ -19,7 +19,7 @@
     {
         "title": "Talk (Work in Progress): Pablo Acuña (UC Chile)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-pablo-acuna-uc-chile.html",
-        "scraped_at": "2026-01-31T12:47:16.394461",
+        "scraped_at": "2026-01-31T15:16:16.460834",
         "talk_title": "Von Neumann, Gleason, and the Irreducibility of Probabilities in Hilbert Space Quantum Mechanics",
         "abstract": "The reducibility or fundamentality of chance in quantum physics has been a pressing issue since Bornâs 1926 clarification of the probabilistic meaning of the wavefunction. That probabilities are irreducible in the standard formalism of quantum theory became, quite early, a central tenet in the Copenhagen orthodoxy, and a theorem formulated by von Neumann in 1927 was referred to as a proof of that statement. Furthermore, the theorem is usually known as an attempt of a refutation of the possibility of hidden variables, and Bellâs 1964 severe criticism of it became quite influential. In this talkâfollowing a recent line of research developed by Jeffrey Bub, Guido Bacciagaluppi, Dennis Dieks, Michel Janssen & Tony Duncan, Chris Mitsch, and myselfâI clarify the many misunderstandings that have surrounded von Neumannâs theorem in connection with hidden variables. Furthermore (and this is the work-in-progress part of the talk), I show that Bellâs criticism, rightly cashed out, amounts to the claim that von Neumannâs result is not enough to establish the irreducibility of probabilities in the Hilbert space formalism of quantum mechanics. Only in 1957, with the introduction of Gleasonâs celebrated theorem, this central claim in quantum orthodoxy was firmly established.",
         "metadata": {
@@ -36,7 +36,7 @@
     {
         "title": "Talk: Timothy Williamson (Oxford)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-timothy-williamson-oxford.html",
-        "scraped_at": "2026-01-31T12:47:16.394470",
+        "scraped_at": "2026-01-31T15:16:16.460839",
         "talk_title": "Illusions of Hyperintensionality and the Semantics of Function Symbols",
         "abstract": "Kit Fineâs âEssence and Modalityâ played a key role in the development of hyperintensional metaphysics, where necessary equivalence is insufficient for the identity of propositions, properties, and relations. Careful attention to the semantics of function symbols shows how the intuitive judgments on which Fine relies may be the outputs of heuristics that give inconsistent results in analogous cases, and so are unreliable. Fine has recently responded to this critique. The talk will take the dialectic further.",
         "metadata": {
@@ -53,7 +53,7 @@
     {
         "title": "Model Choice in Bayesian Inference",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/model-choice-in-bayesian-inference.html",
-        "scraped_at": "2026-01-31T12:47:16.394476",
+        "scraped_at": "2026-01-31T15:16:16.460845",
         "metadata": {
             "year": 2026,
             "month": "March",
@@ -65,7 +65,7 @@
     {
         "title": "Fifth Irvine-London-Munich-PoliMi-Salzburg Conference in Philosophy and Foundations of Physics",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/fifth-irvine-london-munich-polimi-salzburg-conference-in-philosophy-and-foundations-of-physics.html",
-        "scraped_at": "2026-01-31T12:47:16.394482",
+        "scraped_at": "2026-01-31T15:16:16.460848",
         "metadata": {
             "year": 2026,
             "month": "June",
@@ -77,7 +77,7 @@
     {
         "title": "The Epistemology of Medicine",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/the-epistemology-of-medicine.html",
-        "scraped_at": "2026-01-31T12:47:16.394488",
+        "scraped_at": "2026-01-31T15:16:16.460851",
         "metadata": {
             "year": 2026,
             "month": "June",
@@ -89,7 +89,7 @@
     {
         "title": "Talk: Carrie Figdor (Iowa and Edinburgh)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-carrie-figdor-iowa-and-edinburgh.html",
-        "scraped_at": "2026-01-31T12:47:16.394493",
+        "scraped_at": "2026-01-31T15:16:16.460854",
         "talk_title": "A Defense of Substrate-Dependence in the Sciences of the Mind",
         "abstract": "I argue against the principle of substrate (or medium) independence (PSI) associated with functionalist individuation of mental types. This principle holds that the individuation conditions of types of mental states impose no logical restrictions on the nature of the physical types that can realize (or implement) the roles: for example, episodic memory is a type of mental state defined in terms of its role in a cognitive system, and this type can be multiply realized in humans, computers, octopuses, or any other type of physical system. While PSI was a boon to the growth of cognitive science and is central to the dominant functionalist consensus in philosophy of mind, it has become a major conceptual impediment to the development of our best explanations of cognition and consciousness in biological organisms, and in consequence to our efforts to theorize the possibility of artificial consciousness and cognition in a way guided by scientific knowledge.",
         "metadata": {
@@ -106,7 +106,7 @@
     {
         "title": "Talk: Ivano Ciardelli (Padova)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-ivano-ciardelli-padova.html",
-        "scraped_at": "2026-01-31T12:47:16.394498",
+        "scraped_at": "2026-01-31T15:16:16.460858",
         "talk_title": "Dependence and arbitrariness",
         "abstract": "In previous work, I have proposed an analysis of dependence claims as strict conditionals whose antecedent and consequent are questions: âQ1 determines Q2â is true if, within a certain range of possibilities, any answer to Q1 implies some answer to Q2. In this talk, I consider dependence statements in mathematics, such as (1). (1) The number of sides of a polygon determines the sum of its internal angles. I argue that (1) fits the general analysis provided we take an indefinite like âa polygon xâ to introduce a range of possibilities, one for each permissible value of x. Within this range of possibilities, an answer to the question \"how many sides does x have\" yields an answer to the question \"what is the sum of the internal angles of x\". Thus, the semantics of dependence statements like (1) involves a kind of intensionality that has its source in arbitrary reference. I implement this idea in a team-based extension of first-order logic that comprises (i) an operator [x] which introduces an arbitrary referent and (ii) questions concerning the value of this referent. In this logic, the above dependence claim can be regimented as follows: (2) [x]( polygon(x) -> ( value-of(num-sides(x)) -> value-of(sum-angles(x)) ) I then study how, and to what extent, such intensional claims can be reduced to extensional claims in first-order logic, such as (3): (3) âxây( polygon(x) & polygon(y) -> ( num-sides(x)=num-sides(y) -> sum-angles(x)=sum-angles(y)) As I will show, the relation between the two ways of expressing dependencies is far from straightforward. If time permits, I will also consider a modal extension of the logic and discuss how it offers a unified analysis of different varieties of supervenience.",
         "metadata": {
@@ -123,7 +123,7 @@
     {
         "title": "Talk (Work in Progress): Mario Hubert (LMU)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-mario-hubert-lmu.html",
-        "scraped_at": "2026-01-31T12:47:16.394503",
+        "scraped_at": "2026-01-31T15:16:16.460860",
         "talk_title": "Credence without Probability",
         "abstract": "I develop the Typicality Principle of Expectations (TPE), a novel rationality principle that links typicality-based probabilistic explanations with expectations about the future. I argue that TPE offers a more coherent foundation in the context of typicality-based probabilistic explanations for expectations than traditional rationality principles, including Cournot's Principle, Locke's Principle of Proportionality and Lewis's Principal Principle. The framework of the TPE will ultimately reject a fundamental assumption about probability, namely, its Janus-faced dual nature, as representing objective chance and credences. Thus, I advocate a monistic account of probability: probabilities reflect purely statistical patterns and do not directly map to credences.",
         "metadata": {
@@ -140,7 +140,7 @@
     {
         "title": "Talk: Carl Hoefer (Barcelona)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-carl-hoefer-barcelona.html",
-        "scraped_at": "2026-01-31T12:47:16.394508",
+        "scraped_at": "2026-01-31T15:16:16.460864",
         "talk_title": "Natural kinds, laws, and necessities: lessons from post-Twin-Earth science and philosophy",
         "abstract": "In a paper co-authored by Genoveva MartÃ­, we defended the Kripke-Putnam thesis that water is necessarily composed of H2O molecules, i.e., that there is no world in which the substance we call âwaterâ exists but is not composed mostly of H2O molecules. But we agree with Putnam that it can be hard to know what to say about imagined possible worlds in which the physical (and hence chemical) laws are different in certain ways. In this talk I will explore some of the speculative ways in which physicists investigate what would be the case in such counternomic worlds, and how these speculations interact with the nature of water and other natural kinds, as well as with powers, dispositions, and other denizens of philosophy-folk physics and chemistry. I will use these explorations to motivate some lessons for debates about the modal status of laws and physical natural",
         "metadata": {
@@ -157,7 +157,7 @@
     {
         "title": "Research Seminar in Decision and Action Theory: Irrational option exclusion?",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/research-seminar-in-decision-and-action-theory-irrational-option-exclusion.html",
-        "scraped_at": "2026-01-31T12:47:16.394514",
+        "scraped_at": "2026-01-31T15:16:16.460867",
         "abstract": "Practical deliberation can be thought of as consisting of two stages: we think about our options and then (if all goes well) choose the option we consider best. Failures of practical rationality are typically associated with the second stage. In this talk, I consider whether the first stage â thinking of our options â falls within the scope of rational evaluation. Recently, some have argued that agents may be practically irrational for excluding particular options from consideration when these options are especially well-aligned with their values and reasons (Jeppsson, 2018). Others argue that, since option generation is spontaneous and sub-personal, the only rationally evaluable aspect at this stage is how long an agent spends thinking about their options (Wedgwood, 2017). I canvass a third possibility: the process of thinking about our options is structured by the exercise of attentional capacities and competence. This suggests that the normativity of attention is importantly intertwined with the normativity of practical rationality.",
         "metadata": {
             "speaker": "Irrational option exclusion?",
@@ -174,7 +174,7 @@
     {
         "title": "Talk: Luca Incurvati (Amsterdam)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-luca-incurvati-amsterdam.html",
-        "scraped_at": "2026-01-31T12:47:16.394519",
+        "scraped_at": "2026-01-31T15:16:16.460869",
         "talk_title": "Classes and objectified properties",
         "abstract": "I will begin by outlining a number of desiderata on conceptions of classes and by briefly discussing how some notable conceptions of classes fare with respect to these desiderata. I will then present a theory of classes as extensional, objectified properties, paying special attention to the question of identity among classes. I will end by discussing the prospects for extending the theory to cover non-extensional objectified properties and by illustrating a number of outstanding technical questions about the theory.",
         "metadata": {
@@ -191,7 +191,7 @@
     {
         "title": "Talk (Work in Progress): Francesco Nappo (Milan)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-francesco-nappo-milan.html",
-        "scraped_at": "2026-01-31T12:47:16.394524",
+        "scraped_at": "2026-01-31T15:16:16.460872",
         "talk_title": "Analogical Reasoning in Science: The Four-Dimensional Theory",
         "abstract": "I will present the outline of a novel theory of analogical reasoning in science: the four-dimensional theory. Its main posit is that the epistemological role of analogy in scientific investigation can only be captured by an account of the reasoning process that utilizes it. This dynamical outlook is in contrast with the traditional philosophical approach, which has focused on articulating the conditions of acceptability of analogical arguments in science. I will discuss how the four-dimensional theory can accommodate lessons from traditional philosophical theories, while also embracing insights from the recent literature in practice-based philosophy of science: template-based reasoning, generic modeling, comparative process tracing, and factual analogies. I conclude by contrasting the four-dimensional theory to Nortonâs material theory of analogy, showing how my proposal offers a novel answer to the question of when analogy fulfills a distinctive epistemic role in empirical investigation.",
         "metadata": {
@@ -208,7 +208,7 @@
     {
         "title": "Talk: Časlav Brukner (Vienna)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-caslav-brukner-vienna.html",
-        "scraped_at": "2026-01-31T12:47:16.394693",
+        "scraped_at": "2026-01-31T15:16:16.460875",
         "talk_title": "When Performed Experiments Have No Results: Extended Wignerâs Friend Scenarios",
         "abstract": "Peres famously argued that âunperformed experiments have no results,â as a reaction to the counterfactual reasoning behind the Bell theorem. Recent progress on extended Wignerâs-friend scenariosâcombining Bell-type setups with Wignerâs original Gedankenexperimentâsuggests a sharper twist: even performed experiments may fail to have observer-independent value when they are performed by different agents, like Wigner and the friend, and when the friendâs outcome is not accessible to Wigner even in principle.",
         "metadata": {
@@ -225,7 +225,7 @@
     {
         "title": "Talk: Hilary Greaves (Oxford)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-hilary-greaves-oxford.html",
-        "scraped_at": "2026-01-31T12:47:16.394700",
+        "scraped_at": "2026-01-31T15:16:16.460878",
         "talk_title": "Risk and the welfare-autonomy conflict",
         "abstract": "It is a familiar point that the values of welfare and autonomy can conflict. If the theatre is better for me but I prefer the cinema, you better promote my welfare by giving me the theatre ticket, but you better promote my autonomy by giving me the cinema ticket. However, this (banal) kind of value conflict occurs only when, and then obviously because, the moral patient has preferences that are substantively (prudentially) irrational. In the example just given, I have strict preferences that run counter to what is strictly better for me, and that is why you are forced to choose between what is better vs. what I prefer. Some recent work has suggested that welfare and autonomy conflict in a more subtle and surprising way, and (in particular) conflict even when none of the relevant preferences are substantively irrational, in cases involving risk. However, I will suggest, the existing results along these lines are deficient, for various reasons. In the talk, I will outline a new and better theorem in the same general spirit. I will then discuss what might be the most plausible reactions to the conflict this theorem illustrates, suggesting in particular that in the context of valuing autonomy, the possibility of time-inconsistency should perhaps be taken more seriously than the preceding literature has taken it.",
         "metadata": {
@@ -242,7 +242,7 @@
     {
         "title": "Talk (Work in Progress): Enrico Maresca (Pisa)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-enrico-maresca-pisa.html",
-        "scraped_at": "2026-01-31T12:47:16.394705",
+        "scraped_at": "2026-01-31T15:16:16.460882",
         "talk_title": "Quantum Gravity Phenomenology: An Integrated Epistemic Approach",
         "abstract": "Quantum gravity (QG) is often characterised as a purely theoretical endeavour aimed at describing physics beyond the reach of current experimental apparatuses. Viable proposals are required to recover the general relativistic framework at low energies: this reduction principle secures the empirical success of general relativity within overlapping domains. By contrast, QG phenomenology seeks potential QG signatures in astrophysical settings, seemingly challenging reduction. In particular, the multi-messenger approach builds on recent advances in high-energy astrophysics to identify candidate observational windows on QG. Despite this, philosophers of physics have largely neglected the role of QG phenomenology in theory building. This neglect motivates a closer examination of the epistemological basis of phenomenological results and their relation to reduction. In this presentation, I argue for two claims. First, phenomenological results refine how the reduction principle is applied in QG. Second, QG phenomenology complements reduction by exploiting it to constrain the domain of viable QG theories. I argue that these results require an integrated epistemology to support their theoretical significance. I illustrate this claim by examining Lorentz-invariance-violating theories as promising case studies.",
         "metadata": {
@@ -259,7 +259,7 @@
     {
         "title": "Talk: Christian Wüthrich (Geneva)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-christian-wuethrich-geneva.html",
-        "scraped_at": "2026-01-31T12:47:16.394711",
+        "scraped_at": "2026-01-31T15:16:16.460885",
         "talk_title": "Is spacetime contingent?",
         "abstract": "Many approaches to quantum gravity suggest that spacetime emerges from a more fundamental, non-spatiotemporal structure. What then is the modal status of the emerging spacetime: is it necessary or contingent? Using loop quantum gravity as a case study, I will argue that spacetime should be considered physically contingent, at least on a naturalist conception of modality. I will then discuss metaphysical implications of this tentative result, particularly concerning the debate between substantivalism and relationalism, and the nature of laws.",
         "metadata": {
@@ -276,7 +276,7 @@
     {
         "title": "Talk: Corina Strößner (Greifswald)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-corina-stroessner-greifswald.html",
-        "scraped_at": "2026-01-31T12:47:16.394716",
+        "scraped_at": "2026-01-31T15:16:16.460888",
         "talk_title": "Similarity first",
         "abstract": "Since Goodman formulated his strictures against similarity in response to Carnapâs use of similarity as a foundation of cognitive development in the Aufbau , philosophers and cognitive scientists have vividly debated the role and nature of similarity. A central issue in this debate is the extent to which similarity is genuinely fundamental, or rather to derived from reasoning and categorization. This talk considers the similarity as a foundational notion in explanations of cognitive development. It explores and defends the view that similarity should be regarded as a fundamental notionâa basic ingredient of cognitive theories that cannot be derived from or defined in terms of more primitive (cognitive) constructs. To capture the nature of similarity, I propose a functional characterization of similarity as the factive mental state that corresponds to agents' propensity to successfully transfer mental attitudes towards an entity to an(other) entity.",
         "metadata": {
@@ -293,7 +293,7 @@
     {
         "title": "Talk (Work in Progress): Daniele Garancini (MCMP)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-daniele-garancini-mcmp.html",
-        "scraped_at": "2026-01-31T12:47:16.394725",
+        "scraped_at": "2026-01-31T15:16:16.460897",
         "talk_title": "Should New Regulations be Imposed on Academic Publishing?",
         "abstract": "This article argues, using a case study on Elsevierâs business, that despite its many merits, the Open Science Movement has not succeeded in lowering the margins of for-profit academic publishing. Accordingly, regulations other than the ones suggested by the movement should be introduced to regulate this business. In conclusion, some reasons in favour of one proposal are briefly reviewed.",
         "metadata": {
@@ -310,7 +310,7 @@
     {
         "title": "Talk: Mario Gollwitzer (LMU)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-mario-gollwitzer-lmu.html",
-        "scraped_at": "2026-01-31T12:47:16.394730",
+        "scraped_at": "2026-01-31T15:16:16.460900",
         "talk_title": "Open ScienceNeeds Meta-Science â And Vice Versa",
         "abstract": "The replicabilitycrisis in the behavioral, social, and cognitive sciences (amongothers) has put forth two independent, yet interrelated developments:First, an âopen science movementâ (which is by definitionactivist, normative, and agenda-driven), and, second, a revival ofmeta-scientific thinking and research within the respectivedisciplines (which is â or ought to be â objective, systematic,evidence-based, transparent, impartial, and non-normative). It isprobably a coincidence that both developments occurred at the sametime, but it is a lucky chance â for both developments,respectively â that they did. Both developments need each other andprofit from each other: Meta-scientific theory and research isrelevant for monitoring and evaluating the âopen science movementâand its effects on the scientific system. And open science isrelevant for improving meta-scientific methods and concepts. In thistalk, I will substantiate this claim with some recent findings fromresearch projects within the DFG-funded Priority Program âMETA-REPâ( https://www.meta-rep.uni-muenchen.de/index.html ).",
         "metadata": {
@@ -327,7 +327,7 @@
     {
         "title": "Talk: Caterina Del Sordo (University of the Basque Country)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-caterina-del-sordo-university-of-the-basque-country.html",
-        "scraped_at": "2026-01-31T12:47:16.394900",
+        "scraped_at": "2026-01-31T15:16:16.460903",
         "talk_title": "In this talk, I introduce a research hypothesis and defend a thesis. The hypothesis I propose is that the development of rational reconstruction and explication in Rudolf Carnapâs work from the early 1940s up to Logical Foundations of Probability can be better understood by examining Carnapâs relationship with representatives of phenomenology as an international movement in America. The thesis I aim to defend is that rational reconstruction is particularly well suited to addressing several objections typically raised against explication. In particular, I will focus on the problem of the âhumanistic residueâ in explication.",
         "metadata": {
             "speaker": "Caterina Del Sordo (University of the Basque Country)",
@@ -343,7 +343,7 @@
     {
         "title": "Talk (Work in Progress): Ignacio Ojea Quintana (MCMP)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-ignacio-ojea-quintana-mcmp.html",
-        "scraped_at": "2026-01-31T12:47:16.394913",
+        "scraped_at": "2026-01-31T15:16:16.460906",
         "talk_title": "Social Norms as Social Habits",
         "abstract": "Standard philosophical accounts (Bicchieri 2006, 2016; Brennan et al. 2013) treat social norms as rules sustained by conditional preferences to conform given (i) empirical expectations and (ii) normative expectations, backed by sanctions. While explanatorily powerful, these views impose heavy cognitive demands and strong rationality requirements. I develop a habit-based account: norms as habitual patterns of response formed through reinforcement learning (RL)âthat is, trial-and-error adjustment to social feedback. On this view, compliance, internalization, and sanctioning arise as agents learn from approval, disapproval, and payoffs. The normative force of habits appears in their stability under repetition and their sensitivity to sanctions and nudging interventions. The framework also supports norm-sensitive interventions (e.g., nudging) with guardrails against backfire. Although general, the account has digital social norms in mindâthe unwritten rules that structure online behavior. I will present multi-agent RL simulations and outline how digital reward proxiesâlikes/upvotes, reports/blocks, and moderation outcomesâlet us calibrate and test norm dynamics with platform data.",
         "metadata": {
@@ -360,7 +360,7 @@
     {
         "title": "Talk: Manolo Martínez (Barcelona)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-manolo-martinez-barcelona.html",
-        "scraped_at": "2026-01-31T12:47:16.394922",
+        "scraped_at": "2026-01-31T15:16:16.460909",
         "talk_title": "The âAlgorithmic Best Systemâ Approach to Laws",
         "abstract": "The Best-System Approach [BSA] (Lewis 1999; Cohen and Callender 2009; Loewer 1996) is one of the main approaches to the metaphysics of laws. In this tradition, a âsystemâ is a deductive system: a set of axioms and theorems derived from them. We want to set things up in such a way that the axioms can be reasonably identifies with the laws of that world, and the derived theorems with the rest of truths. The Best System Approach to this desideratum is to make the axioms optimally trade off (balance) strength and simplicity. Strength: something like how many theorems can be derived from the axioms. Simplicity: something like very few, syntactically simple axioms. Balance: something like judiciously trading off strength and simplicity.",
         "metadata": {
@@ -378,7 +378,7 @@
     {
         "title": "Talk: Catherine Herfeld (Hannover)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-catherine-herfeld-hannover.html",
-        "scraped_at": "2026-01-31T12:47:16.394931",
+        "scraped_at": "2026-01-31T15:16:16.460912",
         "talk_title": "Model Transfer and its Role in Awakening Sleeping Beauties in Science",
         "abstract": "Model transferâthe use of models developed in one domain to address problems in anotherâis widespread in science. Yet it remains underexplored, both empirically and philosophically. In the first part of this talk, I outline some initial ideas about how we might systematically and empirically study model transfer. In the second part, I go more into detail and ask whether, and in what ways, model transfer can shape the impact trajectory of âsleeping beautyâ papersâpapers that âgo unnoticed (âsleepâ) for a long time and then, almost suddenly, attract significant attention (âare awakened by a princeâ)â (van Raan 2004). I present preliminary results from a co-citation analysis conducted using computational methods and network-analytic tools. The analysis has two aims: (1) to identify sleeping beauty papers and (2) to examine how model transfer may contribute to their eventual surge in impact. I illustrate the approach with a case study of model transfer between economics and psychology, focusing on the uptake of economic models of temporal discounting.",
         "metadata": {
@@ -396,7 +396,7 @@
     {
         "title": "Talk: Steffen Koch (Bielefeld)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-steffen-koch-bielefeld.html",
-        "scraped_at": "2026-01-31T12:47:16.394940",
+        "scraped_at": "2026-01-31T15:16:16.460915",
         "talk_title": "Do linguistic interventions change minds?",
         "abstract": "Linguistic interventions are deliberate attempts to reshape linguistic practices. They include introducing new terms for previously neglected phenomena (âpostpartum depression,â âsexual harassment,â âclimate crisisâ), assigning new meanings to familiar words (âqueer,â âmarriage,â âracismâ), retiring problematic expressions (the N-word, âhysterical,â âfake newsâ), and reframing familiar items with new labels (âundocumented immigrant,â âdeath taxâ). Such interventions have a long history. Their core rationale is that altering how we speak will alter how we think, and ultimately how we act. In this talk, I scrutinize this rationale. I first examine and challenge the common view that linguistic interventions expand our repertoire of possible thoughts. I then develop a more empirically grounded alternative: linguistic interventions do not enable previously impossible thoughts; rather, they shift the likelihood with which certain categories are activated and applied, thereby influencing how we categorize our experiences and, ultimately, how we act on them.",
         "metadata": {
@@ -413,7 +413,7 @@
     {
         "title": "Talk (Work in Progress): Edoardo Baccini (MCMP)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-edoardo-baccini-mcmp.html",
-        "scraped_at": "2026-01-31T12:47:16.394950",
+        "scraped_at": "2026-01-31T15:16:16.460918",
         "talk_title": "Learning and Minimal Belief Revision",
         "abstract": "The principle of minimal change in belief revision theory requires that, when accepting new information, one keeps one's belief state as close to the initial belief state as possible. This is precisely what the method known as minimal revision in dynamic epistemic logicdoes. However, unlike less conservative belief revision methods, minimal revision falls short in learning power: It cannot learn everything that can be learned by other learning methods. We begin by showing that, despite this limitation, minimal revision is still a successful learning method in a wide range of situations. We then characterize the prior plausibility assignments (over finitely many possibilities) that enable one to learn via minimal revision, and illustrate a number of difficulties that arise when considering plausibility orders that are not necessarily total. Finally, we outline a program forstudyinglearning and belief revision in multi-agent contexts. (This talk is based on ongoing joint work with ZoÃ© Christoff, Nina Gierasimczuk and Rineke Verbrugge.)",
         "metadata": {
@@ -430,7 +430,7 @@
     {
         "title": "Talk: Uljana Feest (Hannover)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-uljana-feest-hannover.html",
-        "scraped_at": "2026-01-31T12:47:16.394960",
+        "scraped_at": "2026-01-31T15:16:16.460921",
         "talk_title": "Operationism and Exploration in Psychology",
         "abstract": "The talk will provide an overview of central themes from my recent book, Operationism in Psychology: An Epistemology of Exploration (2025). I will begin by arguing that a key challenge researchers face has to do with (what I call) the âepistemic blurrinessâ of their objects of research. The talk will present a philosophical framework for analyzing strategies researchers have at their disposal for dealing with this predicament and, thus, for exploring their objects of research. My framework is inspired by an analysis of early- to mid-20th century operation(al)ism : According to this analysis, the practice of âoperationally definingâ concepts pertaining to the subject matter allows researchers to get a conceptual and experimental handle on their objects without committing them to a naÃ¯ve theory of meaning or trapping their practices in circularity. I will argue that the epistemic blurriness of psychological research objects is not restricted to explanatory questions but extends to fundamental descriptive and taxonomic questions. I will then introduce an account of experimental inferences in psychology to drive home the difficulties of deriving descriptive statements about objects of research from experimentally produced effects. These difficulties once again highlight the degree of epistemic blurriness with which psychological objects present themselves to researchers. I will argue that my account opens up a path forward.",
         "metadata": {
@@ -447,7 +447,7 @@
     {
         "title": "Workshop on Determinism, Indeterminism, and Counterfactuals in History",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/workshop-on-determinism-indeterminism-and-counterfactuals-in-history.html",
-        "scraped_at": "2026-01-31T12:47:16.394969",
+        "scraped_at": "2026-01-31T15:16:16.460927",
         "metadata": {
             "year": 2025,
             "month": "December",
@@ -462,7 +462,7 @@
     {
         "title": "Talk: Anton Freund (Würzburg)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-anton-freund-wuerzburg.html",
-        "scraped_at": "2026-01-31T12:47:16.394978",
+        "scraped_at": "2026-01-31T15:16:16.460930",
         "talk_title": "The reverse mathematics of real analysis - a new picture",
         "abstract": "The talk begins with a short introduction to reverse mathematics, a now classical framework that allows to compare the logical strength of results from various mathematical fields. It then discusses the emerging programme of strict reverse mathematics as promoted by Harvey Friedman. This is followed by a case study (work in progress with Nicholas Pischke and Patrick Uftring) that is inspired by though not entirely faithful to this new programme: By re-interpreting the real numbers, we obtain a new picture of analysis in reverse mathematics, which suggests that some theorems may not need the strong logical axioms that are classically associated with them.",
         "metadata": {
@@ -479,7 +479,7 @@
     {
         "title": "[CANCELLED] Talk (Work in Progress): Flavia Padovani (Drexel)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/cancelled-talk-work-in-progress-flavia-padovani-drexel.html",
-        "scraped_at": "2026-01-31T12:47:16.394986",
+        "scraped_at": "2026-01-31T15:16:16.460933",
         "talk_title": "TBA",
         "abstract": "TBA",
         "metadata": {
@@ -496,7 +496,7 @@
     {
         "title": "Talk: Max Kistler (Paris)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-max-kistler-paris.html",
-        "scraped_at": "2026-01-31T12:47:16.394995",
+        "scraped_at": "2026-01-31T15:16:16.460936",
         "talk_title": "Integrating Constitution into Causal Models",
         "abstract": "According to Craver (2007), constitutive relevance can be discovered by mutual manipulability, based on interventions. However, the requirements on interventions make mutual manipulability of mechanisms and their constituents impossible. Both Baumgartner and Casiniâs (2017) âno-decouplingâ account and Craver, Glennan, and Povichâs (2021) analysis of constitutive relevance as âcausal betweennessâ take into account the fact that one cannot analyze constitution, which is a non-causal dependence relation, as difference-making of the same sort as causation. Both provide decisive new insights on constitution but none of them provides a complete analysis of the scientific construction of models of mechanisms with constituents at different layers. It is possible to construct models of multi-level mechanisms representing constitution (a non-causal relation) although the relevant experiments directly provide only information on causal relations, because causal information can bear on variables at different levels. A multi-level model is built in two steps. 1) first, partial purely causal models are built for each hypothetical constituent variable Fi, on the basis of top-down and bottom-up experiments that modify or measure Fi in a level-specific way, 2) second, those partial models are merged in a comprehensive model containing both causal and constitution relations, on the basis of information about the level of each variable and spatio-temporal constraints.",
         "metadata": {
@@ -513,7 +513,7 @@
     {
         "title": "Talk: Balthasar Grabmayr (Tübingen)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-balthasar-grabmayr-tuebingen.html",
-        "scraped_at": "2026-01-31T12:47:16.395003",
+        "scraped_at": "2026-01-31T15:16:16.460939",
         "talk_title": "Title: The Ontology of Formal Language",
         "abstract": "The study of logic underwent a profound rebirth at the turn of the twentieth century. While logicians were traditionally concerned with the correctness of reasoning in ordinary language, Frege introduced formal languages as the primary medium and objects of logical enquiry. The shift from ordinary language to artificial languages containing formal expressions elevated the study of mathematics and philosophy to a new level of rigour and marked the beginning of the computer age. But what exactly are formal expressions? Although the ontological nature of mathematical objects, such as numbers, has been a central topic in philosophy since antiquity, a systematic study of the ontology of formal expressions is hitherto lacking in the literature. The aim of this talk is threefold. First, I will show that within the last century, the study of formal languages underwent a \"structuralist turn\". I will then argue that recent attempts to make the structuralist view of formal languages explicit are flawed. Finally, I will show how the structuralist view can be stated correctly.",
         "metadata": {
@@ -530,7 +530,7 @@
     {
         "title": "Talk (Work in Progress): Maria Federica Norelli (NU London)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-maria-federica-norelli-nu-london.html",
-        "scraped_at": "2026-01-31T12:47:16.395012",
+        "scraped_at": "2026-01-31T15:16:16.460942",
         "talk_title": "Sparsity, Generalization, and Winning Tickets of Deep Neural Networks: The Principle of Dynamic Simplicity",
         "abstract": "In traditional machine learning, simplicity is often equated with model size, typically measured by the number of parameters, and smaller models are commonly thought to generalize better. This rough principle aligns with classical interpretations of Occamâs Razor, the theoretical principle according to which simpler theories should be preferred over more complex ones. Yet, modern over-parameterized neural networks challenge this relation: despite their size, they often generalize better than smaller counterparts, indicating that simplicity cannot be reduced to parameter count alone. Despite so, pruning deep learning models - the systematic removal of parameters (or weights) according to some relevance criteria - has been showed to further improve performance. By looking at some empirical and theoretical findings on pruning, particularly the so-called Lottery Ticket Hypothesis (LTH), I address this apparent contradiction by interpreting pruningâs success in deep learning not in term of size reduction, but the revealing of dynamically simpler structures already embedded within the model. As dynamic property, simplicity is expressed through modelâs stability: models that maintain coherent learning dynamics despite perturbations tend to generalize better. An extended version of the LTH experiment is used to test this hypothesis by introducing structured noise during training. The results indicate that subnetworks preserving their original initialization exhibit more stable generalization and superior performance compared to randomly reinitialized ones. Based on this, I define a new version of Ockhamâs Razor, the Dynamic Simplicity Principle , according to which models that sustain stable learning dynamics should be preferred.",
         "metadata": {
@@ -547,7 +547,7 @@
     {
         "title": "Talk: Kate Vredenburgh (LSE)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-kate-vredenburgh-lse.html",
-        "scraped_at": "2026-01-31T12:47:16.395021",
+        "scraped_at": "2026-01-31T15:16:16.460946",
         "talk_title": "Understanding discrimination - the purported epistemic advantage of algorithmic decision-making",
         "abstract": "Proponents of explainable AI (XAI) hope that it will allow us to reap the benefits of more accurate and efficient AI systems but also detect, prove, and mitigate algorithmic discrimination. Indeed, the hope is that AI systems become more understandable than human decision-makers, when such tools are used, and that algorithmic discrimination becomes easier to prove in court than direct discriminatory decisions where no AI systems were involved. However, such a position over-estimates how understandable AI systems are, even with XAI tools, and underestimates how understandable humans are. The same point holds for providing direct discrimination in court. In both cases, we must rely on background normative and empirical commitments to understand or prove discrimination.",
         "metadata": {
@@ -564,7 +564,7 @@
     {
         "title": "Research Seminar in Decision and Action Theory: Reflective Transparency and Self-Ascription of Belief",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/research-seminar-in-decision-and-action-theory-reflective-transparency-and-self-ascription-of-belief.html",
-        "scraped_at": "2026-01-31T12:47:16.395029",
+        "scraped_at": "2026-01-31T15:16:16.460949",
         "abstract": "This paper challenges the transparency account of self-knowledge by arguing that it is indistinguishable from an agentâs first-person reflective perspective whether she believes p or whether she merely believes that she believes p . This means that even if the agent starts by taking up the deliberative stance, she could end up believing that she believes that p without rationally endorsing p . I then present a practical worry for deliberately trying to answer a mind-directed question âDo I believe p ?â by deliberating âIs it the case that p ?â.",
         "metadata": {
             "speaker": "Reflective Transparency and Self-Ascription of Belief",
@@ -581,7 +581,7 @@
     {
         "title": "Talk: Laura Crosilla (Florence)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-laura-crosilla-florence.html",
-        "scraped_at": "2026-01-31T12:47:16.395037",
+        "scraped_at": "2026-01-31T15:16:16.460952",
         "talk_title": "Weylâs âconstructivismâ",
         "abstract": "Hermann Weyl changed his views on the foundations of mathematics several times, with commentators often distinguishing four different phases. These changes give us precious insights into Weylâs philosophical positions, but also into the foundations of mathematics more generally. Notwithstanding Weylâs evolving views on foundations, there are also significant elements of continuity throughout his philosophical reflection. In this talk, I will focus on a constructive attitude that pervades Weylâs philosophy of mathematics. One aspect I will elaborate on, are the important connections between Weylâs constructive attitude and his changing views on quantification and logic.",
         "metadata": {
@@ -599,7 +599,7 @@
     {
         "title": "Talk (Work in Progress): Conrad Friedrich (MCMP)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-conrad-friedrich-mcmp.html",
-        "scraped_at": "2026-01-31T12:47:16.395045",
+        "scraped_at": "2026-01-31T15:16:16.460955",
         "talk_title": "Questions, Inquisitive Progress & Norms of Inquiry",
         "abstract": "In this talk I argue for a graded notion of what it is to answer a question. One upshot is that the graded notion has immediate interesting effects on norms of inquiry. Inquiry is often understood as question-directed (e.g. J. Friedman, 2013; Kelp, 2014). Evaluating question-directed inquiry depends in part on what it is to answer a question. The inquiry-focused literature tends to employ a simple notion of settling a question (e.g. Falbo, 2023; D. C. Friedman, 2025; J. Friedman, 2013, 2019) which amounts to a complete answer in the sense of Groenendijk and Stokhof (1997). Taking up and unifying the accounts by Groenendijk and Stokhof (1997) and Roberts (2012), I propose to distinguish (at least) between complete, partial, and weak answers. This result is a graded notion of answer which provides tools to represent inquisitive progress: for instance, coming to believe a weak answer is a step towards completing the inquiry, while coming to believe a complete answer settles the question, i.e. ends the inquiry. Another upshot is that this richer picture of answers to a question has interesting effects on norms of inquiry, in particular the much-discussed DBI (Don't Believe and Inquire) norm. I propose that believing an incomplete answer to a question does not prohibit inquiry into that question, but instead systematically constrains it.",
         "metadata": {
@@ -616,7 +616,7 @@
     {
         "title": "Talk: Elena Castellani (Florence)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-elena-castellani-florence.html",
-        "scraped_at": "2026-01-31T12:47:16.395054",
+        "scraped_at": "2026-01-31T15:16:16.460958",
         "talk_title": "From Symmetry to Supersymmetry to Supergravity",
         "abstract": "The theoretical developments that ledto supersymmetryâfirst global and then localâover roughly sixyears (1970/71â1976) arose from a convergence of physical insightsand mathematical methods stemming from diverse, and sometimesindependent, research directions. This contribution aims toillustrate the interplay of ideas, methods, and motivations thatinformed the entire process and concludes with a reflection on the scientificmodality of these developments.",
         "metadata": {
@@ -633,7 +633,7 @@
     {
         "title": "Research Seminar in Decision and Action Theory: The Phantom of Leeway",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/research-seminar-in-decision-and-action-theory-the-phantom-of-leeway.html",
-        "scraped_at": "2026-01-31T12:47:16.395062",
+        "scraped_at": "2026-01-31T15:16:16.460961",
         "abstract": "This paper engages with the ongoing debate surrounding how to conceptualize free agency. It specifically addresses the current confrontation between the so-called leeway view and the source view. Roughly, it is a debate about whether the ability to do otherwise can ground and metaphysically explain free agency. The primary endeavor is to construct a reductio argument against the leeway view, based on close examination of the nature of free agents, ability-exercise, and the ability to do otherwise. The core of the argument is the claim that whereas we possess the ability to do otherwise, it is impossible to exercise that ability, due to its self-masking structure. Therefore, despite the reality of leeway, it cannot be explanatorily potent for free agency. I will also consider some potential objections, including an alternative formulation of the leeway thesis in terms of two-way powers, and recent developments in the fallibilism of ability-exercise.",
         "metadata": {
             "speaker": "The Phantom of Leeway",
@@ -650,7 +650,7 @@
     {
         "title": "Interdisciplinary Workshop on Preferences in Artificial Intelligence",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/interdisciplinary-workshop-on-preferences-in-artificial-intelligence.html",
-        "scraped_at": "2026-01-31T12:47:16.395071",
+        "scraped_at": "2026-01-31T15:16:16.460964",
         "metadata": {
             "year": 2025,
             "month": "November",
@@ -665,7 +665,7 @@
     {
         "title": "Talk: Jan von Plato (Helsinki/MCMP)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-jan-von-plato-helsinki-mcmp.html",
-        "scraped_at": "2026-01-31T12:47:16.395080",
+        "scraped_at": "2026-01-31T15:16:16.460967",
         "talk_title": "The hidden heritage of modern logic",
         "abstract": "1. Transcription and interpretation of GÃ¶del's thousand-page \"Arbeitshefte\" of 1940-42. 2. To demonstrate the crucial role Paul Bernays played in the development of logic, through transcription of his lecture notes in GÃ¶ttingen, 1927 and 1929-30. 3. Transcription of Gerhard Gentzen's notes on the proof theory of intuitionistic arithmetic and the consistency of analysis. These sources are written in two different shorthand systems. In the talk, I will first describe where we arrived at with the previous ERC project GODELIANA, 2018-24, then show by examples how the source materials are and what can be expected form them.",
         "metadata": {
@@ -683,7 +683,7 @@
     {
         "title": "Talk (Work in Progress): David Colaço (MCMP)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-david-colaco-mcmp.html",
-        "scraped_at": "2026-01-31T12:47:16.395089",
+        "scraped_at": "2026-01-31T15:16:16.460971",
         "talk_title": "The role of uncertainty in debates about cognition",
         "abstract": "Minimal cognition is one of several approaches that present themselves as alternatives to âmainstreamâ perspectives in the study of cognition, where both what cognition is and what systems count as cognitive are challenged. While supporters of these approaches offer argumentative and empirical support for their positions, what is less explicitly discussed is the role that uncertainty plays in motivating these positions and structuring the kinds of argument and evidence that are put forward. Specifically, consideration of these approaches make salient that âmainstreamâ perspectives often, I posit, involve uncertainty regarding claims germane to: (1) whether empirical paradigms used to diagnose cognitive systems can serve to determine them, (2) whether cognitive status can be empirically confirmed or must be inferred , and (3) whether cognition includes (often folk) psychological notions or is distinct from them. In this talk, I defend my posit of individual- or group-level uncertainties about these claims and make rigorous their beneficial role in making conjectures about the intension and extension of the concept COGNITION. These approaches reflect strategies that should be taken in the face of uncertainty.",
         "metadata": {
@@ -700,7 +700,7 @@
     {
         "title": "Talk: Brian Ball & David Freeborn (NU London)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-brian-ball-david-freeborn-nu-london.html",
-        "scraped_at": "2026-01-31T12:47:16.395098",
+        "scraped_at": "2026-01-31T15:16:16.460974",
         "talk_title": "Structure Meets Strategy in the Misinformation Age",
         "abstract": "There is widespread concern about the present age of misinformation. Using computer simulations of communities of rational agents, the current paper explores the effects of social network structures, as well as information-processing strategies, on the spread and uptake of true belief. It finds that poor informational environments lead to delays in discovering the truth - especially when agents employ sceptical information-processing strategies, and/or when social networks have realistic structural features - and that disinformation in particular can result in opinion polarisation. The paper also extends the scope of the antecedently known Zollman effect, showing that in the presence of misinformation, networks of larger size show a trade-off between accuracy and efficiency, with better connected networks faster but less reliable in arriving at the truth.",
         "metadata": {
@@ -717,7 +717,7 @@
     {
         "title": "Talk: Mark Bowker (Bielefeld)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-mark-bowker-bielefeld.html",
-        "scraped_at": "2026-01-31T12:47:16.395108",
+        "scraped_at": "2026-01-31T15:16:16.460977",
         "talk_title": "Thin Semantics and Metaphysics, Thick Psychology",
         "abstract": "I present a novel minimalist approach to semantics that aims to explain contextualist intuitions while preserving the informativeness of semantic content. The contextualist's data are explained through non-semantic psychological variation, operationalised in terms of Raffman's \"internal context\". Variations in internal contextâparticularly in attentionâbring about corresponding shifts in audiences' truth-value judgments and thereby their representation of the world. Unlike other forms of minimalism (particularly Borg's account) this allows us to preserve the the significance of semantic content, rather than appealing to secondary, pragmatic, or speech act contents.",
         "metadata": {
@@ -734,7 +734,7 @@
     {
         "title": "[Cancelled] Talk (Work in Progress): David Colaço (MCMP)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/cancelled-talk-work-in-progress-david-colaco-mcmp.html",
-        "scraped_at": "2026-01-31T12:47:16.395116",
+        "scraped_at": "2026-01-31T15:16:16.460980",
         "talk_title": "The role of uncertainty in debates about cognition",
         "abstract": "Minimal cognition is one of several approaches that present themselves as alternatives to âmainstreamâ perspectives in the study of cognition, where both what cognition is and what systems count as cognitive are challenged. While supporters of these approaches offer argumentative and empirical support for their positions, what is less explicitly discussed is the role that uncertainty plays in motivating these positions and structuring the kinds of argument and evidence that are put forward. Specifically, consideration of these approaches make salient that âmainstreamâ perspectives often, I posit, involve uncertainty regarding claims germane to: (1) whether empirical paradigms used to diagnose cognitive systems can serve to determine them, (2) whether cognitive status can be empirically confirmed or must be inferred , and (3) whether cognition includes (often folk) psychological notions or is distinct from them. In this talk, I defend my posit of individual- or group-level uncertainties about these claims and make rigorous their beneficial role in making conjectures about the intension and extension of the concept COGNITION. These approaches reflect strategies that should be taken in the face of uncertainty.",
         "metadata": {
@@ -751,7 +751,7 @@
     {
         "title": "Talk: Hanoch Ben-Yami (Central European University)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-hanoch-ben-yami-central-european-university.html",
-        "scraped_at": "2026-01-31T12:47:16.395126",
+        "scraped_at": "2026-01-31T15:16:16.460983",
         "talk_title": "On â2nd-orderâ Logic and Quarc",
         "abstract": "The so-called second-order logic has made negligent incursions into the formalisation of natural language. Its conception as being about properties, by contrast to the so-called first-order logic, is wrong. The syntactic features of the so-called 2 nd -order Predicate Calculus do not make it second - or higher -order in any acceptable sense either. Basically, it is an artefact of Fregeâs conception of quantification, not reflecting any general feature of logic. It does have some distinctive semantic features, primarily in allowing several domains of quantification, yet Quarc allows for that by determining the âdomain of quantificationâ through the unary predicate which attaches to the quantifier, in this way making redundant different types of quantification. Its applications in mathematics can also be captured by Quarc, by utilising set theory.",
         "metadata": {
@@ -768,7 +768,7 @@
     {
         "title": "Talk (Work in Progress): Michael Cuffaro (MCMP)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-michael-cuffaro-mcmp.html",
-        "scraped_at": "2026-01-31T12:47:16.395135",
+        "scraped_at": "2026-01-31T15:16:16.460986",
         "talk_title": "Kant on Pure Intuition, Inner Sense, Self-Affection, and Time, and GÃ¶del on Kant",
         "abstract": "Kant's doctrine of inner sense, i.e., our sense, literally, of ourselves, and what according to Kant is its characteristic form: time, bears a critically important relationship to Kant's philosophy of (exact) natural science, broadly understood, and in my talk I will argue, in addition, that it helps to focus the objections that thinkers, such as GÃ¶del, had to what they understood to be the Kantian programme. I will begin by explaining how, according to Kant, space and time are the pure forms of outer and inner sense, respectively, which respectively correspond to our capacity to represent objects as being outside ourselves, and our capacity to represent anything at all. In the latter case, I will explain that attending to the synthesis of what is given to us in outer sensibility invariably produces, for Kant, an effect upon our inner sense, and a corresponding determinate intuition that we relate, in time, to the other determinate intuitions that we have of ourselves and of our own inner state. In this way we perceive ourselves through time, where perception, importantly, involves a kind of empirical consciousness of one's own inner state in relation to some outer appearance. I will then explain that Kant's transcendental schemata correspond to transcendental time determinations, and how the transcendental schemata underlie Kant's synthetic a priori principles, which in turn provide the ground for his metaphysical foundations of natural science. Finally, I relate the discussion to GÃ¶del's ideas on mathematical intuition and to GÃ¶del's objections to and his understanding of Kant's programme. I will explain that intuition, for both Kant and GÃ¶del, is defined in terms of a rule-governed activity, and that GÃ¶del was right, in this sense, to say that there is an analogy between sense perception and mathematical intuition, if the former is understood (as it probably was for GÃ¶del) in the Kantian sense. For Kant, however, intuition is necessarily sensible insofar as the images produced by the power of our imagination are of necessity sensible images, even in the case where what is being exhibited is a temporal interval, and even though time itself cannot be directly perceived. There is no analogous requirement of visualisability, in the case of mathematical intuition, for GÃ¶del.",
         "metadata": {
@@ -785,7 +785,7 @@
     {
         "title": "Talk: Jonathan Shaheen (Uppsala)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-jonathan-shaheen-uppsala.html",
-        "scraped_at": "2026-01-31T12:47:16.395143",
+        "scraped_at": "2026-01-31T15:16:16.460989",
         "talk_title": "Places Incorporated: Cavendish on Body and Place as âbut one thingâ",
         "abstract": "This paper gives an account of Cavendishâs understanding of body and place as âbut one thing.â It begins with an extended discussion intended to establish that Cavendish means âbut one thingâ claims as numerical identity claims. It then discusses various consequences of her understanding of the numerical identity of body and place: the impossibility of change of place without change of body, the possibility of motion in a plenum, the availability within her materialism of various accounts of local motion, and the robustness of her theory of mixture against some objections from her intellectual contact Walter Charleton. A concluding discussion emphasizes the importance of âbut one thingâ claims to a general picture of Cavendishâs materialism as a metaphysics of only bodies.",
         "metadata": {
@@ -802,7 +802,7 @@
     {
         "title": "Talk: Luca Castaldo (MCMP)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-luca-castaldo-mcmp.html",
-        "scraped_at": "2026-01-31T12:47:16.395152",
+        "scraped_at": "2026-01-31T15:16:16.460992",
         "talk_title": "An impossibility result for theories of determinateness",
         "abstract": "In response to semantic paradoxes, several proposals have been made to distinguish paradoxical from non-paradoxical sentences by appealing to notions such as groundedness, meaningfulness, determinateness. In their recent paper \"Classical Determinate Truth I\", Fujimoto and Halbach introduce a theory of truth and determinateness and ask whether it can be consistently extended with an axiom stating that, for every sentence, it is determinate whether it is determinate. In this talk, I show that a negative answer to this question follows as a corollary of a general impossibility result for a broad class of theories of determinateness-like predicates. This is joint work with Maciej GÅowacki and Bartosz WcisÅo.",
         "metadata": {
@@ -819,7 +819,7 @@
     {
         "title": "Talk: David Papineau (KCL)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-david-papineau-kcl.html",
-        "scraped_at": "2026-01-31T12:47:16.395161",
+        "scraped_at": "2026-01-31T15:16:16.460995",
         "talk_title": "Causal Inference and the Metaphysics of Causa",
         "abstract": "What is the nature of causation explains the success of causal inference techniques? Existing metaphysical theories of causation offer no answer. I shall outline a metaphysical theory that is designed to account for the possibility of causal inference. I shall then indicate how this theory also accounts naturally for token-level causation and the relation between causation and rational action. Finally, I shall compare the resulting picture with âinterventionistâ approaches to causation.",
         "metadata": {
@@ -836,7 +836,7 @@
     {
         "title": "Talk: Greg Wheeler (Frankfurt School of Finance & Management)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-greg-wheeler-frankfurt-school-of-finance-management.html",
-        "scraped_at": "2026-01-31T12:47:16.395170",
+        "scraped_at": "2026-01-31T15:16:16.460998",
         "metadata": {
             "speaker": "Greg Wheeler (Frankfurt School of Finance & Management)",
             "year": 2025,
@@ -851,7 +851,7 @@
     {
         "title": "Talk (Work in Progress): Xiaoyu Guo (Darmstadt)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-xiaoyu-guo-darmstadt.html",
-        "scraped_at": "2026-01-31T12:47:16.395179",
+        "scraped_at": "2026-01-31T15:16:16.461002",
         "talk_title": "A conception of Bayesianism for open hypothesis systems",
         "abstract": "Although the long-term objectivity of Bayesian inference from subjective priors is well established in complete hypothesis systems by convergence-to-truth theorems, its validity becomes questionable in open hypothesis systems, where known hypotheses form an incomplete sample space and susceptible to awareness growth. In such systems, Bayesian inference process may lead to âconvergence without truthâ: in the absence of the true hypothesis, the Bayesian posterior will tend to confirm a false view. Another long-standing challenge for Bayesianism in the open systems is how to assign credence to new hypotheses as the awareness grows. This is recognized as the \"accommodation problem\" of the \"problem of new theory\". This project aims to address these problems by developing an \"open hypothesis-system Bayesianism\". I propose a two-phase mechanism to account for the update of the credence. When no new theory emerges, the credence undergoes an incremental updating phase driven by Bayes' theorem. Here I adopt a dynamical perspective, according to which the posterior credence evolves continuously over time. A radical update phase is incurred when a theory revision takes place. This two-phase scenario indicate a possible underlying connection with Kuhn's theory of scientific paradigms and revolutions. As a case study, I will explicitly focus on the famous problem of Mercury's perihelion precession: how people's credence shifted from Newtonian gravity to general relativity as the latter was recognized to solve the puzzle. Finally, I will explore the possibility of extracting scaling laws in citation networks as indicators of Bayesian convergence in scientific practice.",
         "metadata": {
@@ -869,7 +869,7 @@
     {
         "title": "Talk: Clara Bradley (UCL)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-clara-bradley-ucl.html",
-        "scraped_at": "2026-01-31T12:47:16.395187",
+        "scraped_at": "2026-01-31T15:16:16.461005",
         "talk_title": "The Relationship between Lagrangian and Hamiltonian Mechanics: The Irregular Case",
         "abstract": "Lagrangian and Hamiltonian mechanics are widely held to be two distinct but equivalent ways of formulating classical theories. Barrett (2019) makes this intuition precise by showing that under a certain characterization of their structure, the two theories are categorically equivalent. However, Barrett only shows equivalence between âhyperregularâ models of Lagrangian and Hamiltonian mechanics. While hyperregularity characterizes a large class of theories, it does not characterize the class of âgauge theoriesâ. In this talk, I discuss whether one can extend Barrettâs results to show that Lagrangian and Hamiltonian formulations of gauge theories are equivalent. I show that there is a precise sense in which one can, but that it hinges on philosophical issues concerning the interpretation of symmetries, the criteria for theory equivalence, and the status of excess structure.",
         "metadata": {
