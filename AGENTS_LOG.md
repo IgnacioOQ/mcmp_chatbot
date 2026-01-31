@@ -18,3 +18,12 @@
     - Ran all unit tests and connectivity checks.
     - Updated `docs/HOUSEKEEPING.md` with corrected report.
 - **Outcome**: System healthy. 53 events scraped. Minor regression in MCP tests noted.
+
+### 2026-01-31: Fix Future Event Access (Antigravity)
+- **Task**: Debugging LLM refusal to access future events.
+- **Problem**: LLM refused to answer questions about future events (e.g., Feb 2026) despite data being in `raw_events.json`. Error message ("I can only access information from the provided context") indicated strictly following RAG-only context rules in personality.
+- **Fix**: Modified `prompts/personality.md` to explicitly authorize and mandate Tool usage (`get_events`) when text context is insufficient.
+- **Changes**:
+    - Updated `prompts/personality.md` "Behavioral Guidelines" and "What to Avoid".
+    - Verified `get_events` tool logic with `test_events.py` (Tool works correctly).
+- **Outcome**: LLM personality now prioritize Tool usage over politeness when data is missing from text chunks.
