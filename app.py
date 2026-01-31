@@ -73,8 +73,23 @@ def main():
     st.set_page_config(
         page_title="Leopold - The MCMP Chatbot",
         page_icon="🎓",
-        layout="centered"
+        layout="wide"
     )
+
+    # Custom CSS to widen sidebar and narrow chat margins
+    st.markdown("""
+        <style>
+        [data-testid="stSidebar"] {
+            min-width: 350px;
+            max-width: 400px;
+        }
+        .stMainBlockContainer {
+            max-width: 800px;
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
     st.title("Leopold - The MCMP Chatbot")
     st.markdown("Ask me anything about the Munich Center for Mathematical Philosophy: our research, people, history, and upcoming events.\n\nThis is basically Retrieval-Augmented Generation (RAG) + Web scraping ([README](https://github.com/IgnacioOQ/mcmp_chatbot/blob/main/README.md)). It is still very much a demo and it will lack knowledge, but it should be able to provide accurate and up to date information. It is also a little slow, but it gets the job done.\n\nPlease use the feedback form on the left to leave comments, it will help improve the bot.")
@@ -104,7 +119,32 @@ def main():
 
     # Sidebar for configuration
     with st.sidebar:
-        st.header("Events this Week")
+        # 1. Calendar at the top
+        st.header("📅 Calendar")
+        selected_date = st.date_input(
+            "Select a date",
+            value=datetime.now().date(),
+            key="event_calendar",
+            label_visibility="collapsed"
+        )
+        st.caption(f"Selected: {selected_date.strftime('%B %d, %Y')}")
+        
+        st.markdown("---")
+        
+        # 2. Feedback form
+        with st.expander("💬 Give Feedback", expanded=False):
+            with st.form("feedback_form"):
+                name = st.text_input("Name (optional)")
+                feedback = st.text_area("Your Feedback", help="Let us know what you think!")
+                submitted = st.form_submit_button("Submit")
+                if submitted and feedback:
+                    save_feedback(name, feedback)
+                    st.success("Thank you for your feedback!")
+
+        st.markdown("---")
+        
+        # 3. Events this week
+        st.header("📆 Events this Week")
         
         # Load and filter events
         try:
@@ -185,17 +225,9 @@ def main():
             st.error(f"Could not load events: {e}")
 
         st.markdown("---")
-        with st.expander("Give Feedback"):
-            with st.form("feedback_form"):
-                name = st.text_input("Name (optional)")
-                feedback = st.text_area("Your Feedback", help="Let us know what you think!")
-                submitted = st.form_submit_button("Submit")
-                if submitted and feedback:
-                    save_feedback(name, feedback)
-                    st.success("Thank you for your feedback!")
-
-        st.markdown("---")
-        st.header("Configuration")
+        
+        # 4. Configuration at the bottom
+        st.header("⚙️ Configuration")
         use_mcp_tools = st.toggle("Enable Structured Data Tools (MCP)", value=True, help="Allows the AI to search specific databases for people, research, and events.")
         
         # Model Selection
