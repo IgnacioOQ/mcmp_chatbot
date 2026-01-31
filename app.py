@@ -220,6 +220,32 @@ def main():
             font-weight: 700;
             box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
         }
+        .calendar-day.has-event {
+            position: relative;
+            cursor: pointer;
+        }
+        .calendar-day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            background: #64ffda;
+            border-radius: 50%;
+        }
+        .calendar-day a {
+            color: inherit;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .calendar-day.has-event:hover {
+            background: rgba(100, 255, 218, 0.15);
+            transform: scale(1.1);
+        }
         </style>
         <div class="calendar-container">
             <div class="calendar-grid">
@@ -238,34 +264,21 @@ def main():
                     calendar_html += '<div class="calendar-day empty">·</div>'
                 else:
                     classes = ["calendar-day"]
-                    if day == today.day and cal_month == today.month and cal_year == today.year:
+                    is_today = day == today.day and cal_month == today.month and cal_year == today.year
+                    if is_today:
                         classes.append("today")
-                    # Days with events are NOT rendered in HTML anymore
-                    if day not in event_days:
-                        calendar_html += f'<div class="{" ".join(classes)}">{day}</div>'
+                    
+                    if day in event_days:
+                        classes.append("has-event")
+                        # Create clickable link with query parameter
+                        date_str = f"{cal_year}-{cal_month:02d}-{day:02d}"
+                        calendar_html += f'<div class="{" ".join(classes)}"><a href="?event_day={date_str}">{day}</a></div>'
                     else:
-                        # Placeholder for button - we'll render this separately
-                        calendar_html += f'<div class="{" ".join(classes)}" style="visibility: hidden;">{day}</div>'
+                        calendar_html += f'<div class="{" ".join(classes)}">{day}</div>'
         
         calendar_html += "</div></div>"
         
         st.markdown(calendar_html, unsafe_allow_html=True)
-        
-        # Render clickable buttons for event days using custom CSS overlay
-        if event_days:
-            st.markdown("<p style='font-size: 12px; color: #64ffda; margin-top: 8px;'>📍 <em>Click a date below to see events:</em></p>", unsafe_allow_html=True)
-            
-            # Create button grid for event days
-            event_days_sorted = sorted(event_days)
-            cols = st.columns(min(len(event_days_sorted), 7))
-            for i, day in enumerate(event_days_sorted):
-                col_idx = i % min(len(event_days_sorted), 7)
-                with cols[col_idx]:
-                    date_obj = datetime(cal_year, cal_month, day).date()
-                    if st.button(f"{day}", key=f"cal_day_{cal_year}_{cal_month}_{day}", use_container_width=True):
-                        # Store the clicked date to trigger LLM query
-                        st.session_state.calendar_query_date = date_obj.strftime("%Y-%m-%d")
-                        st.session_state.calendar_query_formatted = date_obj.strftime("%B %d, %Y")
         
         st.markdown("---")
         
@@ -391,27 +404,32 @@ def main():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Handle calendar day click - auto-generate prompt
-    if "calendar_query_date" in st.session_state:
-        query_date = st.session_state.calendar_query_date
-        query_formatted = st.session_state.calendar_query_formatted
-        # Clear the trigger
-        del st.session_state.calendar_query_date
-        del st.session_state.calendar_query_formatted
+    # Handle calendar day click via query parameter
+    query_params = st.query_params
+    if "event_day" in query_params:
+        event_day_str = query_params["event_day"]
+        # Clear the query param to prevent re-execution on refresh
+        st.query_params.clear()
         
-        # Generate the prompt silently
-        auto_prompt = f"What talks or events are scheduled for {query_formatted}? Please provide details about each event."
-        
-        # Add to chat history and generate response
-        st.session_state.messages.append({"role": "user", "content": auto_prompt})
-        with st.chat_message("user"):
-            st.markdown(auto_prompt)
-        
-        with st.chat_message("assistant"):
-            with st.spinner("Looking up events..."):
-                response = st.session_state.engine.generate_response(auto_prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
+        try:
+            event_date = datetime.strptime(event_day_str, "%Y-%m-%d").date()
+            query_formatted = event_date.strftime("%B %d, %Y")
+            
+            # Generate the prompt silently
+            auto_prompt = f"What talks or events are scheduled for {query_formatted}? Please provide details about each event."
+            
+            # Add to chat history and generate response
+            st.session_state.messages.append({"role": "user", "content": auto_prompt})
+            with st.chat_message("user"):
+                st.markdown(auto_prompt)
+            
+            with st.chat_message("assistant"):
+                with st.spinner("Looking up events..."):
+                    response = st.session_state.engine.generate_response(auto_prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
+        except ValueError:
+            st.error("Invalid date format in calendar link.")
 
     # User input
     if prompt := st.chat_input("What is the next talk about?"):
