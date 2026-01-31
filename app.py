@@ -180,105 +180,111 @@ def main():
         except:
             pass
         
-        calendar_html = """
+        # Custom CSS for calendar styling
+        st.markdown("""
         <style>
-        .calendar-container {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        /* Calendar container styling */
+        .calendar-wrapper {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             border-radius: 12px;
-            padding: 16px;
+            padding: 12px;
             margin-bottom: 8px;
         }
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
+        /* Style the day header row */
+        .day-headers {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 8px;
         }
-        .calendar-header {
+        .day-header {
+            flex: 1;
             text-align: center;
             font-weight: 600;
             font-size: 11px;
             color: #8892b0;
-            padding: 8px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            padding: 6px 0;
         }
-        .calendar-day {
-            text-align: center;
-            padding: 10px 4px;
-            font-size: 13px;
-            color: #ccd6f6;
-            border-radius: 8px;
-            transition: all 0.2s ease;
+        /* Style calendar buttons */
+        div[data-testid="stHorizontalBlock"] button[kind="secondary"] {
+            border: none !important;
+            background: transparent !important;
+            color: #ccd6f6 !important;
+            font-size: 13px !important;
+            padding: 8px 4px !important;
+            min-height: 36px !important;
         }
-        .calendar-day.empty {
-            color: transparent;
+        /* Event day buttons - teal accent */
+        .event-day-btn button {
+            background: rgba(100, 255, 218, 0.1) !important;
+            border: 1px solid rgba(100, 255, 218, 0.3) !important;
+            color: #64ffda !important;
+            font-weight: 600 !important;
         }
-        .calendar-day.today {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        .event-day-btn button:hover {
+            background: rgba(100, 255, 218, 0.25) !important;
+            transform: scale(1.05);
         }
-        .calendar-day.has-event {
-            position: relative;
-            cursor: pointer;
-        }
-        .calendar-day.has-event::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 5px;
-            height: 5px;
-            background: #64ffda;
-            border-radius: 50%;
-        }
-        .calendar-day a {
-            color: inherit;
-            text-decoration: none;
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-        .calendar-day.has-event:hover {
-            background: rgba(100, 255, 218, 0.15);
-            transform: scale(1.1);
+        /* Today highlight */
+        .today-btn button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4) !important;
         }
         </style>
-        <div class="calendar-container">
-            <div class="calendar-grid">
-                <div class="calendar-header">Mo</div>
-                <div class="calendar-header">Tu</div>
-                <div class="calendar-header">We</div>
-                <div class="calendar-header">Th</div>
-                <div class="calendar-header">Fr</div>
-                <div class="calendar-header">Sa</div>
-                <div class="calendar-header">Su</div>
-        """
+        """, unsafe_allow_html=True)
         
+        # Calendar header
+        st.markdown("""
+        <div class="calendar-wrapper">
+            <div class="day-headers">
+                <span class="day-header">Mo</span>
+                <span class="day-header">Tu</span>
+                <span class="day-header">We</span>
+                <span class="day-header">Th</span>
+                <span class="day-header">Fr</span>
+                <span class="day-header">Sa</span>
+                <span class="day-header">Su</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Build calendar grid using native Streamlit columns
         for week in month_days:
-            for day in week:
-                if day == 0:
-                    calendar_html += '<div class="calendar-day empty">·</div>'
-                else:
-                    classes = ["calendar-day"]
-                    is_today = day == today.day and cal_month == today.month and cal_year == today.year
-                    if is_today:
-                        classes.append("today")
-                    
-                    if day in event_days:
-                        classes.append("has-event")
-                        # Create clickable link with query parameter
-                        date_str = f"{cal_year}-{cal_month:02d}-{day:02d}"
-                        calendar_html += f'<div class="{" ".join(classes)}"><a href="?event_day={date_str}">{day}</a></div>'
+            cols = st.columns(7)
+            for i, day in enumerate(week):
+                with cols[i]:
+                    if day == 0:
+                        st.markdown("<div style='height: 36px;'></div>", unsafe_allow_html=True)
                     else:
-                        calendar_html += f'<div class="{" ".join(classes)}">{day}</div>'
-        
-        calendar_html += "</div></div>"
-        
-        st.markdown(calendar_html, unsafe_allow_html=True)
+                        is_today = day == today.day and cal_month == today.month and cal_year == today.year
+                        has_event = day in event_days
+                        
+                        # Apply CSS class wrapper for styling
+                        if has_event and is_today:
+                            wrapper_class = "event-day-btn today-btn"
+                        elif has_event:
+                            wrapper_class = "event-day-btn"
+                        elif is_today:
+                            wrapper_class = "today-btn"
+                        else:
+                            wrapper_class = ""
+                        
+                        if wrapper_class:
+                            st.markdown(f'<div class="{wrapper_class}">', unsafe_allow_html=True)
+                        
+                        if has_event:
+                            if st.button(f"{day}", key=f"cal_{cal_year}_{cal_month}_{day}", use_container_width=True):
+                                st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
+                                st.session_state.calendar_query_formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
+                        else:
+                            # Non-clickable day - just show the number
+                            st.button(f"{day}", key=f"cal_{cal_year}_{cal_month}_{day}", use_container_width=True, disabled=True)
+                        
+                        if wrapper_class:
+                            st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("---")
         
@@ -404,32 +410,26 @@ def main():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Handle calendar day click via query parameter
-    query_params = st.query_params
-    if "event_day" in query_params:
-        event_day_str = query_params["event_day"]
-        # Clear the query param to prevent re-execution on refresh
-        st.query_params.clear()
+    # Handle calendar day click via session state (from button clicks)
+    if "calendar_query_date" in st.session_state:
+        query_formatted = st.session_state.calendar_query_formatted
+        # Clear the trigger to prevent re-execution
+        del st.session_state.calendar_query_date
+        del st.session_state.calendar_query_formatted
         
-        try:
-            event_date = datetime.strptime(event_day_str, "%Y-%m-%d").date()
-            query_formatted = event_date.strftime("%B %d, %Y")
-            
-            # Generate the prompt silently
-            auto_prompt = f"What talks or events are scheduled for {query_formatted}? Please provide details about each event."
-            
-            # Add to chat history and generate response
-            st.session_state.messages.append({"role": "user", "content": auto_prompt})
-            with st.chat_message("user"):
-                st.markdown(auto_prompt)
-            
-            with st.chat_message("assistant"):
-                with st.spinner("Looking up events..."):
-                    response = st.session_state.engine.generate_response(auto_prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
-                st.markdown(response)
-                st.session_state.messages.append({"role": "assistant", "content": response})
-        except ValueError:
-            st.error("Invalid date format in calendar link.")
+        # Generate the prompt silently
+        auto_prompt = f"What talks or events are scheduled for {query_formatted}? Please provide details about each event."
+        
+        # Add to chat history and generate response
+        st.session_state.messages.append({"role": "user", "content": auto_prompt})
+        with st.chat_message("user"):
+            st.markdown(auto_prompt)
+        
+        with st.chat_message("assistant"):
+            with st.spinner("Looking up events..."):
+                response = st.session_state.engine.generate_response(auto_prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
+            st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
 
     # User input
     if prompt := st.chat_input("What is the next talk about?"):
