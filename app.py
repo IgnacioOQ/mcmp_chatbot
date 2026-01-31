@@ -206,14 +206,21 @@ def main():
             letter-spacing: 0.5px;
             padding: 6px 0;
         }
-        /* Style calendar buttons */
-        div[data-testid="stHorizontalBlock"] button[kind="secondary"] {
+        /* Base style for ALL calendar buttons (enabled and disabled) */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button {
             border: none !important;
             background: transparent !important;
             color: #ccd6f6 !important;
             font-size: 13px !important;
             padding: 8px 4px !important;
             min-height: 36px !important;
+            height: 36px !important;
+            line-height: 20px !important;
+        }
+        /* Ensure disabled buttons look the same height */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button:disabled {
+            opacity: 0.6 !important;
+            cursor: default !important;
         }
         /* Event day buttons - teal accent */
         .event-day-btn button {
@@ -221,10 +228,10 @@ def main():
             border: 1px solid rgba(100, 255, 218, 0.3) !important;
             color: #64ffda !important;
             font-weight: 600 !important;
+            opacity: 1 !important;
         }
         .event-day-btn button:hover {
             background: rgba(100, 255, 218, 0.25) !important;
-            transform: scale(1.05);
         }
         /* Today highlight */
         .today-btn button {
@@ -232,6 +239,7 @@ def main():
             color: #fff !important;
             font-weight: 700 !important;
             box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4) !important;
+            opacity: 1 !important;
         }
         </style>
         """, unsafe_allow_html=True)
