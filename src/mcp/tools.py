@@ -72,19 +72,40 @@ def search_research(topic: Optional[str] = None) -> List[Dict[str, Any]]:
             
     return results
 
-def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Get upcoming events.
     
     Args:
         date_range: Optional. "upcoming" (default), "today", "this_week".
         type_filter: Optional type filter (e.g., "talk", "workshop").
+        start_date: Optional start date in "YYYY-MM-DD" format.
+        end_date: Optional end date in "YYYY-MM-DD" format.
     """
     events = load_data("raw_events.json")
     results = []
     
     today = datetime.now()
     
+    # Parse explicit dates if provided
+    start_dt = None
+    end_dt = None
+    
+    if start_date:
+        try:
+            start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        except ValueError:
+            pass
+            
+    if end_date:
+        try:
+            end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+            # Set end date time to end of day if it's just a date, effectively
+            # But since we compare dates specifically, we might just compare .date() components
+            end_dt = end_dt.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            pass
+
     for event in events:
         title = event.get("title", "")
         meta = event.get("metadata", {})
@@ -100,15 +121,22 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
                 # Handle YYYY-MM-DD
                 evt_date = datetime.strptime(date_str, "%Y-%m-%d")
                 
-                if date_range == "today" and evt_date.date() != today.date():
-                    continue
-                if date_range == "upcoming" and evt_date < today:
-                    continue
-                # Simple logic for "this_week" - can be expanded
-                if date_range == "this_week":
-                    delta = (evt_date - today).days
-                    if delta < 0 or delta > 7:
+                # Logic: Explicit dates take precedence over date_range presets
+                if start_dt or end_dt:
+                    if start_dt and evt_date < start_dt:
                         continue
+                    if end_dt and evt_date > end_dt:
+                        continue
+                else:
+                    # Fallback to date_range presets
+                    if date_range == "today" and evt_date.date() != today.date():
+                        continue
+                    if (date_range == "upcoming" or date_range is None) and evt_date < today:
+                        continue
+                    if date_range == "this_week":
+                        delta = (evt_date - today).days
+                        if delta < 0 or delta > 7:
+                            continue
                         
             except ValueError:
                 pass # skip date check if format unknown
