@@ -89,3 +89,128 @@ st.session_state.messages.append({"role": "user", "content": prompt})
 with st.chat_message("user"):
     st.markdown(prompt)
 ```
+
+### Custom CSS for Layout Control
+- status: active
+<!-- content -->
+Use `st.markdown` with `unsafe_allow_html=True` to inject custom CSS. Target Streamlit's internal test IDs:
+
+```python
+st.markdown("""
+    <style>
+    /* Widen sidebar */
+    [data-testid="stSidebar"] {
+        min-width: 450px;
+        max-width: 500px;
+    }
+    /* Constrain main content and center it */
+    .stMainBlockContainer {
+        max-width: 900px;
+        margin: 0 auto;
+        padding-left: 3rem;
+        padding-right: 3rem;
+    }
+    /* Align chat input with main content */
+    [data-testid="stChatInput"] {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    </style>
+""", unsafe_allow_html=True)
+```
+
+### Monthly Calendar with Navigation
+- status: active
+<!-- content -->
+Create an interactive monthly calendar using Python's `calendar` module and session state for navigation:
+
+```python
+import calendar
+
+# Initialize month/year in session state
+if "cal_year" not in st.session_state:
+    st.session_state.cal_year = datetime.now().year
+if "cal_month" not in st.session_state:
+    st.session_state.cal_month = datetime.now().month
+
+# Navigation buttons
+col1, col2, col3 = st.columns([1, 2, 1])
+with col1:
+    if st.button("◀", key="prev_month", use_container_width=True):
+        # Decrement month (wrap to previous year if January)
+        if st.session_state.cal_month == 1:
+            st.session_state.cal_month = 12
+            st.session_state.cal_year -= 1
+        else:
+            st.session_state.cal_month -= 1
+        st.rerun()
+with col2:
+    month_name = calendar.month_name[st.session_state.cal_month]
+    st.markdown(f"<h4 style='text-align: center;'>{month_name} {st.session_state.cal_year}</h4>", unsafe_allow_html=True)
+with col3:
+    if st.button("▶", key="next_month", use_container_width=True):
+        # Increment month (wrap to next year if December)
+        ...
+
+# Build calendar grid
+cal = calendar.Calendar(firstweekday=0)  # Monday start
+month_days = cal.monthdayscalendar(st.session_state.cal_year, st.session_state.cal_month)
+```
+
+**Styling the calendar**: Use an HTML/CSS grid for elegant display with gradient backgrounds and day highlighting.
+
+### Interactive Elements Triggering LLM Queries
+- status: active
+<!-- content -->
+To make UI elements (like calendar day buttons) silently trigger LLM queries:
+
+1. **Store trigger data in session state** when the element is clicked:
+```python
+if st.button(f"{day}", key=f"cal_day_{year}_{month}_{day}"):
+    st.session_state.calendar_query_date = date_obj.strftime("%Y-%m-%d")
+    st.session_state.calendar_query_formatted = date_obj.strftime("%B %d, %Y")
+```
+
+2. **Detect and handle the trigger** before the normal chat input logic:
+```python
+if "calendar_query_date" in st.session_state:
+    query_formatted = st.session_state.calendar_query_formatted
+    # Clear trigger to prevent re-execution
+    del st.session_state.calendar_query_date
+    del st.session_state.calendar_query_formatted
+    
+    # Generate prompt automatically
+    auto_prompt = f"What events are scheduled for {query_formatted}?"
+    
+    # Add to chat and generate response
+    st.session_state.messages.append({"role": "user", "content": auto_prompt})
+    with st.chat_message("user"):
+        st.markdown(auto_prompt)
+    
+    with st.chat_message("assistant"):
+        with st.spinner("Looking up events..."):
+            response = st.session_state.engine.generate_response(auto_prompt)
+            st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+```
+
+**Key insight**: Since HTML links can't trigger Python callbacks in Streamlit, use `st.button` components and session state as the communication bridge.
+
+### Highlighting Data-Driven Days
+- status: active
+<!-- content -->
+Load event data to determine which days to highlight:
+
+```python
+event_days = set()
+with open("data/raw_events.json", "r") as f:
+    raw_events = json.load(f)
+for event in raw_events:
+    date_str = event.get("metadata", {}).get("date")
+    if date_str:
+        ev_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        if ev_date.year == cal_year and ev_date.month == cal_month:
+            event_days.add(ev_date.day)
+```
+
+Then conditionally add CSS classes or render buttons only for those days.
