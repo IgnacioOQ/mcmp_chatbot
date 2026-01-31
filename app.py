@@ -76,17 +76,22 @@ def main():
         layout="wide"
     )
 
-    # Custom CSS to widen sidebar and narrow chat margins
+    # Custom CSS to widen sidebar and adjust chat container
     st.markdown("""
         <style>
         [data-testid="stSidebar"] {
-            min-width: 350px;
-            max-width: 400px;
+            min-width: 450px;
+            max-width: 500px;
         }
         .stMainBlockContainer {
-            max-width: 800px;
-            padding-left: 2rem;
-            padding-right: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+            padding-left: 3rem;
+            padding-right: 3rem;
+        }
+        [data-testid="stChatInput"] {
+            max-width: 900px;
+            margin: 0 auto;
         }
         </style>
     """, unsafe_allow_html=True)
