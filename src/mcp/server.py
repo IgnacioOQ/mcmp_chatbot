@@ -64,7 +64,7 @@ class MCPServer:
                         },
                         "query": {
                             "type": "string",
-                            "description": "Keyword to search for in event title, abstract, or description. Useful for topic-specific event searches (e.g. 'events about quantum mechanics')."
+                            "description": "Keyword to search for in event title, speaker name, abstract, or description. Useful for topic-specific event searches (e.g. 'events about quantum mechanics') or finding talks by specific people."
                         },
                         "start_date": {
                             "type": "string",

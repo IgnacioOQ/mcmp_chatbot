@@ -399,7 +399,7 @@ def main():
         model_choice = st.radio(
             "Select Model",
             options=["gemini-2.0-flash", "gemini-2.0-flash-lite"],
-            index=1,
+            index=0,
             format_func=lambda x: "Gemini 2.0 Flash (Balanced)" if x == "gemini-2.0-flash" else "Gemini 2.0 Flash-Lite (Economy)",
             help="Flash is better for complex queries. Flash-Lite is cheaper but still powerful."
         )

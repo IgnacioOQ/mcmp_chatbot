@@ -27,3 +27,11 @@
     - Updated `prompts/personality.md` "Behavioral Guidelines" and "What to Avoid".
     - Verified `get_events` tool logic with `test_events.py` (Tool works correctly).
 - **Outcome**: LLM personality now prioritize Tool usage over politeness when data is missing from text chunks.
+
+### 2026-01-31: Model Default Switch (Antigravity)
+- **Task**: Fix "Future Event Access" failure on default settings.
+- **Problem**: `gemini-2.0-flash-lite` (previous default) consistently failed to use the `get_events` tool for speaker queries, hallucinating a capability limitation ("I cannot search for events by speaker").
+- **Fix**: 
+    - Switched default model in `app.py` from Lite (Index 1) to **Gemini 2.0 Flash** (Index 0).
+    - Updated `src/mcp/server.py` tool schema to explicitly mention "speaker name" in the query description (as a best practice, though Lite still struggled).
+- **Outcome**: Default system now uses the more capable Flash model, which correctly calls tools and answers future event queries.
