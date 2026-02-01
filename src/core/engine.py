@@ -137,8 +137,30 @@ If the question is already simple, just return it as-is."""
         
         formatted_context = []
         for chunk in context_chunks:
-            source_url = chunk['metadata'].get('url', 'No URL available')
-            formatted_entry = f"{chunk['text']}\nSource URL: {source_url}"
+            meta = chunk['metadata']
+            source_url = meta.get('url', 'No URL available')
+            title = meta.get('title', 'Untitled')
+            
+            # Extract rich fields if available
+            description = meta.get('meta_description', '')
+            abstract = meta.get('meta_abstract', '')
+            role = meta.get('meta_role', '')
+            
+            # Construct a rich context entry
+            formatted_entry = f"Title: {title}\nSource URL: {source_url}"
+            
+            if role:
+                 formatted_entry += f"\nRole: {role}"
+            
+            # Add content text (which is usually a summary or full text depending on ingestion)
+            formatted_entry += f"\nContent: {chunk['text']}"
+            
+            # Append description/abstract if not already in text (simple heuristic) or just append for completeness
+            if description and len(description) > 50:
+                formatted_entry += f"\nDescription: {description}"
+            if abstract and len(abstract) > 50:
+                formatted_entry += f"\nAbstract: {abstract}"
+                
             formatted_context.append(formatted_entry)
             
         context_text = "\n\n---\n\n".join(formatted_context)

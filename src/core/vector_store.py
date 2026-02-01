@@ -63,16 +63,19 @@ class VectorStore:
                 used_ids.add(doc_id)
                 
                 # Content formatting based on type
+                # Content formatting based on type
+                title_or_name = item.get('title') or item.get('name') or "Untitled"
+                
                 if type_label == "event":
-                    content = f"Event: {item['title']}\nDescription: {item.get('description', '')}"
+                    content = f"Event: {title_or_name}\nDescription: {item.get('description', '')}"
                 elif type_label == "person":
-                    content = f"Person: {item['name']}\nProfile: {url}"
+                    content = f"Person: {title_or_name}\nProfile: {url}"
                 elif type_label == "research":
-                    content = f"Research Project: {item['title']}\nDescription: {item.get('description', '')}"
+                    content = f"Research Project: {title_or_name}\nDescription: {item.get('description', '')}"
                 elif type_label == "general":
-                    content = f"{item['title']}\n{item.get('description', '')}"
+                    content = f"{title_or_name}\n{item.get('description', '')}"
                 elif type_label == "knowledge":
-                    content = f"Concept: {item['title']}\n{item.get('description', '')}"
+                    content = f"Concept: {title_or_name}\n{item.get('description', '')}"
                 
                 documents.append(content)
                 
@@ -81,7 +84,10 @@ class VectorStore:
                     "type": type_label,
                     "title": item.get('title') or item.get('name') or "Untitled",
                     "url": url,
-                    "scraped_at": item.get('scraped_at', '')
+                    "scraped_at": item.get('scraped_at', ''),
+                    # Explicitly add rich text fields to metadata for RAG retrieval
+                    "meta_description": item.get('description', ''),
+                    "meta_abstract": item.get('abstract', '') 
                 }
                 
                 # Flatten extra metadata

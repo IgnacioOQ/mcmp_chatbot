@@ -42,7 +42,13 @@ def search_people(query: str, role_filter: Optional[str] = None) -> List[Dict[st
                 "role": person.get("metadata", {}).get("role", "Unknown"),
                 "chair": person.get("metadata", {}).get("chair", "Unknown"),
                 "url": person.get("url"),
-                "research_interests": person.get("metadata", {}).get("research_interests_text", "")[:200] + "..."
+                "image_url": person.get("image_url"),
+                "email": person.get("metadata", {}).get("email"),
+                "phone": person.get("metadata", {}).get("phone"),
+                "room": person.get("metadata", {}).get("room"),
+                "website": person.get("metadata", {}).get("website"),
+                "description": person.get("description", ""),
+                "research_interests": person.get("metadata", {}).get("research_interests_text", "")
             })
             
     return results[:10] # Limit results
@@ -156,9 +162,11 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
             "title": title,
             "date": date_str,
             "time": f"{meta.get('time_start')} - {meta.get('time_end')}",
-            "location": meta.get("location", "")[:50],
+            "location": meta.get("location", ""),
             "speaker": meta.get("speaker"),
-            "url": event.get("url")
+            "url": event.get("url"),
+            "abstract": abstract,
+            "description": description
         })
         
     # Sort by date
