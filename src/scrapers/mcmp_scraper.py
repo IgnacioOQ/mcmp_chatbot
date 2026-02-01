@@ -425,25 +425,108 @@ class MCMPScraper:
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Name usually in H1
-            name_elem = soup.find('h1')
+            # Name
+            name_elem = soup.find('h1', class_='header-person__name')
             name = name_elem.get_text(strip=True) if name_elem else "Unknown Person"
             
-            # Main content
+            # New Fields Extraction
+            metadata = {}
+            
+            # 1. Position/Role
+            job_elem = soup.find('p', class_='header-person__job')
+            if job_elem:
+                metadata['position'] = job_elem.get_text(strip=True)
+                
+            # 2. Organizational Unit
+            dept_elem = soup.find('p', class_='header-person__department')
+            if dept_elem:
+                metadata['organizational_unit'] = dept_elem.get_text(strip=True)
+                
+            # 3. Image URL
+            img_elem = soup.select_one('img.picture__image')
+            if img_elem and img_elem.get('src'):
+                metadata['image_url'] = img_elem['src']
+
+            # 4. Email
+            email_elem = soup.select_one('a.header-person__contentlink.is-email')
+            if email_elem:
+                email = email_elem.get_text(strip=True).replace("Send an email", "")
+                # If text was just "Send an email", try mailto
+                if not email or "@" not in email:
+                    href = email_elem.get('href', '')
+                    if href.startswith('mailto:'):
+                        email = href.replace('mailto:', '')
+                if email:
+                    metadata['email'] = email.strip()
+
+            # 5. Phone
+            phone_elem = soup.select_one('a.header-person__contentlink.is-phone')
+            if phone_elem:
+                metadata['phone'] = phone_elem.get_text(strip=True)
+
+            # 6. Room / Office Address
+            # Look for div.header-person__detail_area and check p tags
+            detail_areas = soup.find_all('div', class_='header-person__detail_area')
+            for area in detail_areas:
+                p_tags = area.find_all('p')
+                for p in p_tags:
+                    text = p.get_text(strip=True)
+                    if "Room" in text and "Room finder" not in text:
+                        metadata['room'] = text
+                    # Fallback for office if not found yet
+                    if "Ludwigstr" in text or "Geschwister-Scholl" in text:
+                         if 'office_address' not in metadata:
+                             metadata['office_address'] = text
+
+            # 7. Website
+            # Look for link with text "Personal website"
+            website_link = soup.find('a', string=lambda t: t and "Personal website" in t)
+            if website_link:
+                metadata['website'] = website_link.get('href')
+
+            # 8. Selected Publications
+            # Find h2 with text "Selected publications" and get next sibling list
+            pub_header = soup.find('h2', string=lambda t: t and "Selected publications" in t)
+            if pub_header:
+                # The list is usually in the next sibling or container
+                # Structure: h2 -> p -> ol/ul  OR h2 -> div -> ol/ul
+                # We can try to find the next ol or ul
+                pub_list_container = pub_header.find_parent('div', class_='rte__content')
+                if pub_list_container:
+                    pub_list = pub_list_container.find(['ol', 'ul'])
+                    if pub_list:
+                        publications = []
+                        for li in pub_list.find_all('li'):
+                            publications.append(li.get_text(" ", strip=True))
+                        metadata['selected_publications'] = publications
+
+            # Main content for description (fallback/additional)
             main_content = soup.find('div', id='r-main') or soup.find('main')
             description = ""
-            metadata = {}
-
+            
             if main_content:
-                description = main_content.get_text(separator=' ', strip=True)
+                # Clean description: remove the header person part which we already scraped
+                # We can just extract text from rte__content divs which usually hold the main text
+                rte_divs = main_content.find_all('div', class_='rte__content')
+                desc_text = []
+                for div in rte_divs:
+                    # Skip if it's the publications section we already handled
+                    if div.find('h2', string=lambda t: t and "Selected publications" in t):
+                        continue
+                    
+                    # Extract text
+                    text = div.get_text(separator=' ', strip=True)
+                    if text:
+                        desc_text.append(text)
                 
-                # Extract contact info
-                emails = [a.get_text() for a in main_content.find_all('a') if "@" in a.get_text()]
-                if emails:
-                    metadata['email'] = emails[0]
+                description = "\n\n".join(desc_text)
                 
-                # Extract Research Interests specifically
-                # Look for "Research interests" header
+                # Fallback if no rte content found (some pages might differ)
+                if not description:
+                     description = self._clean_text(main_content.get_text(separator=' ', strip=True))
+
+                # Extract Research Interests specifically if not already caught (usually in rte)
+                # But we can look for specific header in the description text or structure
                 ri_header = main_content.find(lambda tag: tag.name in ['h2', 'h3'] and "Research interests" in tag.get_text())
                 if ri_header:
                     interests_text = ""
