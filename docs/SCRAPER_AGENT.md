@@ -111,6 +111,47 @@ match = re.search(r'(\d{1,2})\s+(\w+)\s+(\d{4})', date_text)
 
 ---
 
+## People Scraper Implementation
+
+### Sources
+- **People Index**: `https://www.philosophie.lmu.de/mcmp/en/people/`
+- **Profile Pages**: Individual pages linked from the index (e.g., `/people/contact-page/...`)
+
+### DOM Structure (Profile Page)
+
+| Field | Selector / Logic | Notes |
+|-------|------------------|-------|
+| **Name** | `h1.header-person__name` | Fallback to `h1` |
+| **Position** | `p.header-person__job` | e.g., "Doctoral Fellow" |
+| **Org Unit** | `p.header-person__department` | e.g., "Chair of Philosophy of Science" |
+| **Email** | `a.header-person__contentlink.is-email` | Strip "Send an email", check `mailto:` |
+| **Phone** | `a.header-person__contentlink.is-phone` | |
+| **Room** | `div.header-person__detail_area p` | **CRITICAL**: Exclude text containing "Room finder" |
+| **Image** | `img.picture__image` | Get `src` attribute |
+| **Website** | `a` with text "Personal website" | |
+| **Publications** | `h2` "Selected publications" | Parse sibling `ul` or `ol` lists |
+
+### Output Schema
+```json
+{
+    "name": "Dr. Conrad Friedrich",
+    "url": "https://...",
+    "description": "Personal information...",
+    "metadata": {
+        "position": "Postdoctoral fellow",
+        "organizational_unit": "MCMP",
+        "email": "Conrad.Friedrich@lmu.de",
+        "office_address": "Ludwigstr. 31",
+        "room": "Room 225",
+        "website": "https://conradfriedrich.github.io/",
+        "image_url": "https://...",
+        "selected_publications": ["Pub 1", "Pub 2"]
+    }
+}
+```
+
+---
+
 ## Verification
 - [x] All 53+ events captured
 - [x] Abstracts extracted from individual pages

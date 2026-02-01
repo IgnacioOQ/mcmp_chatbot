@@ -13,6 +13,7 @@ The application is built with **Streamlit** for the frontend, uses **ChromaDB** 
 
 - **Activity QA**: Ask about upcoming talks, reading groups, and events.
 - **Automated Scraping**: Keeps data fresh by scraping the MCMP website.
+- **Rich Metadata Extraction**: Automatically extracts detailed profile information including emails, office locations, hierarchical roles, and publication lists.
 - **Hybrid Search**: Combines semantic vector search with structured metadata filtering (e.g., filter by year, role, or funding).
 - **RAG Architecture**: Uses vector embeddings to retrieve relevant context for accurate answers.
 - **Cloud Database (Feedback)**: User feedback is automatically saved to a Google Sheet for persistent, cloud-based storage (with a local JSON fallback).
@@ -125,7 +126,7 @@ To handle specific queries that require structured data access (e.g., "Which eve
 
 ### 4. Data Model & Relationships
 The system connects four key data types to answer complex questions:
-1.  **People** (`data/people.json`): Raw profiles of researchers, including their bio, contact info, and roles.
+1.  **People** (`data/people.json`): Comprehensive profiles including bios, contact details (email, phone, office), organizational roles, and selected publications.
 2.  **Research** (`data/research.json`): Hierarchical structure of research areas (e.g., Logic, Philosophy of Science) and their subtopics, with automated linking to people.
 3.  **Events** (`data/raw_events.json`): Upcoming talks and workshops.
 4.  **Institutional Graph** (`data/graph/mcmp_graph.md`): A knowledge graph that links **People** to **Organizational Units** (Chairs) and defines hierarchy (e.g., who leads a chair, who supervises whom). 
