@@ -51,7 +51,7 @@ Based on codebase analysis (2026-01-28):
 - type: task
 - owner: Antigravity
 <!-- content -->
-**Execution Date:** 2026-01-31 (Antigravity)
+**Execution Date:** 2026-02-02 (Antigravity)
 
 **Status Checks:**
 1.  **Data Update (`src/scrapers/mcmp_scraper.py`)**: **Passed**.
@@ -70,7 +70,7 @@ Based on codebase analysis (2026-01-28):
         - `test_search_people` failed: `search_people("Bonatti", role_filter="Doctoral fellow")` returned 0 results.
 
 **Summary:**
-Housekeeping successfully restored the exhaustive event scraper by installing missing Selenium dependencies. Database is now fully populated with 53 upcoming events. One minor regression remains in MCP role filtering.
+Housekeeping successfully updated the dataset with 53 upcoming events. The regression in MCP role filtering (`search_people`) persists and requires debugging. All other systems are green.
 
 **Action Items:**
 - [ ] Debug `search_people` in `src/mcp/tools.py` or check if "Bonatti" role data changed.

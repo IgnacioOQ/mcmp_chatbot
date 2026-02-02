@@ -40,3 +40,11 @@
 - **Task**: Improve detail in calendar-triggered event queries.
 - **Change**: Updated the `auto_prompt` in `app.py` (triggered by calendar clicks) to explicitly request an "abstract or description".
 - **Goal**: Ensure the LLM provides more content about the talk, not just the title/time.
+
+### 2026-02-02: Housekeeping Execution (Antigravity)
+- **Task**: Periodic Housekeeping Protocol Execution.
+- **Changes**:
+    - Updated dataset via `scripts/update_dataset.py`.
+    - Validated all tests (`pytest`) and connection checks.
+    - Updated `docs/HOUSEKEEPING.md` with status report.
+- **Outcome**: System healthy with 53 scraping events. `test_search_people` failing in MCP (known issue).
