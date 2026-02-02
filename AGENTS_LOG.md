@@ -54,3 +54,11 @@
     - Updated `src/core/engine.py` system prompt injection with "IMPORTANT: You have permission... Do NOT ask... Just check."
     - Updated `prompts/personality.md` to explicitly forbid asking for permission.
 - **Outcome**: Prompt instructions are now imperative and strictly enforce automatic tool usage.
+
+### 2026-02-02: Fix RAG vs MCP Conflict (Antigravity)
+- **Task**: Resolving conflict where partial RAG context prevented tool usage.
+- **Problem**: LLM was satisfied with just an event title from the vector store and didn't call tools to get the missing abstract/time.
+- **Fix**: 
+    - Updated `prompts/personality.md` to relax "Context-First" rule: *"If context is incomplete... YOU MUST use tools to enrich it."*
+    - Updated `src/core/engine.py` prompt injection to explicitly handle partial info scenarios.
+- **Outcome**: LLM should now recognize "Title-only" context as insufficient and trigger `get_events` for enrichment.

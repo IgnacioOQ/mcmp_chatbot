@@ -202,7 +202,7 @@ Current Date: {current_date}
             tools_description_str = "### AVAILABLE DATA TOOLS (MCP):\n"
             tools_description_str += "You have access to the following tools to fetch real-time data.\n"
             tools_description_str += "IMPORTANT: You have permission to use these tools. Do NOT ask the user if they want you to check. Just check.\n"
-            tools_description_str += "If the text context is insufficient, proceed IMMEDIATELY to calling the relevant tool:\n"
+            tools_description_str += "If the text context is insufficient OR provides only partial information (like a title without an abstract), proceed IMMEDIATELY to calling the relevant tool to get the full details:\n"
             for t in tool_defs:
                 tools_description_str += f"- `{t['name']}`: {t['description']}\n"
             tools_description_str += "---\n"
