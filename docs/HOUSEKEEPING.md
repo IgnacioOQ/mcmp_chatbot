@@ -51,7 +51,7 @@ Based on codebase analysis (2026-01-28):
 - type: task
 - owner: Antigravity
 <!-- content -->
-**Execution Date:** 2026-02-02 (Antigravity)
+**Execution Date:** 2026-01-31 (Antigravity)
 
 **Status Checks:**
 1.  **Data Update (`src/scrapers/mcmp_scraper.py`)**: **Passed**.
@@ -61,15 +61,16 @@ Based on codebase analysis (2026-01-28):
     - Unit tests (`tests/test_vector_store.py`) passed.
 3.  **Connectivity (`scripts/test_sheets_connection.py`)**: **Passed**.
     - Google Sheets authentication and write test successful.
-4.  **Unit Tests**: **Passed**.
+4.  **Unit Tests**: **Mixed**.
     - `tests/test_engine.py`: **Passed**.
     - `tests/test_vector_store.py`: **Passed**.
     - `tests/test_scraper.py`: **Passed**.
     - `tests/test_graph_correctness.py`: **Passed**.
-    - `tests/test_mcp.py`: **Passed**.
+    - `tests/test_mcp.py`: **Failed**.
+        - `test_search_people` failed: `search_people("Bonatti", role_filter="Doctoral fellow")` returned 0 results.
 
 **Summary:**
-Housekeeping successfully updated the dataset with 53 upcoming events. The initial regression in MCP role filtering (`search_people`) was fixed by updating the field name to `position`. All systems are green.
+Housekeeping successfully restored the exhaustive event scraper by installing missing Selenium dependencies. Database is now fully populated with 53 upcoming events. One minor regression remains in MCP role filtering.
 
 **Action Items:**
-- [x] Debug `search_people` in `src/mcp/tools.py` (Fixed).
+- [ ] Debug `search_people` in `src/mcp/tools.py` or check if "Bonatti" role data changed.

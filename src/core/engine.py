@@ -192,25 +192,14 @@ Current Date: {current_date}
         
         # Prepare tools if enabled and available
         tools = []
-        tools_description_str = ""
-        
         if use_mcp_tools and self.mcp_server:
-            # 1. Get tool definitions
-            tool_defs = self.mcp_server.list_tools()
-            
-            # 2. Build text description for the System Prompt
-            tools_description_str = "### AVAILABLE DATA TOOLS (MCP):\n"
-            tools_description_str += "You have access to the following tools to fetch real-time data. USE THEM when the text context is insufficient:\n"
-            for t in tool_defs:
-                tools_description_str += f"- `{t['name']}`: {t['description']}\n"
-            tools_description_str += "---\n"
-
-            # 3. Prepare provider-specific tool objects
+            # For Gemini, we pass the python functions
             if self.provider == "gemini":
                 tools = list(self.mcp_server.tools.values())
+            # For OpenAI, we pass the schemas
             elif self.provider == "openai":
                 tools = []
-                for tool_def in tool_defs:
+                for tool_def in self.mcp_server.list_tools():
                     tools.append({
                         "type": "function",
                         "function": {
@@ -221,16 +210,11 @@ Current Date: {current_date}
                     })
 
         try:
-            # Update system instruction to include tools description
-            final_system_instruction = f"""{system_instruction}
-{tools_description_str}
-"""
-
             if self.provider == "openai":
                 client = openai.OpenAI(api_key=self.api_key)
                 
                 messages = [
-                    {"role": "system", "content": final_system_instruction},
+                    {"role": "system", "content": system_instruction},
                     {"role": "user", "content": query}
                 ]
                 
@@ -279,7 +263,7 @@ Current Date: {current_date}
                 response = client.messages.create(
                     model="claude-3-5-sonnet-20240620",
                     max_tokens=1024,
-                    system=final_system_instruction,
+                    system=system_instruction,
                     messages=[{"role": "user", "content": query}]
                 )
                 return response.content[0].text
@@ -306,7 +290,7 @@ Current Date: {current_date}
                 chat = client.chats.create(
                     model=model_name,
                     config=types.GenerateContentConfig(
-                        system_instruction=final_system_instruction,
+                        system_instruction=system_instruction,
                         tools=tools,
                         automatic_function_calling=types.AutomaticFunctionCallingConfig(
                             disable=False,
