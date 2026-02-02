@@ -62,3 +62,18 @@
     - Updated `prompts/personality.md` to relax "Context-First" rule: *"If context is incomplete... YOU MUST use tools to enrich it."*
     - Updated `src/core/engine.py` prompt injection to explicitly handle partial info scenarios.
 - **Outcome**: LLM should now recognize "Title-only" context as insufficient and trigger `get_events` for enrichment.
+
+### 2026-02-02: Housekeeping Execution (Jules)
+- **Task**: Executed Housekeeping Protocol & Fixed Data/MCP.
+- **Problem**:
+    - `update_dataset.py` failed due to missing `data/graph` directory.
+    - `test_search_people` failed due to role/position mismatch in metadata.
+- **Fix**:
+    - Manually created `data/graph` and rebuilt graph.
+    - Updated `src/mcp/tools.py` to check both "role" and "position" in metadata.
+- **Changes**:
+    - Installed missing python dependencies.
+    - Updated dataset (53 events, 82 people).
+    - Fixed `src/mcp/tools.py`.
+    - Verified all tests pass.
+- **Outcome**: System healthy and data updated.

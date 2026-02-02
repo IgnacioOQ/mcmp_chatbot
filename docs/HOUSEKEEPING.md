@@ -49,28 +49,27 @@ Based on codebase analysis (2026-01-28):
 ## Latest Report
 - status: active
 - type: task
-- owner: Antigravity
+- owner: Jules
 <!-- content -->
-**Execution Date:** 2026-01-31 (Antigravity)
+**Execution Date:** 2026-02-02 (Jules)
 
 **Status Checks:**
 1.  **Data Update (`src/scrapers/mcmp_scraper.py`)**: **Passed**.
     - **Selenium Enabled**: Yes.
-    - Stats: **53 events** (Exhaustive scrape success), 82 people, 4 research items, 7 general items.
+    - Stats: **53 events**, 82 people, 4 research items, 7 general items.
 2.  **Vector Store (`src/core/vector_store.py`)**: **Passed**.
     - Unit tests (`tests/test_vector_store.py`) passed.
-3.  **Connectivity (`scripts/test_sheets_connection.py`)**: **Passed**.
-    - Google Sheets authentication and write test successful.
-4.  **Unit Tests**: **Mixed**.
+3.  **Connectivity (`scripts/test_sheets_connection.py`)**: **Skipped**.
+    - Reason: Missing `.streamlit/secrets.toml` in environment.
+4.  **Unit Tests**: **Passed**.
     - `tests/test_engine.py`: **Passed**.
     - `tests/test_vector_store.py`: **Passed**.
     - `tests/test_scraper.py`: **Passed**.
     - `tests/test_graph_correctness.py`: **Passed**.
-    - `tests/test_mcp.py`: **Failed**.
-        - `test_search_people` failed: `search_people("Bonatti", role_filter="Doctoral fellow")` returned 0 results.
+    - `tests/test_mcp.py`: **Passed**. (Fixed regression in `test_search_people`).
 
 **Summary:**
-Housekeeping successfully restored the exhaustive event scraper by installing missing Selenium dependencies. Database is now fully populated with 53 upcoming events. One minor regression remains in MCP role filtering.
+Executed housekeeping protocol. Restored data by creating missing `data/graph` directory and running update script. Fixed regression in `src/mcp/tools.py` where `search_people` role filter was failing due to metadata key mismatch ("role" vs "position"). All tests passed.
 
 **Action Items:**
-- [ ] Debug `search_people` in `src/mcp/tools.py` or check if "Bonatti" role data changed.
+- [ ] Restore `.streamlit/secrets.toml` if deploying to production.
