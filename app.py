@@ -207,39 +207,43 @@ def main():
             padding: 6px 0;
         }
         /* Base style for ALL calendar buttons (enabled and disabled) */
+        /* Increased specificity to ensure it applies, but allowing overrides */
         [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button {
-            border: none !important;
-            background: transparent !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            background: #1a1a2e !important;    /* Dark background fixes Light Mode contrast */
             color: #ccd6f6 !important;
             font-size: 13px !important;
             padding: 8px 4px !important;
             min-height: 36px !important;
             height: 36px !important;
             line-height: 20px !important;
+            border-radius: 4px !important;
         }
         /* Ensure disabled buttons look the same height */
         [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button:disabled {
-            opacity: 0.6 !important;
+            opacity: 0.5 !important;
             cursor: default !important;
+            background: #161625 !important; /* Slightly distinct for disabled */
         }
-        /* Event day buttons - teal accent */
-        .event-day-btn button {
-            background: rgba(100, 255, 218, 0.1) !important;
-            border: 1px solid rgba(100, 255, 218, 0.3) !important;
+        /* Event day buttons - consistent dark teal base */
+        [data-testid="stSidebar"] .event-day-btn button {
+            background: #1a2f2f !important;    /* Dark Teal background */
+            border: 1px solid rgba(100, 255, 218, 0.5) !important;
             color: #64ffda !important;
             font-weight: 600 !important;
             opacity: 1 !important;
         }
-        .event-day-btn button:hover {
-            background: rgba(100, 255, 218, 0.25) !important;
+        [data-testid="stSidebar"] .event-day-btn button:hover {
+            background: #234545 !important;
         }
         /* Today highlight */
-        .today-btn button {
+        [data-testid="stSidebar"] .today-btn button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             color: #fff !important;
             font-weight: 700 !important;
             box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4) !important;
             opacity: 1 !important;
+            border: none !important;
         }
         </style>
         """, unsafe_allow_html=True)
