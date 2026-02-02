@@ -46,3 +46,11 @@
 - **Problem**: LLM was providing minimal info for events because it wasn't fully aware of `get_events` capabilities.
 - **Fix**: Re-applied prompt dynamic injection in `src/core/engine.py` (fetching tools list) and updated `src/mcp/server.py` to explicitly state `get_events` returns matching titles/abstracts.
 - **Outcome**: LLM now has explicit instructions to use `get_events` for detailed data. Unit tests passed.
+
+### 2026-02-02: Force Tool Usage (Antigravity)
+- **Task**: Forcing automatic tool usage without permission-asking.
+- **Problem**: LLM was politely asking "Would you like me to check?" instead of checking automatically, violating the seamless RAG experience.
+- **Fix**: 
+    - Updated `src/core/engine.py` system prompt injection with "IMPORTANT: You have permission... Do NOT ask... Just check."
+    - Updated `prompts/personality.md` to explicitly forbid asking for permission.
+- **Outcome**: Prompt instructions are now imperative and strictly enforce automatic tool usage.
