@@ -29,7 +29,7 @@ def search_people(query: str, role_filter: Optional[str] = None) -> List[Dict[st
     for person in people:
         name = person.get("name", "").lower()
         desc = person.get("description", "").lower()
-        role = person.get("metadata", {}).get("role", "").lower()
+        role = person.get("metadata", {}).get("position", "").lower()
         
         # Apply role filter if specified
         if role_filter and role_filter not in role:
@@ -39,7 +39,7 @@ def search_people(query: str, role_filter: Optional[str] = None) -> List[Dict[st
         if query in name or query in desc:
             results.append({
                 "name": person.get("name"),
-                "role": person.get("metadata", {}).get("role", "Unknown"),
+                "role": person.get("metadata", {}).get("position", "Unknown"),
                 "chair": person.get("metadata", {}).get("chair", "Unknown"),
                 "url": person.get("url"),
                 "image_url": person.get("image_url"),

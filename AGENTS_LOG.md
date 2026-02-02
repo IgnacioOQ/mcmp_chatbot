@@ -47,4 +47,4 @@
     - Updated dataset via `scripts/update_dataset.py`.
     - Validated all tests (`pytest`) and connection checks.
     - Updated `docs/HOUSEKEEPING.md` with status report.
-- **Outcome**: System healthy with 53 scraping events. `test_search_people` failing in MCP (known issue).
+- **Outcome**: System healthy with 53 scraping events. `test_search_people` fixed in post-housekeeping patch.
