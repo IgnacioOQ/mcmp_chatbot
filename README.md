@@ -124,6 +124,13 @@ To handle specific queries that require structured data access (e.g., "Which eve
 - **Hybrid Execution**: The RAG engine first retrieves semantic context, then offers these tools to the LLM. If the LLM determines it needs precise data, it calls the tool, and the result is fed back for the final answer.
 - **Toggle**: This feature is optional and can be enabled/disabled via the Streamlit sidebar to manage latency and costs.
 
+### 6. Advanced Logic (Prompt Engineering)
+To ensure reliable tool usage, the system implements:
+- **Dynamic Injection**: Tools are explicitly listed in the system prompt.
+- **Force Usage**: Imperative commands ("Just check") prevent the LLM from asking for permission.
+- **Data Enrichment**: If RAG context is partial (e.g., missing abstracts), the LLM is mandated to use tools to fetch full details.
+*(See `docs/MCP_AGENT.md` for full implementation details)*
+
 ### 4. Data Model & Relationships
 The system connects four key data types to answer complex questions:
 1.  **People** (`data/people.json`): Comprehensive profiles including bios, contact details (email, phone, office), organizational roles, and selected publications.

@@ -75,3 +75,23 @@ To add a new capability:
 -   **Tool Descriptions**: The LLM relies *entirely* on the `description` field in `list_tools` to decide when to use a tool. Be verbose and specific (e.g., "Use this for X, but not for Y").
 -   **Parameter Descriptions**: Explain the format (e.g., "YYYY-MM-DD") and examples.
 -   **Return Concise Data**: The LLM has a context window. Do not return the entire database. limit results (e.g., `[:10]`) or summarize fields in the tool before returning.
+
+## 5. Prompt Engineering for Tools
+- status: active
+<!-- content -->
+Simply defining a tool is often insufficient; the LLM must be "coached" to use it correctly, especially in a hybrid RAG system.
+
+### A. Dynamic Injection
+Do not rely on the API's implicit tool support alone. **Explicitly inject the list of tools** into the System Prompt.
+- **Why**: It improves tool awareness for smaller or less-tuned models.
+- **How**: In `src/core/engine.py`, we iterate over `mcp_server.list_tools()` and append a "### AVAILABLE DATA TOOLS" section to the system instruction.
+
+### B. The "Force Usage" Pattern
+LLMs are trained to be polite and helpful, often asking "Would you like me to check the database?". This breaks the seamless RAG experience.
+- **Fix**: Use **Imperative Instructions** in the system prompt.
+- **Example**: *"IMPORTANT: You have permission to use these tools. Do NOT ask the user if they want you to check. Just check."*
+
+### C. The "Data Enrichment" Pattern (RAG vs Tool Conflict)
+A common failure mode is "Partial Satisfaction": The LLM finds an event title in the Vector Store (RAG) and thinks it's done, ignoring the Tool that has the full abstract/time.
+- **Fix**: Explicitly instruct the LLM to use tools for **Enrichment**.
+- **Rule**: *"If the text context provides only partial information (like a title without an abstract), you MUST call the tool to get the full details."*
