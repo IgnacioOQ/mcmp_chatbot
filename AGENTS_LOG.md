@@ -48,3 +48,9 @@
     - Validated all tests (`pytest`) and connection checks.
     - Updated `docs/HOUSEKEEPING.md` with status report.
 - **Outcome**: System healthy with 53 scraping events. `test_search_people` fixed in post-housekeeping patch.
+
+### 2026-02-02: Fix MCP Awareness (Antigravity)
+- **Task**: Inject MCP Protocol into System Prompt.
+- **Problem**: LLM was unaware of its ability to search for events/data when RAG context was empty, causing polite refusals.
+- **Fix**: Modified `src/core/engine.py` to dynamically inject a "AVAILABLE DATA TOOLS (MCP)" section into the system prompt, explicitly listing all available tools.
+- **Outcome**: LLM now receives explicit instructions about its tool capabilities in every request.
