@@ -53,7 +53,7 @@ class MCPServer:
             },
             {
                 "name": "get_events",
-                "description": "Get a list of upcoming or past events, talks, and workshops. Can filter by specific date ranges.",
+                "description": "Get a list of upcoming or past events, talks, and workshops. Returns DETAILED information including titles, speakers, abstracts, and descriptions. Can filter by specific date ranges.",
                 "input_schema": {
                     "type": "object",
                     "properties": {

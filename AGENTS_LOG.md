@@ -40,3 +40,9 @@
 - **Task**: Improve detail in calendar-triggered event queries.
 - **Change**: Updated the `auto_prompt` in `app.py` (triggered by calendar clicks) to explicitly request an "abstract or description".
 - **Goal**: Ensure the LLM provides more content about the talk, not just the title/time.
+
+### 2026-02-02: Re-implement MCP Awareness (Antigravity)
+- **Task**: Re-inject MCP Protocol into System Prompt & Enhance Tool Descriptions.
+- **Problem**: LLM was providing minimal info for events because it wasn't fully aware of `get_events` capabilities.
+- **Fix**: Re-applied prompt dynamic injection in `src/core/engine.py` (fetching tools list) and updated `src/mcp/server.py` to explicitly state `get_events` returns matching titles/abstracts.
+- **Outcome**: LLM now has explicit instructions to use `get_events` for detailed data. Unit tests passed.
