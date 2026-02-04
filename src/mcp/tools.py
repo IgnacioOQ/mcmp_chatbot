@@ -29,7 +29,11 @@ def search_people(query: str, role_filter: Optional[str] = None) -> List[Dict[st
     for person in people:
         name = person.get("name", "").lower()
         desc = person.get("description", "").lower()
-        role = person.get("metadata", {}).get("role", "").lower()
+        # Look for 'role' or 'position' (scraper uses 'position')
+        role = person.get("metadata", {}).get("role", "")
+        if not role:
+             role = person.get("metadata", {}).get("position", "")
+        role = role.lower()
         
         # Apply role filter if specified
         if role_filter and role_filter not in role:
@@ -37,9 +41,11 @@ def search_people(query: str, role_filter: Optional[str] = None) -> List[Dict[st
             
         # Apply text query
         if query in name or query in desc:
+            display_role = person.get("metadata", {}).get("role") or person.get("metadata", {}).get("position") or "Unknown"
+
             results.append({
                 "name": person.get("name"),
-                "role": person.get("metadata", {}).get("role", "Unknown"),
+                "role": display_role,
                 "chair": person.get("metadata", {}).get("chair", "Unknown"),
                 "url": person.get("url"),
                 "image_url": person.get("image_url"),
