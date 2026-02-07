@@ -51,25 +51,20 @@ Based on codebase analysis (2026-01-28):
 - type: task
 - owner: Jules
 <!-- content -->
-**Execution Date:** 2026-02-02 (Jules)
+**Execution Date:** 2026-02-07 (Antigravity/User)
 
 **Status Checks:**
 1.  **Data Update (`src/scrapers/mcmp_scraper.py`)**: **Passed**.
-    - **Selenium Enabled**: Yes.
-    - Stats: **53 events**, 82 people, 4 research items, 7 general items.
+    - Stats: **53 events**, 83 people, 4 research items, 7 general items.
 2.  **Vector Store (`src/core/vector_store.py`)**: **Passed**.
     - Unit tests (`tests/test_vector_store.py`) passed.
-3.  **Connectivity (`scripts/test_sheets_connection.py`)**: **Skipped**.
-    - Reason: Missing `.streamlit/secrets.toml` in environment.
+3.  **Connectivity**: **Skipped**.
 4.  **Unit Tests**: **Passed**.
-    - `tests/test_engine.py`: **Passed**.
-    - `tests/test_vector_store.py`: **Passed**.
-    - `tests/test_scraper.py`: **Passed**.
-    - `tests/test_graph_correctness.py`: **Passed**.
-    - `tests/test_mcp.py`: **Passed**. (Fixed regression in `test_search_people`).
+    - All 15 tests passed, including `tests/test_mcp.py` after user's manual fix for `position` key.
+    - User manually refined `src/mcp/tools.py` for robustness.
 
 **Summary:**
-Executed housekeeping protocol. Restored data by creating missing `data/graph` directory and running update script. Fixed regression in `src/mcp/tools.py` where `search_people` role filter was failing due to metadata key mismatch ("role" vs "position"). All tests passed.
+Re-ran housekeeping protocol. Dataset successfully updated. Verified system health after user's manual refinement of `src/mcp/tools.py`.
 
 **Action Items:**
-- [ ] Restore `.streamlit/secrets.toml` if deploying to production.
+- [ ] Monitor `data/people.json` for schema consistency in future scrapes.
