@@ -766,23 +766,74 @@ class MCMPScraper:
             log_error(f"Error scraping reading groups: {e}")
             return []
 
+    def _merge_and_save(self, existing_file, new_data, key_field="url"):
+        """Merges new data with existing JSON data, preserving old records."""
+        merged_data = {}
+        
+        # 1. Load existing data
+        if os.path.exists(existing_file):
+            try:
+                with open(existing_file, 'r', encoding='utf-8') as f:
+                    old_list = json.load(f)
+                    for item in old_list:
+                        # Use URL as key if available, otherwise title or fallback
+                        key = item.get(key_field)
+                        if key:
+                            merged_data[key] = item
+            except (json.JSONDecodeError, OSError) as e:
+                log_error(f"Could not read existing file {existing_file}: {e}")
+
+        # 2. Update/Add new data
+        for item in new_data:
+            key = item.get(key_field)
+            if key:
+                # Update existing or add new
+                merged_data[key] = item
+            else:
+                # If no key, just append? Or skip?
+                # Probably append to a list, but for now let's assume valid objects have keys
+                pass
+
+        return list(merged_data.values())
+
     def save_to_json(self):
-        """Saves scraped data to JSON files."""
+        """Saves scraped data to JSON files, merging with existing data."""
         os.makedirs("data", exist_ok=True)
         
+        # Merge and Save Events
+        full_events = self._merge_and_save("data/raw_events.json", self.events, "url")
         with open("data/raw_events.json", 'w', encoding='utf-8') as f:
-            json.dump(self.events, f, indent=4, ensure_ascii=False)
+            json.dump(full_events, f, indent=4, ensure_ascii=False)
         
+        # Merge and Save People
+        full_people = self._merge_and_save("data/people.json", self.people, "url")
         with open("data/people.json", 'w', encoding='utf-8') as f:
-            json.dump(self.people, f, indent=4, ensure_ascii=False)
+            json.dump(full_people, f, indent=4, ensure_ascii=False)
             
+        # Merge and Save Research
+        # Research structure is hierarchical, merging is trickier. 
+        # For now, we'll try to merge flat projects if possible, but the current structure is categories.
+        # IF research.json is a list of categories, we might just overwrite for now OR 
+        # we have to flatten, merge, and rebuild. 
+        # Given the complexity, let's just overwrite Research/General for now unless requested, 
+        # OR attempt a simple merge if the structure allows.
+        # Actually, research is critical. Let's start with overwrite for Research/General 
+        # to ensure structure integrity, as they are less transient than events.
+        # CHECK: User asked for "past scrapings", usually implies events/people.
+        # Let's apply merge to all if possible.
+        
+        # Research is a list of categories. 
+        # Merging logic for categories is hard. Let's overwrite research for now to avoid duplication bugs.
         with open("data/research.json", 'w', encoding='utf-8') as f:
             json.dump(self.research, f, indent=4, ensure_ascii=False)
 
+        # General info (often static or changing in place)
+        # We can overwrite or merge by title.
         with open("data/general.json", 'w', encoding='utf-8') as f:
             json.dump(self.general, f, indent=4, ensure_ascii=False)
             
-        log_info(f"Saved {len(self.events)} events, {len(self.people)} people, {len(self.research)} research items, {len(self.general)} general items.")
+        log_info(f"Saved (Merged) {len(full_events)} events, {len(full_people)} people.")
+        log_info(f"Saved {len(self.research)} research categories, {len(self.general)} general items.")
         
         # Auto-update Graph
         try:

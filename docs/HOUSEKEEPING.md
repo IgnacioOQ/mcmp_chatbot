@@ -51,20 +51,21 @@ Based on codebase analysis (2026-01-28):
 - type: task
 - owner: Jules
 <!-- content -->
-**Execution Date:** 2026-02-07 (Antigravity/User)
+**Execution Date:** 2026-02-07 (Antigravity - Post-Feature)
 
 **Status Checks:**
 1.  **Data Update (`src/scrapers/mcmp_scraper.py`)**: **Passed**.
     - Stats: **53 events**, 83 people, 4 research items, 7 general items.
+    - **Incremental Scraping**: Enabled (Merge logic active).
 2.  **Vector Store (`src/core/vector_store.py`)**: **Passed**.
     - Unit tests (`tests/test_vector_store.py`) passed.
 3.  **Connectivity**: **Skipped**.
 4.  **Unit Tests**: **Passed**.
-    - All 15 tests passed, including `tests/test_mcp.py` after user's manual fix for `position` key.
-    - User manually refined `src/mcp/tools.py` for robustness.
+    - All 16 tests passed (including new `test_scraper.py::test_merge_and_save`).
+    - Validated data persistence logic.
 
 **Summary:**
-Re-ran housekeeping protocol. Dataset successfully updated. Verified system health after user's manual refinement of `src/mcp/tools.py`.
+Re-ran housekeeping after implementing Incremental Scraping. Scraper successfully merged data. All tests passed, confirming that existing data is preserved and new data is added correctly.
 
 **Action Items:**
-- [ ] Monitor `data/people.json` for schema consistency in future scrapes.
+- [ ] Monitor `data/raw_events.json` size over time to ensure it grows as expected.

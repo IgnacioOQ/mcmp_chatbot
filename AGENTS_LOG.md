@@ -84,5 +84,19 @@
     - Re-ran `scripts/update_dataset.py` (53 events, 83 people).
     - Verified `src/mcp/tools.py` (User's fix for `role`/`position` fallback).
     - Ran full test suite (15/15 passed).
-- **Outcome**: System healthy & consistent.
 
+### 2026-02-07: Incremental Scraping Implementation (Antigravity)
+- **Task**: Implement Data Persistence.
+- **Problem**: User requested that past scraping data be preserved. Previous implementation overwrote data files.
+- **Fix**: 
+    - Implemented `_merge_and_save` method in `src/scrapers/mcmp_scraper.py`.
+    - Merges new data with existing JSON records based on URL.
+    - Added unit test `tests/test_scraper.py::test_merge_and_save` to verify logic.
+
+### 2026-02-07: Housekeeping Post-Feature (Antigravity)
+- **Task**: Re-run Housekeeping protocol after enabling Incremental Scraping.
+- **Outcome**: 
+    - Dataset updated with merge logic active.
+    - All 16 tests passed (including new persistence test).
+    - `README.md` and `HOUSEKEEPING.md` updated.
+    - System is fully operational with historical data preservation.

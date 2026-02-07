@@ -69,3 +69,52 @@ def test_scrape_people(mock_get, scraper):
         # Check argument
         args, _ = mock_single.call_args
         assert "contact-page/doe-john/index.html" in args[0]
+
+def test_merge_and_save(scraper):
+    """Test the data merging logic."""
+    # Setup mock existing data
+    existing_data = [
+        {"url": "http://example.com/old", "title": "Old Event"},
+        {"url": "http://example.com/update", "title": "Old Title"}
+    ]
+    
+    # Setup new scraped data
+    new_data = [
+        {"url": "http://example.com/update", "title": "New Title"},
+        {"url": "http://example.com/new", "title": "New Event"}
+    ]
+    
+    # Create a temporary file with existing data
+    import json
+    import os
+    import tempfile
+    
+    with tempfile.NamedTemporaryFile(mode='w+', delete=False) as tmp:
+        json.dump(existing_data, tmp)
+        tmp_path = tmp.name
+        
+    try:
+        # Run merge logic
+        merged = scraper._merge_and_save(tmp_path, new_data, key_field="url")
+        
+        # Verify results
+        assert len(merged) == 3
+        
+        # Convert to dict for easier checking
+        merged_dict = {item['url']: item for item in merged}
+        
+        # 1. Old preserved
+        assert "http://example.com/old" in merged_dict
+        assert merged_dict["http://example.com/old"]["title"] == "Old Event"
+        
+        # 2. Update overwrites old
+        assert "http://example.com/update" in merged_dict
+        assert merged_dict["http://example.com/update"]["title"] == "New Title"
+        
+        # 3. New added
+        assert "http://example.com/new" in merged_dict
+        assert merged_dict["http://example.com/new"]["title"] == "New Event"
+
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)

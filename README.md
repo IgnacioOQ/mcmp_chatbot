@@ -13,6 +13,7 @@ The application is built with **Streamlit** for the frontend, uses **ChromaDB** 
 
 - **Activity QA**: Ask about upcoming talks, reading groups, and events.
 - **Automated Scraping**: Keeps data fresh by scraping the MCMP website.
+- **Incremental Scraping**: Preserves historical data (e.g., past events) by merging new scrapes with existing records logic, ensuring a growing knowledge base.
 - **Rich Metadata Extraction**: Automatically extracts detailed profile information including emails, office locations, hierarchical roles, and publication lists.
 - **Hybrid Search**: Combines semantic vector search with structured metadata filtering (e.g., filter by year, role, or funding).
 - **RAG Architecture**: Uses vector embeddings to retrieve relevant context for accurate answers.
