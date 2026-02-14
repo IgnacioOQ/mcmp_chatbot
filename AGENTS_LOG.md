@@ -113,3 +113,12 @@
     - **Updated**: `requirements.txt` — removed `chromadb` dependency.
     - **Updated**: `README.md` — replaced RAG architecture description with MCP-only architecture, updated Mermaid diagram and project structure.
 - **Outcome**: All 12 tests pass. Architecture simplified from 3-phase pipeline to direct LLM + MCP tools.
+
+### 2026-02-14: Latency Optimization
+- **Agent**: LatencyOptimizationAgent
+- **Goal**: Reduce `generate_response` latency (~4.9s).
+- **Changes**:
+    - Moved `google.genai` imports to module level in `src/core/engine.py`.
+    - Implemented `genai.Client` and `personality` caching in `ChatEngine.__init__`.
+    - Added `@lru_cache` to `load_data` in `src/mcp/tools.py`.
+- **Result**: Reduced first-request latency to **~2.6s** (eliminated ~2s import/init overhead).

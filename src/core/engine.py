@@ -8,6 +8,11 @@ from src.utils.logger import log_info, log_error, log_latency
 import openai
 from anthropic import Anthropic
 from datetime import datetime
+try:
+    from google import genai
+    from google.genai import types
+except ImportError:
+    pass # Handle environment without google-genai if necessary
 
 load_dotenv()
 
@@ -34,6 +39,16 @@ class ChatEngine:
             log_error(error_msg)
             raise ValueError(error_msg)
 
+        # Cache personality
+        with log_latency("load_personality_init"):
+             self.personality = load_personality()
+
+        # Cache Gemini Client
+        self.gemini_client = None
+        if self.provider == "gemini":
+            with log_latency("gemini_client_init_once"):
+                self.gemini_client = genai.Client(api_key=self.api_key)
+
     def generate_response(self, query, model_name="gemini-2.0-flash", chat_history=None):
         """
         Generates a response using the configured LLM provider with MCP tools.
@@ -44,8 +59,8 @@ class ChatEngine:
             current_date = datetime.now().strftime("%A, %B %d, %Y")
 
             # Load static personality from file
-            with log_latency("load_personality"):
-                personality = load_personality()
+            # with log_latency("load_personality"): # OLD: Loaded every time
+            personality = self.personality
 
             # Compose system instruction: personality + date
             system_instruction = f"""{personality}
@@ -159,12 +174,12 @@ Current Date: {current_date}
                     return response.content[0].text
 
                 elif self.provider == "gemini":
-                    with log_latency("gemini_import"):
-                        from google import genai
-                        from google.genai import types
+                    # with log_latency("gemini_import"): # OLD: Imported every time
+                    #     from google import genai
+                    #     from google.genai import types
 
-                    with log_latency("gemini_client_init"):
-                        client = genai.Client(api_key=self.api_key)
+                    # with log_latency("gemini_client_init"): # OLD: Created every time
+                    client = self.gemini_client
 
                     # Convert chat history to Gemini format
                     with log_latency("format_history"):

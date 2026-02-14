@@ -247,3 +247,27 @@ with log_latency("my_new_stage"):
 - [x] All latency entries use `[LATENCY]` prefix for easy grep filtering
 - [x] No new dependencies (uses stdlib `time` and `contextlib`)
 - [x] Baseline measured: ~4.9s total (first request), ~3s steady-state (2026-02-14)
+
+---
+
+## 8. Optimization Record
+- status: active
+<!-- content -->
+
+### Optimization 1: Initialization & Caching (2026-02-14)
+**Problem:**
+- `gemini_import` took ~2s on first request.
+- `gemini_client_init` took ~200ms per request.
+- `load_personality` took ~1-3ms per request.
+- `tool` loading relied on repeatedly reading JSONs from disk.
+
+**Solution:**
+1.  **Moved Imports:** `google.genai` is now imported at module level in `engine.py`.
+2.  **Cached Client:** `genai.Client` is instantiated once in `ChatEngine.__init__`.
+3.  **Cached Personality:** Loaded once in `__init__`.
+4.  **Cached Data:** Added `@lru_cache` to `load_data` in `src/mcp/tools.py`.
+
+**Results:**
+- `total_generate_response`: Reduced from **~4.9s** to **~2.6s** (First Request).
+- `gemini_import` / `client_init` overhead removed from response path.
+- `llm_api_call` remains the dominant factor (~2.6s).

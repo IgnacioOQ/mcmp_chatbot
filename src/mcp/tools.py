@@ -2,9 +2,11 @@ import json
 import os
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+from functools import lru_cache
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
 
+@lru_cache(maxsize=None)
 def load_data(filename: str) -> List[Dict[str, Any]]:
     path = os.path.join(DATA_DIR, filename)
     if not os.path.exists(path):
