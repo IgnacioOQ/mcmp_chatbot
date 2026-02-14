@@ -34,7 +34,7 @@ class ChatEngine:
             log_error(error_msg)
             raise ValueError(error_msg)
 
-    def generate_response(self, query, model_name="gemini-2.0-flash"):
+    def generate_response(self, query, model_name="gemini-2.0-flash", chat_history=None):
         """
         Generates a response using the configured LLM provider with MCP tools.
         """
@@ -89,8 +89,12 @@ Current Date: {current_date}
                 
                 messages = [
                     {"role": "system", "content": final_system_instruction},
-                    {"role": "user", "content": query}
                 ]
+                if chat_history:
+                    for msg in chat_history:
+                        if msg["role"] in ("user", "assistant"):
+                            messages.append({"role": msg["role"], "content": msg["content"]})
+                messages.append({"role": "user", "content": query})
                 
                 # First Call
                 completion_args = {
@@ -132,20 +136,35 @@ Current Date: {current_date}
 
             elif self.provider == "anthropic":
                 client = Anthropic(api_key=self.api_key)
+                anthropic_messages = []
+                if chat_history:
+                    for msg in chat_history:
+                        if msg["role"] in ("user", "assistant"):
+                            anthropic_messages.append({"role": msg["role"], "content": msg["content"]})
+                anthropic_messages.append({"role": "user", "content": query})
                 response = client.messages.create(
                     model="claude-3-5-sonnet-20240620",
                     max_tokens=1024,
                     system=final_system_instruction,
-                    messages=[{"role": "user", "content": query}]
+                    messages=anthropic_messages
                 )
                 return response.content[0].text
 
             elif self.provider == "gemini":
                 from google import genai
                 from google.genai import types
-                
+
                 client = genai.Client(api_key=self.api_key)
-                
+
+                # Convert chat history to Gemini format
+                gemini_history = []
+                if chat_history:
+                    for msg in chat_history:
+                        if msg["role"] == "user":
+                            gemini_history.append(types.Content(role="user", parts=[types.Part.from_text(text=msg["content"])]))
+                        elif msg["role"] == "assistant":
+                            gemini_history.append(types.Content(role="model", parts=[types.Part.from_text(text=msg["content"])]))
+
                 chat = client.chats.create(
                     model=model_name,
                     config=types.GenerateContentConfig(
@@ -155,9 +174,10 @@ Current Date: {current_date}
                             disable=False,
                             maximum_remote_calls=5
                         )
-                    )
+                    ),
+                    history=gemini_history
                 )
-                
+
                 response = chat.send_message(query)
                 return response.text
 

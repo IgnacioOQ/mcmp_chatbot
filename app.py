@@ -417,7 +417,7 @@ def main():
         
         with st.chat_message("assistant"):
             with st.spinner("Looking up events..."):
-                response = st.session_state.engine.generate_response(auto_prompt, model_name=model_choice)
+                response = st.session_state.engine.generate_response(auto_prompt, model_name=model_choice, chat_history=st.session_state.messages[:-1])
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
 
@@ -429,7 +429,7 @@ def main():
 
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                response = st.session_state.engine.generate_response(prompt, model_name=model_choice)
+                response = st.session_state.engine.generate_response(prompt, model_name=model_choice, chat_history=st.session_state.messages[:-1])
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
 
