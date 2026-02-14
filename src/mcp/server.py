@@ -1,5 +1,6 @@
 from typing import List, Dict, Any
 from src.mcp.tools import search_people, search_research, get_events, search_graph, search_news
+from src.utils.logger import log_latency
 import json
 
 class MCPServer:
@@ -121,6 +122,7 @@ class MCPServer:
             
         tool_func = self.tools[name]
         try:
-            return tool_func(**arguments)
+            with log_latency(f"tool:{name}"):
+                return tool_func(**arguments)
         except Exception as e:
             return {"error": str(e)}
