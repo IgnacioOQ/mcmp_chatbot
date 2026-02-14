@@ -7,56 +7,56 @@ This document defines the implementation patterns for the MCMP event scraper, in
 
 ---
 
-## Critical: Dynamic Loading
+## Event Scraper Implementation
 
-> [!CAUTION]
-> The events-overview page uses a **"Load more" button** to dynamically load events. Static `requests.get()` only captures 16 of 53+ events.
+### Primary Source: JSON API
+- **Endpoint**: `https://www.philosophie.lmu.de/mcmp/site_tech/json-newsboard/json-events-newsboard-en.json`
+- Discovered from the `jsonUrl` attribute of the `LmuNewsboard` Vue component on the events-overview page
+- Returns **all events** reliably (54+) without Selenium or dynamic page loading
 
-### Problem
-- Initial page load shows ~16 events
-- Remaining events load via JavaScript when clicking "Load more"
-- Button class: `button.filterable-list__load-more`
-- Requires 4+ clicks to reveal all events
+> [!NOTE]
+> The events-overview page is JS-rendered via `LmuNewsboard.init()`. The JSON API bypasses this entirely, making Selenium optional.
 
-### Solution: Selenium
-```python
-def _fetch_events_with_selenium(self, url):
-    driver = webdriver.Chrome(options=headless_options)
-    driver.get(url)
-    
-    # Click "Load more" until it disappears
-    while True:
-        try:
-            btn = driver.find_element(By.CSS_SELECTOR, "button.filterable-list__load-more")
-            if btn.is_displayed():
-                btn.click()
-                time.sleep(1)
-            else:
-                break
-        except NoSuchElementException:
-            break
-    
-    # Now extract all event links
-    links = driver.find_elements(By.CSS_SELECTOR, "a.filterable-list__list-item-link.is-events")
+### How It Works
+1. **Fetch JSON index** from the API — returns all events with `id`, `date`, `dateEnd`, `link.href`, `link.text`
+2. **Pre-populate metadata** from API data (`date`, `date_end` for multi-day events)
+3. **Scrape individual pages** for full details (speaker, abstract, location, times)
+4. **Fallback**: Selenium and static HTML scraping supplement the API for any events it might miss
+
+### API Response Schema
+```json
+{
+    "id": "9216",
+    "categoryHeadline": "Event",
+    "date": "2026-06-25T00:00:00.000Z",
+    "dateEnd": "2026-06-26T00:00:00.000Z",
+    "link": {
+        "href": "https://...event/the-epistemology-of-medicine-92a34605.html",
+        "text": "The Epistemology of Medicine"
+    },
+    "time": "",
+    "topics": [],
+    "description": ""
+}
 ```
 
-**Dependencies**: `selenium`, `webdriver-manager`
+### Fallback Sources (supplement API)
+1. **Selenium** (if available): Clicks "Load more" on events-overview for any events not in the API
+2. **Static scraping**: Events page and homepage for events linked outside the newsboard
+
+### Selenium (Legacy Fallback)
+The events-overview page uses a "Load more" button for dynamic loading. Selenium clicks it repeatedly to reveal all events. This is now only used as a supplement to the JSON API.
+
+**Dependencies** (optional): `selenium`, `webdriver-manager`
 
 ---
 
 ## Website Structure
 
-### Event Sources
-1. **Events Overview** (Primary): `https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/` ⚠️ Dynamic
-2. **Events Page**: `https://www.philosophie.lmu.de/mcmp/en/events/`
-3. **Homepage**: `https://www.philosophie.lmu.de/mcmp/en/`
-
-### DOM Structure
-- **Listing pages**: Events in `<a>` tags with class `.filterable-list__list-item-link.is-events`
-- **Individual event pages**:
-  - `<h1>` with speaker/event name
-  - `<h2>` labels for "Date:", "Location:", "Title:", "Abstract:"
-  - Location in `<address>` tag
+### DOM Structure (Individual Event Pages)
+- `<h1>` with speaker/event name
+- `<h2>` labels for "Date:", "Location:", "Title:", "Abstract:"
+- Location in `<address>` tag
 
 ---
 
@@ -128,7 +128,7 @@ match = re.search(r'(\d{1,2})\s+(\w+)\s+(\d{4})', date_text)
 
 ---
 
-## Output Schema
+## Output Schema (Events)
 ```json
 {
     "title": "Talk: Simon Saunders (Oxford)",
@@ -137,6 +137,7 @@ match = re.search(r'(\d{1,2})\s+(\w+)\s+(\d{4})', date_text)
     "abstract": "Given two principles (a) no action-at-a-distance...",
     "metadata": {
         "date": "2026-02-04",
+        "date_end": "2026-02-05",
         "time_start": "4:00 pm",
         "location": "Ludwigstr. 31 Ground floor, room 021",
         "speaker": "Simon Saunders (Oxford)"
@@ -187,10 +188,69 @@ match = re.search(r'(\d{1,2})\s+(\w+)\s+(\d{4})', date_text)
 
 ---
 
+## News Scraper Implementation
+
+### Source
+- **JSON API**: `https://www.philosophie.lmu.de/mcmp/site_tech/json-newsboard/json-news-newsboard-en.json`
+- Discovered from the `data-` attributes of the `LmuNewsboard` Vue component on the news-overview page
+
+> [!NOTE]
+> The news-overview page (`/latest-news/news-overview/`) is fully JS-rendered via `LmuNewsboard.init()`. Static scraping sees no content. The JSON API endpoint bypasses this entirely.
+
+### How It Works
+1. **Fetch JSON index** from the API — returns a list of news items with `id`, `date`, `link.href`, `link.text`
+2. **Scrape individual pages** for full content (`div.rte__content` or fallback to `main`)
+3. **Store in `data/news.json`** with incremental merge (URL-keyed, like events/people)
+
+### API Response Schema
+```json
+{
+    "id": "11072",
+    "categoryHeadline": "News",
+    "date": "2026-02-02T14:07:38.628Z",
+    "link": {
+        "href": "https://...news/call-for-application-phd-student-mfx-b7a800fd.html",
+        "text": "Call for Application: PhD student (m/f/x)"
+    },
+    "topics": [],
+    "description": ""
+}
+```
+
+### Output Schema (`data/news.json`)
+```json
+{
+    "title": "Call for Application: PhD student (m/f/x)",
+    "url": "https://...",
+    "metadata": {
+        "date": "2026-02-02",
+        "category": "News"
+    },
+    "description": "Full text scraped from the individual news page...",
+    "type": "news",
+    "scraped_at": "2026-02-14T..."
+}
+```
+
+### Content Types
+- Job postings (PhD, postdoc, faculty positions)
+- Calls for papers/abstracts
+- Award announcements (Karl-Heinz Hoffmann Prize, Kurt Gödel Award)
+- Publication announcements
+- Partnership announcements
+
+### MCP Tool
+Exposed as `search_news(query)` — searches titles and descriptions. Separate from `get_events` since news and events are semantically different.
+
+---
+
 ## Verification
-- [x] All 53+ events captured
+- [x] All 54+ events captured via JSON API (no Selenium required)
 - [x] Abstracts extracted from individual pages
 - [x] No duplicate URLs
 - [x] Dates in ISO format
+- [x] Multi-day events have `date_end` from API
 - [x] UTF-8 encoding enforced (no mojibake in smart quotes/accented characters)
 - [x] Past events/people preserved across scraper runs (incremental merge)
+- [x] News items scraped from JSON API (bypasses JS-rendered newsboard)
+- [x] News stored separately in `data/news.json` with incremental merge

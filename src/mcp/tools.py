@@ -164,7 +164,7 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
             except ValueError:
                 pass # skip date check if format unknown
         
-        results.append({
+        result_entry = {
             "title": title,
             "date": date_str,
             "time": f"{meta.get('time_start')} - {meta.get('time_end')}",
@@ -173,10 +173,47 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
             "url": event.get("url"),
             "abstract": abstract,
             "description": description
-        })
+        }
+        if meta.get("date_end"):
+            result_entry["date_end"] = meta["date_end"]
+        results.append(result_entry)
         
     # Sort by date
     results.sort(key=lambda x: x.get("date", "9999-99-99"))
+    return results[:10]
+
+
+def search_news(query: Optional[str] = None) -> List[Dict[str, Any]]:
+    """
+    Search for MCMP news and announcements (job postings, awards, calls for papers, etc.).
+
+    Args:
+        query: Optional keyword to search for in news titles and descriptions
+               (e.g., "PhD", "postdoc", "award", "call for papers").
+    """
+    news = load_data("news.json")
+    results = []
+
+    query_lower = query.lower() if query else None
+
+    for item in news:
+        title = item.get("title", "")
+        description = item.get("description", "")
+
+        if query_lower:
+            text_content = (title + " " + description).lower()
+            if query_lower not in text_content:
+                continue
+
+        results.append({
+            "title": title,
+            "date": item.get("metadata", {}).get("date", ""),
+            "category": item.get("metadata", {}).get("category", "News"),
+            "url": item.get("url"),
+            "description": description[:1000]
+        })
+
+    results.sort(key=lambda x: x.get("date", ""), reverse=True)
     return results[:10]
 
 

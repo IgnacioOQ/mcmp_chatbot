@@ -36,15 +36,17 @@ class MCMPScraper:
         f"{BASE_URL}/mcmp/en/index.html"
     ]
     # Fallback if file not found, but we prefer reading from file
-    PEOPLE_URLS = [f"{BASE_URL}/mcmp/en/people/index.html"] 
+    PEOPLE_URLS = [f"{BASE_URL}/mcmp/en/people/index.html"]
     RESEARCH_URL = f"{BASE_URL}/mcmp/en/research/index.html"
+    EVENTS_JSON_URL = f"{BASE_URL}/mcmp/site_tech/json-newsboard/json-events-newsboard-en.json"
+    NEWS_JSON_URL = f"{BASE_URL}/mcmp/site_tech/json-newsboard/json-news-newsboard-en.json"
 
     def __init__(self):
         self.events = []
         self.people = []
         self.research = []
         self.general = []
-        self.general = []
+        self.news = []
         self.important_urls = self.load_important_urls()
 
     def _get(self, url):
@@ -97,21 +99,54 @@ class MCMPScraper:
         return urls
 
     def scrape_events(self):
-        """Scrapes multiple sources for event links with exhaustive nested search.
-        
-        Uses Selenium for pages with dynamic 'Load more' buttons (like events-overview).
-        Falls back to requests.get() for other pages.
+        """Scrapes events using the JSON API as primary source, with static/Selenium fallback.
+
+        Primary: JSON API (json-events-newsboard-en.json) — returns all events reliably.
+        Fallback: Selenium or static scraping for any additional events not in the API.
         """
         seen_urls = set()  # URL-based deduplication
-        
-        # Events overview page needs dynamic loading (has "Load more" button)
-        events_overview_url = f"{self.BASE_URL}/mcmp/en/latest-news/events-overview/index.html"
-        
-        # First, scrape the events overview with Selenium (if available)
+
+        # Primary source: JSON API (bypasses dynamic JS loading entirely)
+        log_info(f"Fetching events index from {self.EVENTS_JSON_URL}")
+        try:
+            response = self._get(self.EVENTS_JSON_URL)
+            api_events = json.loads(response.text)
+            log_info(f"JSON API returned {len(api_events)} events")
+
+            for item in api_events:
+                link = item.get("link", {})
+                url = link.get("href", "")
+                title = link.get("text", "")
+
+                if not url or url in seen_urls:
+                    continue
+                seen_urls.add(url)
+
+                # Pre-populate metadata from API (date, dateEnd)
+                api_date = item.get("date", "")[:10]  # "2026-02-04T..." -> "2026-02-04"
+                api_date_end = item.get("dateEnd", "")[:10]
+                metadata = {}
+                if api_date:
+                    metadata["date"] = api_date
+                if api_date_end and api_date_end != api_date:
+                    metadata["date_end"] = api_date_end
+
+                self.events.append({
+                    "title": title,
+                    "url": url,
+                    "metadata": metadata,
+                    "scraped_at": datetime.now().isoformat()
+                })
+        except Exception as e:
+            log_error(f"JSON API failed, falling back to HTML scraping: {e}")
+
+        # Fallback: Selenium for dynamic pages (if API failed or missed events)
         if SELENIUM_AVAILABLE:
-            log_info(f"Using Selenium to scrape {events_overview_url} (dynamic loading)")
+            events_overview_url = f"{self.BASE_URL}/mcmp/en/latest-news/events-overview/index.html"
+            log_info(f"Supplementing with Selenium scrape of {events_overview_url}")
             try:
                 event_links = self._fetch_events_with_selenium(events_overview_url)
+                added = 0
                 for url, title in event_links:
                     if url not in seen_urls:
                         seen_urls.add(url)
@@ -120,50 +155,45 @@ class MCMPScraper:
                             "url": url,
                             "scraped_at": datetime.now().isoformat()
                         })
-                log_info(f"Selenium found {len(self.events)} events from events-overview")
+                        added += 1
+                if added:
+                    log_info(f"Selenium added {added} extra events not in API")
             except Exception as e:
-                log_error(f"Selenium failed, falling back to static scraping: {e}")
-        
-        # Scrape remaining sources with requests (static pages)
+                log_error(f"Selenium supplemental scrape failed: {e}")
+
+        # Fallback: Static scraping for other source pages
         for source_url in self.EVENT_SOURCES:
-            # Skip events-overview if already scraped with Selenium
-            if "events-overview" in source_url and SELENIUM_AVAILABLE and len(self.events) > 0:
-                continue
-                
-            log_info(f"Starting static scrape of {source_url}")
+            if "events-overview" in source_url:
+                continue  # Already covered by API + Selenium
             try:
                 response = self._get(source_url)
                 soup = BeautifulSoup(response.text, 'html.parser')
-
-                # Primary method: Use CSS class for event links
                 event_links = soup.select('a.filterable-list__list-item-link.is-events')
-                
-                # Fallback: Heuristic matching
                 if not event_links:
                     event_links = [
                         link for link in soup.find_all('a', href=True)
                         if self._is_event_link(link['href'])
                     ]
-                
+                added = 0
                 for link in event_links:
                     href = link.get('href', '')
-                    text = link.get_text(strip=True)
                     full_url = self._normalize_url(href, source_url)
-                    
                     if full_url in seen_urls:
                         continue
                     seen_urls.add(full_url)
-                    
+                    text = link.get_text(strip=True)
                     title = text or href.split('/')[-1].replace('.html', '').replace('-', ' ').title()
                     self.events.append({
                         "title": title,
                         "url": full_url,
                         "scraped_at": datetime.now().isoformat()
                     })
-                    
+                    added += 1
+                if added:
+                    log_info(f"Static scrape of {source_url} added {added} extra events")
             except Exception as e:
                 log_error(f"Error scraping {source_url}: {e}")
-        
+
         log_info(f"Found {len(self.events)} unique event links in total.")
         
         # Now scrape details for all found events
@@ -263,8 +293,9 @@ class MCMPScraper:
             response = self._get(event['url'])
             soup = BeautifulSoup(response.text, 'html.parser')
 
-            metadata = {}
-            
+            # Preserve any metadata pre-populated from the JSON API (date, date_end)
+            metadata = event.get("metadata", {}).copy()
+
             # Extract speaker from main H1 (e.g., "Talk: Simon Saunders (Oxford)")
             h1 = soup.find('h1')
             if h1:
@@ -284,7 +315,11 @@ class MCMPScraper:
                     event['abstract'] = self._extract_section_content(h2)
                 elif label == 'date':
                     date_text = self._extract_section_content(h2)
-                    metadata.update(self._parse_date_time(date_text))
+                    parsed = self._parse_date_time(date_text)
+                    # Only fill in fields not already set by the JSON API
+                    for k, v in parsed.items():
+                        if k not in metadata:
+                            metadata[k] = v
             
             # Extract location from address tag (most reliable)
             address = soup.find('address')
@@ -765,6 +800,64 @@ class MCMPScraper:
             log_error(f"Error scraping reading groups: {e}")
             return []
 
+    def scrape_news(self):
+        """Scrapes MCMP news from the JSON newsboard API and individual news pages."""
+        log_info(f"Fetching news index from {self.NEWS_JSON_URL}")
+        try:
+            response = self._get(self.NEWS_JSON_URL)
+            news_items = json.loads(response.text)
+            log_info(f"Found {len(news_items)} news items in API")
+
+            for item in news_items:
+                link = item.get("link", {})
+                url = link.get("href", "")
+                title = link.get("text", "")
+
+                if not url:
+                    continue
+
+                news_entry = {
+                    "title": title,
+                    "url": url,
+                    "metadata": {
+                        "date": item.get("date", "")[:10],  # "2026-02-02T14:..." -> "2026-02-02"
+                        "category": item.get("categoryHeadline", "News"),
+                    },
+                    "description": item.get("description", ""),
+                    "type": "news",
+                    "scraped_at": datetime.now().isoformat()
+                }
+
+                # Scrape individual news page for full content
+                self._scrape_news_details(news_entry)
+                self.news.append(news_entry)
+
+            log_info(f"Scraped {len(self.news)} news items with details.")
+            return self.news
+        except Exception as e:
+            log_error(f"Error scraping news: {e}")
+            return []
+
+    def _scrape_news_details(self, news_entry):
+        """Scrapes the full content of an individual news page."""
+        try:
+            response = self._get(news_entry['url'])
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            main_content = soup.find('div', id='r-main') or soup.find('main')
+            if main_content:
+                # Extract full body text from rte__content divs
+                rte_divs = main_content.find_all('div', class_='rte__content')
+                if rte_divs:
+                    text_parts = [div.get_text(separator=' ', strip=True) for div in rte_divs]
+                    news_entry['description'] = '\n\n'.join(p for p in text_parts if p)
+                else:
+                    news_entry['description'] = self._clean_text(
+                        main_content.get_text(separator='\n', strip=True)
+                    )
+        except Exception as e:
+            log_error(f"Error scraping news details for {news_entry['url']}: {e}")
+
     def _merge_and_save(self, existing_file, new_data, key_field="url"):
         """Merges new data with existing JSON data, preserving old records."""
         merged_data = {}
@@ -830,8 +923,13 @@ class MCMPScraper:
         # We can overwrite or merge by title.
         with open("data/general.json", 'w', encoding='utf-8') as f:
             json.dump(self.general, f, indent=4, ensure_ascii=False)
-            
-        log_info(f"Saved (Merged) {len(full_events)} events, {len(full_people)} people.")
+
+        # Merge and Save News
+        full_news = self._merge_and_save("data/news.json", self.news, "url")
+        with open("data/news.json", 'w', encoding='utf-8') as f:
+            json.dump(full_news, f, indent=4, ensure_ascii=False)
+
+        log_info(f"Saved (Merged) {len(full_events)} events, {len(full_people)} people, {len(full_news)} news.")
         log_info(f"Saved {len(self.research)} research categories, {len(self.general)} general items.")
         
         # Auto-update Graph
@@ -849,4 +947,5 @@ if __name__ == "__main__":
     scraper.scrape_research()
     scraper.scrape_general()
     scraper.scrape_reading_groups()
+    scraper.scrape_news()
     scraper.save_to_json()

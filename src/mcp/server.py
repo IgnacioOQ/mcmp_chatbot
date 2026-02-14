@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from src.mcp.tools import search_people, search_research, get_events, search_graph
+from src.mcp.tools import search_people, search_research, get_events, search_graph, search_news
 import json
 
 class MCPServer:
@@ -13,7 +13,8 @@ class MCPServer:
             "search_people": search_people,
             "search_research": search_research,
             "get_events": get_events,
-            "search_graph": search_graph
+            "search_graph": search_graph,
+            "search_news": search_news
         }
         
     def list_tools(self) -> List[Dict[str, Any]]:
@@ -94,6 +95,19 @@ class MCPServer:
                         }
                     },
                     "required": ["query"]
+                }
+            },
+            {
+                "name": "search_news",
+                "description": "Search for MCMP news and announcements. Use this for job postings (PhD, postdoc positions), calls for papers/abstracts, awards, prizes, and publication announcements. NOT for events like talks or workshops.",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "Optional keyword to search for in news (e.g., 'PhD', 'postdoc', 'award', 'call for papers'). Omit to get all recent news."
+                        }
+                    }
                 }
             }
         ]
