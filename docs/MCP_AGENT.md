@@ -5,6 +5,9 @@
 <!-- content -->
 This document explains the **Model Context Protocol (MCP)** implementation within the MCMP Chatbot and provides guidelines for extending it.
 
+> [!NOTE]
+> As of February 2026, the chatbot uses an **MCP-only architecture**. The RAG pipeline (ChromaDB, embeddings, query decomposition) was removed. MCP tools are now the sole data access mechanism.
+
 ## 1. Architecture Overview
 - status: active
 <!-- content -->
@@ -16,12 +19,12 @@ The project implements a **Lightweight In-Process MCP Server** rather than a sep
     -   Host the tool registry.
     -   Exposes `list_tools()` (returns OpenAI/Gemini compatible schemas) and `call_tool()` (executes Python functions).
 2.  **Tools (`src/mcp/tools.py`)**:
-    -   Contains the actual Python logic for tools.
-    -   Loads data from JSON files in `data/` (`raw_events.json`, `people.json`, `research.json`).
+    -   Contains the actual Python logic for tools: `search_people`, `search_research`, `get_events`, `search_graph`.
+    -   Loads data from JSON files in `data/` (`raw_events.json`, `people.json`, `research.json`) and the institutional graph (`data/graph/mcmp_graph.md`).
 3.  **Integration (`src/core/engine.py`)**:
-    -   The `RAGEngine` initializes the `MCPServer`.
+    -   The `ChatEngine` initializes the `MCPServer`.
     -   It passes tools to the LLM (Gemini/OpenAI) during chat generation.
-    -   It handles the tool call loop (LLM requests tool -> Engine executes tool -> Engine feeds result back to LLM).
+    -   It handles the tool call loop (LLM requests tool → Engine executes tool → Engine feeds result back to LLM).
 
 ## 2. The "JSON Database" Pattern
 - status: active
@@ -79,7 +82,7 @@ To add a new capability:
 ## 5. Prompt Engineering for Tools
 - status: active
 <!-- content -->
-Simply defining a tool is often insufficient; the LLM must be "coached" to use it correctly, especially in a hybrid RAG system.
+Simply defining a tool is often insufficient; the LLM must be "coached" to use it correctly.
 
 ### A. Dynamic Injection
 Do not rely on the API's implicit tool support alone. **Explicitly inject the list of tools** into the System Prompt.
@@ -91,7 +94,7 @@ LLMs are trained to be polite and helpful, often asking "Would you like me to ch
 - **Fix**: Use **Imperative Instructions** in the system prompt.
 - **Example**: *"IMPORTANT: You have permission to use these tools. Do NOT ask the user if they want you to check. Just check."*
 
-### C. The "Data Enrichment" Pattern (RAG vs Tool Conflict)
-A common failure mode is "Partial Satisfaction": The LLM finds an event title in the Vector Store (RAG) and thinks it's done, ignoring the Tool that has the full abstract/time.
-- **Fix**: Explicitly instruct the LLM to use tools for **Enrichment**.
-- **Rule**: *"If the text context provides only partial information (like a title without an abstract), you MUST call the tool to get the full details."*
+### C. The "Data Enrichment" Pattern
+If a tool returns only partial information (e.g., a name but no abstract), the LLM should call another tool to get the full details.
+- **Fix**: Explicitly instruct the LLM to use tools for **enrichment**.
+- **Rule**: *"If the available data provides only partial information (like a title without an abstract), you MUST call the appropriate tool to get the full details."*

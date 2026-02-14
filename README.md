@@ -5,9 +5,9 @@
 
 <!-- content -->
 
-A RAG-based (Retrieval-Augmented Generation) chatbot for the **Munich Center for Mathematical Philosophy (MCMP)**. This application scrapes the MCMP website for the latest events, people, and research, and uses an LLM (Google Gemini, OpenAI, or Anthropic) to answer user queries about the center's activities.
+A chatbot for the **Munich Center for Mathematical Philosophy (MCMP)**. This application scrapes the MCMP website for the latest events, people, and research, and uses an LLM (Google Gemini, OpenAI, or Anthropic) with structured data tools (MCP) to answer user queries about the center's activities.
 
-The application is built with **Streamlit** for the frontend, uses **ChromaDB** for vector storage, and integrates with **Google Sheets** for cloud-based feedback collection.
+The application is built with **Streamlit** for the frontend, uses **MCP tools** over JSON databases for data access, and integrates with **Google Sheets** for cloud-based feedback collection.
 
 ## Features
 
@@ -15,41 +15,25 @@ The application is built with **Streamlit** for the frontend, uses **ChromaDB** 
 - **Automated Scraping**: Keeps data fresh by scraping the MCMP website.
 - **Incremental Scraping**: Preserves historical data (e.g., past events) by merging new scrapes with existing records logic, ensuring a growing knowledge base.
 - **Rich Metadata Extraction**: Automatically extracts detailed profile information including emails, office locations, hierarchical roles, and publication lists.
-- **Hybrid Search**: Combines semantic vector search with structured metadata filtering (e.g., filter by year, role, or funding).
-- **RAG Architecture**: Uses vector embeddings to retrieve relevant context for accurate answers.
+- **MCP Architecture**: Uses structured data tools (Model Context Protocol) over JSON databases for precise, low-latency data access — no embedding pipeline needed.
+- **Institutional Graph**: Uses a graph-based layer (`data/graph`) to understand organizational structure (Chairs, Leadership) while linking people to hierarchical **Research Topics**.
 - **Cloud Database (Feedback)**: User feedback is automatically saved to a Google Sheet for persistent, cloud-based storage (with a local JSON fallback).
 - **Multi-LLM Support**: Configured to work seamlessly with **Google Gemini**, but also supports OpenAI and Anthropic.
-- **Smart Retrieval (Query Decomposition)**: automatically breaks down complex multi-part questions into simpler sub-queries for more complete answers.
-- **Institutional Graph**: Uses a graph-based layer (`data/graph`) to understand organizational structure (Chairs, Leadership) while linking people to hierarchical **Research Topics**.
-- **Structured Data Tools (MCP)**: Implements an in-process Model Context Protocol (MCP) server that exposes `people.json`, `research.json`, and `raw_events.json` as structured tools. This allows the LLM to perform precise queries (e.g., "List all events next week", "Who researches Logic?") rather than relying solely on semantic retrieval.
+- **Structured Data Tools (MCP)**: Implements an in-process Model Context Protocol (MCP) server that exposes `people.json`, `research.json`, `raw_events.json`, and the institutional graph as structured tools. This allows the LLM to perform precise queries (e.g., "List all events next week", "Who researches Logic?", "Who leads the Chair of Logic?").
 - **Configurable Personality (Leopold)**: The chatbot's personality is defined in `prompts/personality.md`, separating tone and identity from code. Edit the file to adjust behavior without touching the engine.
 - **Agentic Workflow**: Follows the `AGENTS.md` and `docs/MD_CONVENTIONS.md` protocols for AI-assisted development.
 
-## Performance Optimization
-- **Vector Search**: The retrieval engine uses **batch querying** to minimize latency. By sending all decomposed sub-queries to ChromaDB in a single parallel batch request, we achieved an **~82% reduction in retrieval time** (from ~0.43s to ~0.07s per query set).
-
-## RAG Architecture Explained
-
-This project is a definitive implementation of **Retrieval-Augmented Generation (RAG)**.
-
-1.  **Retrieval**: The system uses `src/scrapers` to fetch data from the MCMP website, chunks it, and stores embeddings in `ChromaDB`. When a user asks a question, the system *retrieves* the most relevant chunks.
-2.  **Augmentation**: These chunks are passed as context to the LLM (Gemini) via `src/core/engine.py`.
-3.  **Generation**: The LLM *generates* a response based on the augmented prompt, ensuring accuracy grounded in the retrieved data.
 
 
+## Architecture
 
-### Why Embeddings? (vs. just JSON)
-While the system stores data in JSON files (raw material), it uses **Embeddings** as the search mechanism.
-- **JSONs**: Store the text.
-- **Embeddings**: Convert that text into vectors (lists of numbers) using a small LLM (Sentence Transformers).
-This allows the system to find relevant information based on *meaning* (semantic search) rather than just keyword matching.
-This allows the system to find relevant information based on *meaning* (semantic search) rather than just keyword matching.
+The system uses an **MCP-only architecture**: the LLM has direct access to structured data tools that query the JSON databases. No embedding pipeline or vector database is needed.
 
-### Advanced: Query Decomposition
-For complex questions (e.g., *"Who is Mario Hubert and what is his talk about?"*), a single search often fails to find all necessary context. This project implements **Query Decomposition**:
-1.  **Decompose**: The LLM breaks the user's complex question into distinct sub-queries (e.g., *"Who is Mario Hubert?"* and *"What is Mario Hubert's talk?"*).
-2.  **Parallel Retrieval**: The system executes searches for *each* sub-query independently.
-3.  **Synthesis**: All retrieved context chunks are combined and deduplicated before generating the final answer.
+1.  **Data Collection**: The system uses `src/scrapers` to fetch data from the MCMP website and stores it as JSON files.
+2.  **Tool-Augmented Generation**: When a user asks a question, the LLM receives the query along with available MCP tools. It decides which tools to call to fetch relevant data.
+3.  **Response**: The LLM generates a response grounded in the tool results.
+
+
 
 ## Setup
 
@@ -147,78 +131,54 @@ The system connects four key data types to answer complex questions:
 
 ## Query Processing Pipeline
 
-This diagram illustrates how the system combines **RAG (Text)**, **Graph (Relationships)**, and **MCP (Structured Data)** to answer a user query.
+This diagram illustrates how the system uses **MCP (Structured Data)** tools and the **Graph (Relationships)** to answer a user query.
 
 ```mermaid
 graph TD
-    UserQuery[User Query] --> Decompose[Query Decomposition]
+    UserQuery[User Query] --> LLM[LLM with MCP Tools]
     
-    subgraph "Phase 1: Retrieval (RAG)"
-        Decompose -->|Sub-queries| VectorDB[(ChromaDB)]
-        VectorDB -->|Retrieved Chunks| ContextAgg{Context Aggregator}
-        UserQuery -->|Direct Query| GraphDB[(Institutional Graph)]
-        GraphDB -->|Graph Relationships| ContextAgg
+    subgraph "MCP Tools"
+        LLM -->|"search_people(query)"| PeopleDB[(people.json)]
+        LLM -->|"get_events(query)"| EventsDB[(raw_events.json)]
+        LLM -->|"search_research(topic)"| ResearchDB[(research.json)]
+        LLM -->|"search_graph(query)"| GraphDB[(Institutional Graph)]
     end
     
-    subgraph "Phase 2: Generation & Tool Use (MCP)"
-        ContextAgg -->|System Instruction| LLM[LLM (Gemini/OpenAI)]
-        UserQuery --> LLM
-        
-        Tools[MCP Tools] -->|Defines: search_people, get_events| LLM
-        
-        LLM -- "Needs Structured Data?" --> ToolCall{Decision}
-        ToolCall -- Yes --> ExecuteTool[Execute Tool]
-        ExecuteTool -->|Query JSONs| JsonDB[(Data JSONs)]
-        JsonDB -->|Structured Result| LLM
-        ToolCall -- No/Done --> GenerateAnswer[Generate Answer]
-    end
+    PeopleDB --> |Results| LLM
+    EventsDB --> |Results| LLM
+    ResearchDB --> |Results| LLM
+    GraphDB --> |Results| LLM
     
-    GenerateAnswer --> FinalResponse[Final Response]
+    LLM --> FinalResponse[Final Response]
 
-    style VectorDB fill:#e1f5fe,stroke:#01579b
-    style JsonDB fill:#e8f5e9,stroke:#1b5e20
-    style LLM fill:#fff3e0,stroke:#e65100
+    style PeopleDB fill:#e8f5e9,stroke:#1b5e20
+    style EventsDB fill:#e8f5e9,stroke:#1b5e20
+    style ResearchDB fill:#e8f5e9,stroke:#1b5e20
     style GraphDB fill:#f3e5f5,stroke:#4a148c
+    style LLM fill:#fff3e0,stroke:#e65100
 ```
 
-### Explanation of the Flow
-1.  **Decomposition**: The complex user query is broken down into simpler sub-queries.
-2.  **Hybrid Retrieval**:
-    *   **Vector Search**: Finds relevant text chunks from the scraped website content (Vector DB).
-    *   **Graph Search**: Identifies institutional relationships (leads, supervises, member of).
-3.  **Context Construction**: The retrieved text and graph data are combined into a rich **System Instruction**.
-4.  **LLM Execution with Tools**:
-    *   The LLM receives the prompt and a list of available **MCP Tools** (e.g., `search_people`, `get_events`).
-    *   It evaluates if the retrieved text context is sufficient.
-    *   **Scenario A (Context Sufficient)**: The LLM answers directly using the RAG data.
-    *   **Scenario B (Needs Structured Data)**: The LLM calls a tool (e.g., "Get events for next week"). The system executes this against the **JSON Database** and feeds the precise result back to the LLM.
+### How It Works
+1.  **User Query**: The user asks a question (e.g., *"What is Hannes Leitgeb working on?"*).
+2.  **LLM with Tools**: The LLM receives the query along with personality instructions and available MCP tools.
+3.  **Tool Calls**: The LLM decides which tools to call based on the question:
+    - `search_people` for profile information
+    - `get_events` for upcoming talks and workshops
+    - `search_research` for research topics and areas
+    - `search_graph` for institutional relationships (who leads which chair, etc.)
+4.  **Final Response**: The LLM synthesizes all tool results into a coherent answer.
 
-5.  **Final Answer**: The LLM synthesizes the RAG context, Graph context, and Tool outputs into the final response.
-
-### 3. Example Walkthrough
+### Example Walkthrough
 
 **Query:** *"What is Hannes Leitgeb working on and what are his upcoming events?"*
 
-1.  **Decomposition**:
-    *   Sub-query 1: "Hannes Leitgeb research"
-    *   Sub-query 2: "Hannes Leitgeb upcoming events"
+1.  **Tool Calls**:
+    - `search_people("Hannes Leitgeb")` → Returns profile, research interests
+    - `search_graph("Hannes Leitgeb")` → Returns: "Hannes Leitgeb LEADS Chair of Logic..."
+    - `get_events(query="Hannes Leitgeb")` → Returns: `[{"title": "Talk at LMU", "date": "2024-10-15", ...}]`
 
-2.  **RAG Retrieval**:
-    *   `src/scrapers` content about Hannes Leitgeb's profile and recent publications is retrieved from the **Vector DB**.
-    *   *Result*: Text chunks detailing his work on "Logic and Probability".
-
-3.  **Graph Retrieval**:
-    *   The **Graph** identifies Hannes Leitgeb as the *Chair of Logic and Philosophy of Language*.
-    *   *Result*: Context string: "Hannes Leitgeb LEADS Chair of Logic..."
-
-4.  **MCP Tool Execution**:
-    *   The LLM recognizes the second part of the question ("upcoming events") requires precise real-time data.
-    *   It calls the tool: `get_events(query="Hannes Leitgeb")`.
-    *   The tool scans `data/raw_events.json` and returns: `[{"title": "Talk at LMU", "date": "2024-10-15", ...}]`.
-
-
-5.  **Final Synthesis**:
-    > "Hannes Leitgeb is currently working on Logic and Probability... (from RAG). He leads the Chair of Logic and Philosophy of Language (from Graph). Regarding his schedule, he has an upcoming talk at LMU on October 15th (from MCP Tool)."
+2.  **Final Synthesis**:
+    > "Hannes Leitgeb is currently working on Logic and Probability... He leads the Chair of Logic and Philosophy of Language. Regarding his schedule, he has an upcoming talk at LMU on October 15th."
 
 ## Project Structure
 
@@ -226,14 +186,14 @@ graph TD
 mcmp_chatbot/
 ├── app.py                # Main Streamlit application entry point
 ├── src/
-│   ├── core/             # RAG engine (Gemini), Vector Store (Chroma), Personality loader
+│   ├── core/             # Chat engine (Gemini), Graph Utils, Personality loader
 │   ├── mcp/              # MCP Tools and Server implementation
 │   ├── scrapers/         # Scrapers for MCMP website
 │   ├── ui/               # Streamlit UI components
 │   └── utils/            # Helper functions (logging, etc.)
 ├── prompts/              # Chatbot personality configuration
 │   └── personality.md    # Leopold's identity, tone, and guidelines
-├── data/                 # Local data storage (JSONs, Vector DB)
+├── data/                 # Local data storage (JSONs)
 ├── docs/                 # Project documentation and proposals
 │   ├── rag_improvements.md
 │   ├── HOUSEKEEPING.md   # Maintenance protocols

@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import json
 from datetime import datetime, timedelta
-from src.core.engine import RAGEngine
+from src.core.engine import ChatEngine
 from src.utils.logger import log_info, log_error
 
 def save_feedback(name, feedback):
@@ -97,30 +97,9 @@ def main():
     """, unsafe_allow_html=True)
 
     st.title("Leopold - The MCMP Chatbot")
-    st.markdown("Ask me anything about the Munich Center for Mathematical Philosophy: our research, people, history, and upcoming events.\n\nThis is basically Retrieval-Augmented Generation (RAG) + Web scraping ([README](https://github.com/IgnacioOQ/mcmp_chatbot/blob/main/README.md)). It is still very much a demo and it will lack knowledge, but it should be able to provide accurate and up to date information. It is also a little slow, but it gets the job done.\n\nPlease use the feedback form on the left to leave comments, it will help improve the bot.")
+    st.markdown("Ask me anything about the Munich Center for Mathematical Philosophy: our research, people, history, and upcoming events.\n\nThis chatbot uses LLM + structured data tools over the MCMP website ([README](https://github.com/IgnacioOQ/mcmp_chatbot/blob/main/README.md)). It is still very much a demo and it will lack knowledge, but it should be able to provide accurate and up to date information.\n\nPlease use the feedback form on the left to leave comments, it will help improve the bot.")
 
-    # Auto-refresh check
-    RAW_DATA_PATH = "data/raw_events.json"
-    needs_refresh = False
-    if not os.path.exists(RAW_DATA_PATH):
-        needs_refresh = True
-    else:
-        # If older than 24 hours
-        mtime = os.path.getmtime(RAW_DATA_PATH)
-        if (datetime.now().timestamp() - mtime) > 86400:
-            needs_refresh = True
 
-    if needs_refresh and "auto_refreshed" not in st.session_state:
-        with st.status("Initializing knowledge base..."):
-            from src.scrapers.mcmp_scraper import MCMPScraper
-            from src.core.vector_store import VectorStore
-            scraper = MCMPScraper()
-            scraper.scrape_events()
-            scraper.save_to_json()
-            vs = VectorStore()
-            vs.add_events()
-            st.session_state.auto_refreshed = True
-            st.rerun()
 
     # Sidebar for configuration
     with st.sidebar:
@@ -397,7 +376,6 @@ def main():
         
         # 4. Configuration at the bottom
         st.header("⚙️ Configuration")
-        use_mcp_tools = st.toggle("Enable Structured Data Tools (MCP)", value=True, help="Allows the AI to search specific databases for people, research, and events.")
         
         # Model Selection
         model_choice = st.radio(
@@ -408,11 +386,11 @@ def main():
             help="Flash is better for complex queries. Flash-Lite is cheaper but still powerful."
         )
 
-    # Initialize RAGEngine
+    # Initialize ChatEngine
     if "engine" not in st.session_state:
-        # Try to get key from secrets, otherwise RAGEngine will fallback to os.getenv
+        # Try to get key from secrets, otherwise ChatEngine will fallback to os.getenv
         api_key = st.secrets.get("GEMINI_API_KEY") 
-        st.session_state.engine = RAGEngine(provider="gemini", api_key=api_key, use_mcp=True)
+        st.session_state.engine = ChatEngine(provider="gemini", api_key=api_key)
 
     # Chat history
     if "messages" not in st.session_state:
@@ -439,7 +417,7 @@ def main():
         
         with st.chat_message("assistant"):
             with st.spinner("Looking up events..."):
-                response = st.session_state.engine.generate_response(auto_prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
+                response = st.session_state.engine.generate_response(auto_prompt, model_name=model_choice)
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
 
@@ -451,7 +429,7 @@ def main():
 
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                response = st.session_state.engine.generate_response(prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
+                response = st.session_state.engine.generate_response(prompt, model_name=model_choice)
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
 

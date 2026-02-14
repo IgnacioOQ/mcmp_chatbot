@@ -38,3 +38,15 @@ def test_get_events():
     if len(results) > 0:
         assert 'title' in results[0]
         assert 'date' in results[0]
+
+def test_search_graph():
+    from src.mcp.tools import search_graph
+    
+    # Test with a known entity (should find something in the graph)
+    result = search_graph("Logic")
+    assert isinstance(result, str)
+    assert len(result) > 0
+    
+    # Test with unknown entity
+    result_empty = search_graph("XylophoneUnicornSearch")
+    assert "No institutional relationships found" in result_empty

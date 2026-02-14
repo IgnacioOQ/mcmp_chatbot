@@ -178,3 +178,26 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
     # Sort by date
     results.sort(key=lambda x: x.get("date", "9999-99-99"))
     return results[:10]
+
+
+def search_graph(query: str) -> str:
+    """
+    Search the MCMP institutional graph for organizational relationships.
+    
+    Args:
+        query: Name of a person, chair, or organizational unit to search for
+               (e.g., "Hannes Leitgeb", "Chair of Logic", "Philosophy of Science").
+    
+    Returns:
+        A natural language description of the institutional relationships found.
+    """
+    from src.core.graph_utils import GraphUtils
+    
+    graph = GraphUtils()
+    subgraph = graph.get_subgraph(query)
+    result = graph.to_natural_language(subgraph)
+    
+    if not result:
+        return f"No institutional relationships found for '{query}'."
+    
+    return result

@@ -100,3 +100,16 @@
     - All 16 tests passed (including new persistence test).
     - `README.md` and `HOUSEKEEPING.md` updated.
     - System is fully operational with historical data preservation.
+
+### 2026-02-14: Remove RAG, Switch to MCP-Only Architecture (Antigravity)
+- **Task**: Remove the RAG pipeline (ChromaDB, embeddings, query decomposition) and switch to an MCP-only architecture.
+- **Rationale**: Datasets are small (~400 KB total). The RAG pipeline added latency (query decomposition LLM call + embedding + vector search) without proportional value. MCP tools provide direct, fast access to the same data.
+- **Changes**:
+    - **Deleted**: `src/core/vector_store.py`, `tests/test_vector_store.py`, `tests/verify_metadata.py`, `reproduce_truncation.py`.
+    - **Rewritten**: `src/core/engine.py` — `RAGEngine` → `ChatEngine`. Removed `decompose_query`, `retrieve_with_decomposition`, `VectorStore` init. MCP tools always enabled.
+    - **Added**: `search_graph()` tool in `src/mcp/tools.py` and registered it in `src/mcp/server.py`. Exposes institutional graph as an MCP tool.
+    - **Updated**: `app.py` — removed auto-refresh VectorStore block, MCP toggle, RAG references.
+    - **Updated**: `tests/test_engine.py` — rewritten for `ChatEngine`. `tests/test_mcp.py` — added `test_search_graph`.
+    - **Updated**: `requirements.txt` — removed `chromadb` dependency.
+    - **Updated**: `README.md` — replaced RAG architecture description with MCP-only architecture, updated Mermaid diagram and project structure.
+- **Outcome**: All 12 tests pass. Architecture simplified from 3-phase pipeline to direct LLM + MCP tools.
