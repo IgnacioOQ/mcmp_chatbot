@@ -19,8 +19,11 @@ The pipeline uses a `log_latency` context manager (`src/utils/logger.py`) that w
 | `total_generate_response` | `engine.py` | End-to-end time for a single request |
 | `load_personality` | `engine.py` | Reading `prompts/personality.md` from disk |
 | `build_tools` | `engine.py` | Building tool definitions + description strings |
+| `gemini_import` | `engine.py` | Lazy `from google import genai` (first request only) |
+| `gemini_client_init` | `engine.py` | `genai.Client()` instantiation |
 | `format_history` | `engine.py` | Converting chat history to provider format |
-| `llm_api_call` | `engine.py` | First LLM network call (all providers) |
+| `gemini_chat_create` | `engine.py` | `client.chats.create()` with config |
+| `llm_api_call` | `engine.py` | LLM network call — `chat.send_message()` / API call |
 | `llm_api_call_2` | `engine.py` | Second LLM call after tool results (OpenAI only) |
 | `tool:{name}` | `server.py` | Individual MCP tool execution (e.g., `tool:get_events`) |
 
@@ -30,14 +33,16 @@ The pipeline uses a `log_latency` context manager (`src/utils/logger.py`) that w
 grep "\[LATENCY\]" mcmp_chatbot.log
 ```
 
-Example output for a single request:
+Example output for a single Gemini request:
 ```
-[LATENCY] load_personality: 3.2ms
-[LATENCY] build_tools: 1.1ms
-[LATENCY] format_history: 0.8ms
-[LATENCY] tool:get_events: 87.3ms
-[LATENCY] llm_api_call: 2341.5ms
-[LATENCY] total_generate_response: 2476.2ms
+[LATENCY] load_personality: 0.7ms
+[LATENCY] build_tools: 0.0ms
+[LATENCY] gemini_import: 1939.4ms       ← first request only
+[LATENCY] gemini_client_init: 208.3ms
+[LATENCY] format_history: 0.0ms
+[LATENCY] gemini_chat_create: 0.3ms
+[LATENCY] llm_api_call: 2706.7ms
+[LATENCY] total_generate_response: 4856.7ms
 ```
 
 ### The `log_latency` Context Manager
@@ -67,16 +72,19 @@ User Query (app.py)
   v
 generate_response() [total_generate_response]
   |
-  +-- load_personality()      [load_personality]     ~3ms    (file I/O)
-  +-- build tool definitions  [build_tools]          ~1ms    (in-memory)
-  +-- format chat history     [format_history]       ~1ms    (in-memory)
-  +-- LLM API call            [llm_api_call]         ~1-3s   (network)
+  +-- load_personality()        [load_personality]     ~1ms      (file I/O)
+  +-- build tool definitions    [build_tools]          ~0ms      (in-memory)
+  +-- import google.genai       [gemini_import]        ~1900ms   (first request only!)
+  +-- create API client         [gemini_client_init]   ~200ms    (per request)
+  +-- format chat history       [format_history]       ~0ms      (in-memory)
+  +-- create chat session       [gemini_chat_create]   ~0ms      (in-memory)
+  +-- LLM API call              [llm_api_call]         ~2-3s     (network + inference)
   |     |
   |     +-- (Gemini auto-function-calling may trigger tool calls internally)
   |     +-- (OpenAI: explicit tool loop below)
   |
-  +-- Tool execution          [tool:{name}]          ~5-100ms (file I/O)
-  +-- LLM API call #2         [llm_api_call_2]       ~0.5-1.5s (network, OpenAI only)
+  +-- Tool execution            [tool:{name}]          ~5-100ms  (file I/O)
+  +-- LLM API call #2           [llm_api_call_2]       ~0.5-1.5s (network, OpenAI only)
 ```
 
 ### Provider Differences
@@ -89,13 +97,38 @@ generate_response() [total_generate_response]
 
 ---
 
-## 3. Known Bottlenecks
+## 3. Measured Baseline (2026-02-14)
+- status: active
+- last_checked: 2026-02-14
+<!-- content -->
+Measured with `gemini-2.0-flash`, no chat history, single query ("What is the next upcoming talk?"):
+
+| Stage | Time | % of Total | Notes |
+|:---|---:|---:|:---|
+| `gemini_import` | 1939ms | 39.9% | First request only (Python import of `google.genai`) |
+| `llm_api_call` | 2707ms | 55.7% | Network + LLM inference + auto tool calls |
+| `gemini_client_init` | 208ms | 4.3% | Creates `genai.Client()` per request |
+| `load_personality` | 0.7ms | <0.1% | Reads `personality.md` from disk |
+| `build_tools` | 0.0ms | <0.1% | In-memory tool definition building |
+| `format_history` | 0.0ms | <0.1% | No history on first message |
+| `gemini_chat_create` | 0.3ms | <0.1% | In-memory chat session creation |
+| **total_generate_response** | **4857ms** | **100%** | |
+
+> [!IMPORTANT]
+> On subsequent requests within the same process, `gemini_import` drops to ~0ms (Python caches imports). This means steady-state latency is ~3000ms, dominated by `llm_api_call`.
+
+> [!NOTE]
+> Gemini's `automatic_function_calling` executes tools internally. The `tool:{name}` entries from `server.py` will appear in the log, but their time is included within `llm_api_call`.
+
+---
+
+## 4. Known Bottlenecks
 - status: active
 <!-- content -->
 
-### A. LLM API Latency (1000-3000ms per call)
+### A. LLM API Latency (2000-3000ms per call)
 
-The dominant cost. Typically 50-70% of total request time.
+The dominant cost. Typically 55-70% of total request time on steady-state requests.
 
 **Factors:**
 - Model size (`gemini-2.0-flash` vs `gemini-2.0-flash-lite`)
@@ -123,13 +156,21 @@ Every MCP tool call loads its JSON file from disk via `load_data()`:
 
 `load_personality()` reads `prompts/personality.md` from disk on every request. The file is static and rarely changes.
 
-### D. Logging Overhead
+### D. Gemini SDK Import (~1900ms, first request only)
+
+The lazy `from google import genai` inside `generate_response()` takes ~2 seconds on the first call. Python caches the import for subsequent calls, so this only affects cold-start latency.
+
+### E. Gemini Client Init (~200ms per request)
+
+`genai.Client(api_key=...)` is created on every request. This involves internal SDK setup.
+
+### F. Logging Overhead
 
 Each `log_info()` call writes synchronously to both `mcmp_chatbot.log` (file) and stdout. Multiple log calls per request add up to ~20-60ms.
 
 ---
 
-## 4. Optimization Playbook
+## 5. Optimization Playbook
 - status: active
 <!-- content -->
 Ranked by impact (highest first). These are documented strategies for when latency becomes a problem.
@@ -158,7 +199,19 @@ Ranked by impact (highest first). These are documented strategies for when laten
 - **Action:** Read personality once at `ChatEngine.__init__` and store as `self.personality`.
 - **Trade-off:** Requires restart to pick up personality changes.
 
-### Priority 5: Limit Chat History Length
+### Priority 5: Move Gemini Import to Module Level
+
+- **Symptom:** `gemini_import` ~1900ms on first request.
+- **Action:** Move `from google import genai` and `from google.genai import types` to the top of `engine.py` (guarded with a try/except for environments without the SDK).
+- **Trade-off:** Slower module import time, but eliminates first-request penalty.
+
+### Priority 6: Cache Gemini Client
+
+- **Symptom:** `gemini_client_init` ~200ms on every request.
+- **Action:** Create `genai.Client()` once in `ChatEngine.__init__` and store as `self.gemini_client`.
+- **Trade-off:** Client may need recreation if API key changes (unlikely in production).
+
+### Priority 7: Limit Chat History Length
 
 - **Symptom:** `llm_api_call` grows linearly with conversation length.
 - **Action:** Cap `chat_history` to the last N messages (e.g., 10-20) before passing to the LLM.
@@ -166,7 +219,7 @@ Ranked by impact (highest first). These are documented strategies for when laten
 
 ---
 
-## 5. Adding New Instrumentation
+## 6. Adding New Instrumentation
 - status: active
 <!-- content -->
 When adding new pipeline stages or optimizing existing ones:
@@ -185,11 +238,12 @@ with log_latency("my_new_stage"):
 
 ---
 
-## 6. Verification
+## 7. Verification
 - status: active
 <!-- content -->
 - [x] `log_latency` context manager implemented in `src/utils/logger.py`
-- [x] `generate_response` instrumented with 5 stages in `src/core/engine.py`
+- [x] `generate_response` instrumented with 8 stages in `src/core/engine.py`
 - [x] `call_tool` instrumented per-tool in `src/mcp/server.py`
 - [x] All latency entries use `[LATENCY]` prefix for easy grep filtering
 - [x] No new dependencies (uses stdlib `time` and `contextlib`)
+- [x] Baseline measured: ~4.9s total (first request), ~3s steady-state (2026-02-14)

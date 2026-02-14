@@ -159,10 +159,12 @@ Current Date: {current_date}
                     return response.content[0].text
 
                 elif self.provider == "gemini":
-                    from google import genai
-                    from google.genai import types
+                    with log_latency("gemini_import"):
+                        from google import genai
+                        from google.genai import types
 
-                    client = genai.Client(api_key=self.api_key)
+                    with log_latency("gemini_client_init"):
+                        client = genai.Client(api_key=self.api_key)
 
                     # Convert chat history to Gemini format
                     with log_latency("format_history"):
@@ -174,18 +176,19 @@ Current Date: {current_date}
                                 elif msg["role"] == "assistant":
                                     gemini_history.append(types.Content(role="model", parts=[types.Part.from_text(text=msg["content"])]))
 
-                    chat = client.chats.create(
-                        model=model_name,
-                        config=types.GenerateContentConfig(
-                            system_instruction=final_system_instruction,
-                            tools=tools,
-                            automatic_function_calling=types.AutomaticFunctionCallingConfig(
-                                disable=False,
-                                maximum_remote_calls=5
-                            )
-                        ),
-                        history=gemini_history
-                    )
+                    with log_latency("gemini_chat_create"):
+                        chat = client.chats.create(
+                            model=model_name,
+                            config=types.GenerateContentConfig(
+                                system_instruction=final_system_instruction,
+                                tools=tools,
+                                automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                                    disable=False,
+                                    maximum_remote_calls=5
+                                )
+                            ),
+                            history=gemini_history
+                        )
 
                     with log_latency("llm_api_call"):
                         response = chat.send_message(query)
