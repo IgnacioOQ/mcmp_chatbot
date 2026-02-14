@@ -60,6 +60,41 @@ def _fetch_events_with_selenium(self, url):
 
 ---
 
+## Critical: UTF-8 Encoding
+
+> [!CAUTION]
+> The MCMP website serves UTF-8 content (smart quotes like `'`, em dashes, etc.), but `requests` may guess the wrong encoding from HTTP headers, causing **mojibake** (e.g., `'` → `â€™`).
+
+### Problem
+- `requests` defaults to `ISO-8859-1` for `text/html` when the server doesn't declare `charset=utf-8`
+- UTF-8 multi-byte characters (smart quotes, accented names) decode as garbage
+
+### Solution: `_get()` helper
+All HTTP requests go through `self._get(url)`, which forces `response.encoding = 'utf-8'` before `response.text` is accessed:
+```python
+def _get(self, url):
+    """Wrapper around requests.get that forces UTF-8 encoding."""
+    response = requests.get(url)
+    response.raise_for_status()
+    response.encoding = 'utf-8'
+    return response
+```
+
+> [!IMPORTANT]
+> **Never call `requests.get()` directly** in scraping methods. Always use `self._get()`.
+
+---
+
+## Incremental Scraping (Backward Compatibility)
+
+The scraper preserves historical data across runs using `_merge_and_save()`:
+- **Events and People**: Merged by URL key. Records from previous scrapes that no longer appear on the website are **retained**. Only matching URLs get updated.
+- **Research and General**: **Overwritten** each run (structural merge is too complex for hierarchical category data).
+
+This ensures a growing knowledge base where past events remain queryable even after they leave the website.
+
+---
+
 ## Implementation Patterns
 
 ### 1. Deduplication (URL-based)
@@ -157,3 +192,5 @@ match = re.search(r'(\d{1,2})\s+(\w+)\s+(\d{4})', date_text)
 - [x] Abstracts extracted from individual pages
 - [x] No duplicate URLs
 - [x] Dates in ISO format
+- [x] UTF-8 encoding enforced (no mojibake in smart quotes/accented characters)
+- [x] Past events/people preserved across scraper runs (incremental merge)

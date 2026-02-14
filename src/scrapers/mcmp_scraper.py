@@ -47,6 +47,13 @@ class MCMPScraper:
         self.general = []
         self.important_urls = self.load_important_urls()
 
+    def _get(self, url):
+        """Wrapper around requests.get that forces UTF-8 encoding."""
+        response = requests.get(url)
+        response.raise_for_status()
+        response.encoding = 'utf-8'
+        return response
+
     def _clean_text(self, text):
         """Removes common noise from scraped text."""
         if not text:
@@ -125,10 +132,9 @@ class MCMPScraper:
                 
             log_info(f"Starting static scrape of {source_url}")
             try:
-                response = requests.get(source_url)
-                response.raise_for_status()
+                response = self._get(source_url)
                 soup = BeautifulSoup(response.text, 'html.parser')
-                
+
                 # Primary method: Use CSS class for event links
                 event_links = soup.select('a.filterable-list__list-item-link.is-events')
                 
@@ -254,10 +260,9 @@ class MCMPScraper:
     def scrape_event_details(self, event):
         """Scrapes details for a single event with structured field extraction."""
         try:
-            response = requests.get(event['url'])
-            response.raise_for_status()
+            response = self._get(event['url'])
             soup = BeautifulSoup(response.text, 'html.parser')
-            
+
             metadata = {}
             
             # Extract speaker from main H1 (e.g., "Talk: Simon Saunders (Oxford)")
@@ -372,10 +377,9 @@ class MCMPScraper:
         for people_url in sources:
             log_info(f"Starting scrape of people from {people_url}")
             try:
-                response = requests.get(people_url)
-                response.raise_for_status()
+                response = self._get(people_url)
                 soup = BeautifulSoup(response.text, 'html.parser')
-                
+
                 person_links = soup.find_all('a', href=True)
                 profiles_to_visit = set()
 
@@ -421,10 +425,9 @@ class MCMPScraper:
             if url in [p['url'] for p in self.people]:
                 return
 
-            response = requests.get(url)
-            response.raise_for_status()
+            response = self._get(url)
             soup = BeautifulSoup(response.text, 'html.parser')
-            
+
             # Name
             name_elem = soup.find('h1', class_='header-person__name')
             name = name_elem.get_text(strip=True) if name_elem else "Unknown Person"
@@ -562,8 +565,7 @@ class MCMPScraper:
                 "structure": {"name": "Mathematical Philosophy", "keywords": ["mathematical", "formal"], "items": []} # Fallback
             }
 
-            response = requests.get(self.RESEARCH_URL)
-            response.raise_for_status()
+            response = self._get(self.RESEARCH_URL)
             soup = BeautifulSoup(response.text, 'html.parser')
             
             subpage_links = set()
@@ -630,10 +632,9 @@ class MCMPScraper:
     def _scrape_single_research_page(self, url):
         """Helper to scrape a specific research page. Returns dict or None."""
         try:
-            response = requests.get(url)
-            response.raise_for_status()
+            response = self._get(url)
             soup = BeautifulSoup(response.text, 'html.parser')
-            
+
             title_elem = soup.find('h1')
             title = title_elem.get_text(strip=True) if title_elem else "Research Project"
             
@@ -655,8 +656,7 @@ class MCMPScraper:
         home_url = f"{self.BASE_URL}/mcmp/en/index.html"
         log_info(f"Starting scrape of {home_url}")
         try:
-            response = requests.get(home_url)
-            response.raise_for_status()
+            response = self._get(home_url)
             soup = BeautifulSoup(response.text, 'html.parser')
             
             main_content = soup.find('div', id='r-main') or soup.find('main')
@@ -695,10 +695,9 @@ class MCMPScraper:
         url = f"{self.BASE_URL}/mcmp/en/events/index.html"
         log_info(f"Starting scrape of reading groups from {url}")
         try:
-            response = requests.get(url)
-            response.raise_for_status()
+            response = self._get(url)
             soup = BeautifulSoup(response.text, 'html.parser')
-            
+
             # Reading groups seem to be in an accordion or headers under "Reading groups" section
             # We look for the "Reading groups" header and then parse subsequent content
             
