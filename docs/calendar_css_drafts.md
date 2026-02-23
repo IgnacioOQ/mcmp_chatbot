@@ -158,6 +158,86 @@ This file stores different iterations and drafts for the Calendar UI CSS in `app
         st.markdown("---")
 ```
 
+## Draft 3: Native Streamlit Logic (Agent Refactor)
+- status: draft
+- type: code_snippet
+<!-- content -->
+```python
+        # Scoped, safe CSS to tighten the grid and style the container
+        st.markdown("""
+        <style>
+            /* Tighten column spacing for the calendar grid */
+            [data-testid="stSidebar"] [data-testid="column"] {
+                padding: 0 2px;
+            }
+            
+            /* Make calendar buttons perfectly square and uniform */
+            [data-testid="stSidebar"] button {
+                height: 40px !important;
+                padding: 0px !important;
+                border-radius: 8px !important;
+            }
+            
+            /* Subtle text styling for the native headers */
+            .day-header-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 8px;
+                padding: 0 10px;
+            }
+            .day-header-item {
+                color: #94a3b8;
+                font-weight: 600;
+                font-size: 12px;
+                width: 14%;
+                text-align: center;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="day-header-row">
+            <span class="day-header-item">Mo</span>
+            <span class="day-header-item">Tu</span>
+            <span class="day-header-item">We</span>
+            <span class="day-header-item">Th</span>
+            <span class="day-header-item">Fr</span>
+            <span class="day-header-item">Sa</span>
+            <span class="day-header-item">Su</span>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Build calendar grid natively
+        for week in month_days:
+            cols = st.columns(7)
+            for i, day in enumerate(week):
+                with cols[i]:
+                    if day == 0:
+                        # Empty placeholder to maintain grid structure
+                        st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
+                    else:
+                        is_today = (day == today.day and cal_month == today.month and cal_year == today.year)
+                        has_event = day in event_days
+                        
+                        # Determine button label and type
+                        # Using emoji or unicode dots is the safest way to indicate events in native Streamlit
+                        button_label = f"{day}\n🔵" if has_event else str(day)
+                        
+                        # Use primary button type to naturally highlight "today"
+                        btn_type = "primary" if is_today else "secondary"
+                        
+                        if st.button(
+                            button_label, 
+                            key=f"cal_{cal_year}_{cal_month}_{day}", 
+                            use_container_width=True,
+                            type=btn_type
+                        ):
+                            st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
+                            st.session_state.calendar_query_formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
+        
+        st.markdown("---")
+```
+
 ## Draft 2: Minimalist Bright (Alternative)
 - status: draft
 - type: code_snippet
