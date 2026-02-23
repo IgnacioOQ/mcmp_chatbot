@@ -159,78 +159,185 @@ def main():
         except:
             pass
         
-        # Scoped, safe CSS to tighten the grid and style the container
-        st.markdown("""
+        # ─────────────────────────────────────────────────────────────
+        # CALENDAR CSS
+        # Minimal & clean dark theme with blue/cyan accents.
+        # Key improvements:
+        #   - More breathing room: larger padding, taller buttons
+        #   - Subtle card background instead of heavy glassmorphism
+        #   - Day buttons have a soft hover lift instead of flat nothing
+        #   - Today gets a solid cyan pill — impossible to miss
+        #   - Event days use a bordered badge feel, not a gradient blob
+        # ─────────────────────────────────────────────────────────────
+        CALENDAR_CSS = """
         <style>
-            /* Tighten column spacing for the calendar grid */
-            [data-testid="stSidebar"] [data-testid="column"] {
-                padding: 0 2px;
-            }
-            
-            /* Make calendar buttons perfectly square and uniform */
-            [data-testid="stSidebar"] button {
-                height: 40px !important;
-                padding: 0px !important;
-                border-radius: 8px !important;
-            }
-            
-            /* Subtle text styling for the native headers */
-            .day-header-row {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 8px;
-                padding: 0 10px;
-            }
-            .day-header-item {
-                color: #94a3b8;
-                font-weight: 600;
-                font-size: 12px;
-                width: 14%;
-                text-align: center;
-            }
+
+        /* ── Outer card ───────────────────────────────────────────── */
+        .calendar-wrapper {
+            background: #0f172a;               /* slate-900: clean, not muddy */
+            border: 1px solid #1e293b;         /* slate-800 border — just enough definition */
+            border-radius: 14px;
+            padding: 20px 16px 12px 16px;      /* extra top padding for breathing room */
+            margin-bottom: 16px;
+        }
+
+        /* ── Day-of-week header row ───────────────────────────────── */
+        .day-headers {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #1e293b;  /* thin separator, not a wall */
+        }
+        .day-header {
+            flex: 1;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: #475569;                    /* slate-600: muted, not distracting */
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+        }
+
+        /* ── Base style for ALL calendar day buttons ──────────────── */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button {
+            background: transparent !important;
+            border: 1px solid transparent !important;
+            color: #94a3b8 !important;         /* slate-400: readable but secondary */
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            min-height: 44px !important;       /* taller = less cramped */
+            height: 44px !important;
+            border-radius: 10px !important;
+            transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease !important;
+        }
+
+        /* Hover: subtle background lift so buttons feel alive */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button:hover {
+            background: #1e293b !important;    /* slate-800 */
+            color: #e2e8f0 !important;
+            transform: translateY(-1px) !important;
+            border-color: #334155 !important;  /* slate-700 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+        }
+
+        /* Disabled (empty day padding) — invisible, takes no attention */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button:disabled {
+            opacity: 0 !important;
+            cursor: default !important;
+            pointer-events: none !important;
+        }
+
+        /* ── Event day buttons ────────────────────────────────────── */
+        /* Badge-style: cyan border + tinted background */
+        [data-testid="stSidebar"] .event-day-btn button {
+            background: rgba(6, 182, 212, 0.08) !important;   /* cyan-500 at 8% */
+            border: 1px solid rgba(6, 182, 212, 0.35) !important;
+            color: #67e8f9 !important;                         /* cyan-300 */
+            font-weight: 600 !important;
+        }
+        [data-testid="stSidebar"] .event-day-btn button:hover {
+            background: rgba(6, 182, 212, 0.16) !important;
+            border-color: rgba(6, 182, 212, 0.6) !important;
+            box-shadow: 0 2px 12px rgba(6, 182, 212, 0.15) !important;
+        }
+
+        /* ── Today button ─────────────────────────────────────────── */
+        /* Solid cyan pill — clear, clean, unmistakable */
+        [data-testid="stSidebar"] .today-btn button {
+            background: #0891b2 !important;    /* cyan-600 */
+            border: none !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.2) !important;  /* soft glow ring */
+        }
+        [data-testid="stSidebar"] .today-btn button:hover {
+            background: #0e7490 !important;    /* cyan-700 on hover */
+            box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.3) !important;
+            transform: translateY(-1px) !important;
+        }
+
         </style>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class="day-header-row">
-            <span class="day-header-item">Mo</span>
-            <span class="day-header-item">Tu</span>
-            <span class="day-header-item">We</span>
-            <span class="day-header-item">Th</span>
-            <span class="day-header-item">Fr</span>
-            <span class="day-header-item">Sa</span>
-            <span class="day-header-item">Su</span>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Build calendar grid natively
+        """
+
+        # ─────────────────────────────────────────────────────────────
+        # CALENDAR HEADER HTML
+        # Simple day-name row, wrapped in the card container.
+        # ─────────────────────────────────────────────────────────────
+        CALENDAR_HEADER_HTML = """
+        <div class="calendar-wrapper">
+            <div class="day-headers">
+                <span class="day-header">Mo</span>
+                <span class="day-header">Tu</span>
+                <span class="day-header">We</span>
+                <span class="day-header">Th</span>
+                <span class="day-header">Fr</span>
+                <span class="day-header">Sa</span>
+                <span class="day-header">Su</span>
+            </div>
+        """
+
+        # 1. Inject the CSS once per render
+        st.markdown(CALENDAR_CSS, unsafe_allow_html=True)
+
+        # 2. Render the header card (day names)
+        st.markdown(CALENDAR_HEADER_HTML, unsafe_allow_html=True)
+
+        # 3. Build the day grid — one Streamlit row per calendar week
         for week in month_days:
-            cols = st.columns(7)
+            cols = st.columns(7)  # 7 equal columns, one per day of week
+
             for i, day in enumerate(week):
                 with cols[i]:
+
+                    # Empty slot (day == 0 means the month hasn't started / already ended)
                     if day == 0:
-                        # Empty placeholder to maintain grid structure
-                        st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
+                        # A disabled button keeps column widths consistent
+                        st.button(" ", key=f"cal_empty_{cal_year}_{cal_month}_{i}_{day}",
+                                  use_container_width=True, disabled=True)
+                        continue
+
+                    # Determine what kind of day this is
+                    is_today = (
+                        day == today.day
+                        and cal_month == today.month
+                        and cal_year == today.year
+                    )
+                    has_event = day in event_days
+
+                    # Build the CSS wrapper class(es) — order matters for specificity
+                    css_classes = []
+                    if has_event:
+                        css_classes.append("event-day-btn")
+                    if is_today:
+                        css_classes.append("today-btn")
+
+                    wrapper_class = " ".join(css_classes)
+
+                    # Wrap button in a div so our CSS class selectors can target it
+                    if wrapper_class:
+                        st.markdown(f'<div class="{wrapper_class}">', unsafe_allow_html=True)
+
+                    # Render the button — clickable only if it has an event
+                    if has_event:
+                        if st.button(str(day), key=f"cal_{cal_year}_{cal_month}_{day}",
+                                     use_container_width=True):
+                            # Store the selected date in session state for downstream use
+                            st.session_state.calendar_query_date = (
+                                f"{cal_year}-{cal_month:02d}-{day:02d}"
+                            )
+                            st.session_state.calendar_query_formatted = (
+                                datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
+                            )
                     else:
-                        is_today = (day == today.day and cal_month == today.month and cal_year == today.year)
-                        has_event = day in event_days
-                        
-                        # Determine button label and type
-                        # Using emoji or unicode dots is the safest way to indicate events in native Streamlit
-                        button_label = f"{day}\n🔵" if has_event else str(day)
-                        
-                        # Use primary button type to naturally highlight "today"
-                        btn_type = "primary" if is_today else "secondary"
-                        
-                        if st.button(
-                            button_label, 
-                            key=f"cal_{cal_year}_{cal_month}_{day}", 
-                            use_container_width=True,
-                            type=btn_type
-                        ):
-                            st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
-                            st.session_state.calendar_query_formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
-        
+                        # Non-event days are shown but not interactive
+                        st.button(str(day), key=f"cal_{cal_year}_{cal_month}_{day}",
+                                  use_container_width=True, disabled=True)
+
+                    if wrapper_class:
+                        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("---")
         
         # 2. Feedback form
