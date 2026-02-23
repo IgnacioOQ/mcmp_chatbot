@@ -245,86 +245,110 @@ def main():
 
         st.markdown("---")
         
-        # 3. Events this week
-        st.header("📆 Events this Week")
+        # 3. News & Events this week
+        st.header("📆 News & Events this Week")
         
-        # Load and filter events
+        # Load and filter events and news
         try:
-            with open("data/raw_events.json", "r") as f:
-                raw_events = json.load(f)
-            
             today = datetime.now().date()
             start_of_week = today - timedelta(days=today.weekday())
             end_of_week = start_of_week + timedelta(days=6)
             
-            events_this_week = []
+            items_this_week = []
             
-            for event in raw_events:
-                meta = event.get("metadata", {})
-                date_str = meta.get("date")
-                if not date_str:
-                    continue
-                    
-                try:
-                    event_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-                    if start_of_week <= event_date <= end_of_week:
-                        # Enhanced speaker extraction
-                        speaker = meta.get("speaker")
-                        title = event.get("title", "Untitled")
+            # --- Load Events ---
+            try:
+                with open("data/raw_events.json", "r") as f:
+                    raw_events = json.load(f)
+                
+                for event in raw_events:
+                    meta = event.get("metadata", {})
+                    date_str = meta.get("date")
+                    if not date_str:
+                        continue
                         
-                        if not speaker or speaker == "Unknown Speaker":
-                            # Heuristic: "Talk: [Speaker Name]" or "Talk (Info): [Speaker Name]"
-                            if "Talk" in title and ":" in title:
+                    try:
+                        event_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                        if start_of_week <= event_date <= end_of_week:
+                            speaker = meta.get("speaker")
+                            title = event.get("title", "Untitled")
+                            
+                            if not speaker or speaker == "Unknown Speaker":
+                                if "Talk" in title and ":" in title:
+                                    try:
+                                        parts = title.split(":", 1)
+                                        if len(parts) > 1:
+                                            speaker = parts[1].strip()
+                                    except: pass
+                            if not speaker: speaker = "Unknown Speaker"
+                            
+                            description = event.get("description", "")
+                            if "Title:\n" in description:
                                 try:
-                                    # Split by first colon and strip
-                                    parts = title.split(":", 1)
-                                    if len(parts) > 1:
-                                        speaker = parts[1].strip()
-                                except:
-                                    pass
-                        
-                        if not speaker:
-                             speaker = "Unknown Speaker"
+                                    part_after = description.split("Title:\n", 1)[1]
+                                    if "Abstract" in part_after:
+                                        real_title = part_after.split("Abstract", 1)[0].strip()
+                                        if real_title:
+                                            title = real_title.replace("\n", " ")
+                                except: pass
 
-                        # Enhanced title extraction from description
-                        description = event.get("description", "")
-                        if "Title:\n" in description:
-                            try:
-                                # Extract text after "Title:\n"
-                                part_after = description.split("Title:\n", 1)[1]
-                                # Stop at "Abstract"
-                                if "Abstract" in part_after:
-                                    real_title = part_after.split("Abstract", 1)[0].strip()
-                                    # Clean up newlines if it spans multiple lines
-                                    if real_title:
-                                        title = real_title.replace("\n", " ")
-                            except:
-                                pass
+                            items_this_week.append({
+                                "type": "Event",
+                                "title": title,
+                                "speaker": speaker,
+                                "date": event_date,
+                                "time": meta.get("time_start", "Time TBA"),
+                                "url": event.get("url", "#")
+                            })
+                    except ValueError:
+                        continue
+            except FileNotFoundError:
+                pass
 
-                        events_this_week.append({
-                            "title": title,
-                            "speaker": speaker,
-                            "date": event_date,
-                            "time": meta.get("time_start", "Time TBA"),
-                            "url": event.get("url", "#")
-                        })
-                except ValueError:
-                    continue
+            # --- Load News ---
+            try:
+                with open("data/news.json", "r") as f:
+                    raw_news = json.load(f)
+                    
+                for news in raw_news:
+                    meta = news.get("metadata", {})
+                    date_str = meta.get("date")
+                    if not date_str: continue
+                    
+                    try:
+                        news_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                        # We also include news published this week
+                        if start_of_week <= news_date <= end_of_week:
+                            items_this_week.append({
+                                "type": "News",
+                                "title": news.get("title", "News"),
+                                "date": news_date,
+                                "url": news.get("url", "#")
+                            })
+                    except ValueError:
+                        continue
+            except FileNotFoundError:
+                pass
             
-            events_this_week.sort(key=lambda x: x["date"])
+            items_this_week.sort(key=lambda x: x["date"])
             
-            if not events_this_week:
-                st.info("No events scheduled for this week.")
+            if not items_this_week:
+                st.info("No news or events scheduled for this week.")
             else:
-                for ev in events_this_week:
-                    date_fmt = ev["date"].strftime("%A, %d")
-                    st.markdown(f"**{ev['speaker']}**")
-                    st.markdown(f"[{ev['title']}]({ev['url']})")
-                    st.caption(f"📅 {date_fmt} at {ev['time']}")
+                for item in items_this_week:
+                    date_fmt = item["date"].strftime("%A, %d")
+                    if item["type"] == "Event":
+                        st.markdown(f"🗓️ **Event: {item['speaker']}**")
+                        st.markdown(f"[{item['title']}]({item['url']})")
+                        st.caption(f"📅 {date_fmt} at {item['time']}")
+                    else:
+                        st.markdown(f"📰 **News**")
+                        st.markdown(f"[{item['title']}]({item['url']})")
+                        st.caption(f"📅 published {date_fmt}")
                     st.markdown("---")
             
         except Exception as e:
-            st.error(f"Could not load events: {e}")
+            st.error(f"Could not load items: {e}")
 
         st.markdown("---")
         
