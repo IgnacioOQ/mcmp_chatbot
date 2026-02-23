@@ -903,26 +903,46 @@ class MCMPScraper:
             json.dump(full_people, f, indent=4, ensure_ascii=False)
             
         # Merge and Save Research
-        # Research structure is hierarchical, merging is trickier. 
-        # For now, we'll try to merge flat projects if possible, but the current structure is categories.
-        # IF research.json is a list of categories, we might just overwrite for now OR 
-        # we have to flatten, merge, and rebuild. 
-        # Given the complexity, let's just overwrite Research/General for now unless requested, 
-        # OR attempt a simple merge if the structure allows.
-        # Actually, research is critical. Let's start with overwrite for Research/General 
-        # to ensure structure integrity, as they are less transient than events.
-        # CHECK: User asked for "past scrapings", usually implies events/people.
-        # Let's apply merge to all if possible.
-        
-        # Research is a list of categories. 
-        # Merging logic for categories is hard. Let's overwrite research for now to avoid duplication bugs.
+        if os.path.exists("data/research.json"):
+            try:
+                with open("data/research.json", 'r', encoding='utf-8') as f:
+                    old_research = json.load(f)
+                
+                old_cats = {c.get("id"): c for c in old_research}
+                new_cats = {c.get("id"): c for c in self.research}
+                
+                for cat_id, new_cat in new_cats.items():
+                    if cat_id in old_cats:
+                        old_cat = old_cats[cat_id]
+                        
+                        # Merge projects preserving old ones
+                        old_projects = {p.get("url", p.get("title")): p for p in old_cat.get("projects", [])}
+                        for p in new_cat.get("projects", []):
+                            key = p.get("url", p.get("title"))
+                            old_projects[key] = p
+                        new_cat["projects"] = list(old_projects.values())
+                        
+                        # Merge subtopics
+                        old_subtopics = set(old_cat.get("subtopics", []))
+                        old_subtopics.update(new_cat.get("subtopics", []))
+                        new_cat["subtopics"] = list(old_subtopics)
+                        
+                # Keep old categories not in new scrape
+                for cat_id, old_cat in old_cats.items():
+                    if cat_id not in new_cats:
+                        new_cats[cat_id] = old_cat
+                        
+                self.research = list(new_cats.values())
+            except Exception as e:
+                log_error(f"Error merging research: {e}")
+
         with open("data/research.json", 'w', encoding='utf-8') as f:
             json.dump(self.research, f, indent=4, ensure_ascii=False)
 
         # General info (often static or changing in place)
-        # We can overwrite or merge by title.
+        full_general = self._merge_and_save("data/general.json", self.general, "title")
         with open("data/general.json", 'w', encoding='utf-8') as f:
-            json.dump(self.general, f, indent=4, ensure_ascii=False)
+            json.dump(full_general, f, indent=4, ensure_ascii=False)
 
         # Merge and Save News
         full_news = self._merge_and_save("data/news.json", self.news, "url")
@@ -930,7 +950,7 @@ class MCMPScraper:
             json.dump(full_news, f, indent=4, ensure_ascii=False)
 
         log_info(f"Saved (Merged) {len(full_events)} events, {len(full_people)} people, {len(full_news)} news.")
-        log_info(f"Saved {len(self.research)} research categories, {len(self.general)} general items.")
+        log_info(f"Saved {len(self.research)} research categories, {len(full_general)} general items.")
         
         # Auto-update Graph
         try:

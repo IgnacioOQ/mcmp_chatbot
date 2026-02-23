@@ -254,3 +254,27 @@ Exposed as `search_news(query)` — searches titles and descriptions. Separate f
 - [x] Past events/people preserved across scraper runs (incremental merge)
 - [x] News items scraped from JSON API (bypasses JS-rendered newsboard)
 - [x] News stored separately in `data/news.json` with incremental merge
+
+---
+
+## Dataset Size Tracking
+
+> [!IMPORTANT]
+> To monitor the growth of the knowledge base, agents must log the file sizes of the generated datasets into `AGENT_LOGS.md` after running the scraper.
+
+### Logging Protocol
+After successfully executing `scripts/update_dataset.py`, follow these steps:
+1. Examine the file sizes of the primary datasets located in `data/`.
+2. Inspect the JSON files to count the total number of top-level entries (e.g., number of events, number of people) in each. Compare this to the previous run to note if new entries were added.
+3. Open `AGENT_LOGS.md` and locate the `## Dataset Size History` section.
+4. Append a new entry with the current date, the sizes (in KB/MB), the exact entry counts, and a note indicating `(+X new)` if applicable.
+
+Example format for `AGENT_LOGS.md`:
+```markdown
+### [YYYY-MM-DD]
+- events.json: 85 KB (51 entries, +2 new)
+- people.json: 210 KB (80 entries, +0 new)
+- research.json: 45 KB (4 entries, +0 new)
+- general.json: 12 KB (6 entries, +0 new)
+- news.json: 30 KB (8 entries, +1 new)
+```
