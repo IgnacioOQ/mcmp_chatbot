@@ -1,6 +1,7 @@
 # Event Scraper Implementation Guide
 - status: active
-- type: guideline
+- type: agent_skill
+- label: [agent]
 <!-- content -->
 
 This document defines the implementation patterns for the MCMP event scraper, including critical lessons learned from production usage.
