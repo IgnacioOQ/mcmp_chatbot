@@ -162,67 +162,93 @@ def main():
         # Custom CSS for calendar styling
         st.markdown("""
         <style>
-        /* Calendar container styling */
+        /* Modern Glassmorphic Calendar Container */
         .calendar-wrapper {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 8px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
-        /* Style the day header row */
+        
+        /* Day Headers */
         .day-headers {
             display: flex;
             justify-content: space-around;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
         }
         .day-header {
             flex: 1;
             text-align: center;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 11px;
-            color: #8892b0;
+            color: #94a3b8;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 6px 0;
+            letter-spacing: 1px;
         }
-        /* Base style for ALL calendar buttons (enabled and disabled) */
-        /* Increased specificity to ensure it applies, but allowing overrides */
+        
+        /* Premium Button Styling for ALL calendar buttons */
         [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button {
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            background: #1a1a2e !important;    /* Dark background fixes Light Mode contrast */
-            color: #ccd6f6 !important;
-            font-size: 13px !important;
+            border: 1px solid transparent !important;
+            background: rgba(255, 255, 255, 0.02) !important;
+            color: #f8fafc !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
             padding: 8px 4px !important;
-            min-height: 36px !important;
-            height: 36px !important;
-            line-height: 20px !important;
-            border-radius: 4px !important;
+            min-height: 40px !important;
+            height: 40px !important;
+            line-height: 22px !important;
+            border-radius: 10px !important;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
-        /* Ensure disabled buttons look the same height */
+        
+        /* Hover state for interactive buttons */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Disabled buttons (empty days) */
         [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button:disabled {
-            opacity: 0.5 !important;
+            opacity: 0.3 !important;
             cursor: default !important;
-            background: #161625 !important; /* Slightly distinct for disabled */
+            background: transparent !important;
+            transform: none !important;
+            box-shadow: none !important;
         }
-        /* Event day buttons - consistent dark teal base */
+        
+        /* Event day buttons - Elegant Primary Gradient */
         [data-testid="stSidebar"] .event-day-btn button {
-            background: #1a2f2f !important;    /* Dark Teal background */
-            border: 1px solid rgba(100, 255, 218, 0.5) !important;
-            color: #64ffda !important;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(236, 72, 153, 0.15) 100%) !important;
+            border: 1px solid rgba(99, 102, 241, 0.3) !important;
+            color: #e0e7ff !important;
             font-weight: 600 !important;
             opacity: 1 !important;
         }
         [data-testid="stSidebar"] .event-day-btn button:hover {
-            background: #234545 !important;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(236, 72, 153, 0.25) 100%) !important;
+            border: 1px solid rgba(99, 102, 241, 0.5) !important;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2) !important;
         }
-        /* Today highlight */
+        
+        /* Today highlight - Vibrant Solid Gradient */
         [data-testid="stSidebar"] .today-btn button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            color: #fff !important;
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%) !important;
+            color: #ffffff !important;
             font-weight: 700 !important;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4) !important;
-            opacity: 1 !important;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4) !important;
             border: none !important;
+            opacity: 1 !important;
+        }
+        [data-testid="stSidebar"] .today-btn button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5) !important;
         }
         </style>
         """, unsafe_allow_html=True)
