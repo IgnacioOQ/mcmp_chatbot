@@ -329,16 +329,8 @@ def main():
         st.markdown("---")
         
         # 4. Configuration at the bottom
-        st.header("⚙️ Configuration")
-        
-        # Model Selection
-        model_choice = st.radio(
-            "Select Model",
-            options=["gemini-2.0-flash", "gemini-2.0-flash-lite"],
-            index=0,
-            format_func=lambda x: "Gemini 2.0 Flash (Balanced)" if x == "gemini-2.0-flash" else "Gemini 2.0 Flash-Lite (Economy)",
-            help="Flash is better for complex queries. Flash-Lite is cheaper but still powerful."
-        )
+        # Configuration UI removed - defaulting to Gemini 2.0 Flash
+        model_choice = "gemini-2.0-flash"
 
     # Initialize ChatEngine
     if "engine" not in st.session_state:
