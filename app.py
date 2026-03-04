@@ -69,6 +69,16 @@ def save_feedback(name, feedback):
     with open(feedback_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
+
+@st.cache_data
+def load_json_data(filepath):
+    try:
+        with open(filepath, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+
 def main():
     st.set_page_config(
         page_title="Leopold - The MCMP Chatbot",
@@ -145,8 +155,7 @@ def main():
         # Load events to highlight days with events
         event_days = set()
         try:
-            with open("data/raw_events.json", "r") as f:
-                raw_events = json.load(f)
+            raw_events = load_json_data("data/raw_events.json")
             for event in raw_events:
                 date_str = event.get("metadata", {}).get("date")
                 if date_str:
@@ -258,8 +267,7 @@ def main():
             
             # --- Load Events ---
             try:
-                with open("data/raw_events.json", "r") as f:
-                    raw_events = json.load(f)
+                raw_events = load_json_data("data/raw_events.json")
                 
                 for event in raw_events:
                     meta = event.get("metadata", {})
@@ -307,8 +315,7 @@ def main():
 
             # --- Load News ---
             try:
-                with open("data/news.json", "r") as f:
-                    raw_news = json.load(f)
+                raw_news = load_json_data("data/news.json")
                     
                 for news in raw_news:
                     meta = news.get("metadata", {})
