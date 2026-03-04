@@ -87,6 +87,16 @@ def save_feedback(name, feedback):
     with open(feedback_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
+
+@st.cache_data
+def load_json_data(filepath):
+    try:
+        with open(filepath, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+
 def main():
     st.set_page_config(
         page_title="Leopold - The MCMP Chatbot",
