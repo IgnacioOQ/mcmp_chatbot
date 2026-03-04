@@ -19,17 +19,16 @@ def normalize_id(name):
     name = re.sub(r'[^a-z0-9_]', '', name)
     return name
 
-def extract_role(description):
+def extract_role(description, raw_name=""):
     description = description.lower()
+    raw_name = raw_name.lower()
+
     if "chair" in description and "co-director" in description:
         return "Chair & Co-Director"
-    if "chair" in description and "director" not in description and "secretary" not in description and "fellow" not in description:
-        # Check if they are THE chair (Prof.)
-        if "prof." in description or "professor" in description:
-             pass # heuristic, might be Assistant Prof.
     
     roles = [
         "co-director",
+        "adjunct professor",
         "assistant professor",
         "postdoctoral researcher",
         "postdoctoral fellow",
@@ -39,16 +38,24 @@ def extract_role(description):
         "visiting fellow",
         "visiting researcher",
         "research fellow",
+        "research associate",
         "secretary",
         "administration",
         "student assistant",
         "emeritus",
-        "chair", # Moved to bottom to avoid matching "Chair of X" when a more specific role exists
     ]
     
     for r in roles:
         if r in description:
             return r.title()
+
+    if "chair" in description and "director" not in description and "secretary" not in description and "fellow" not in description:
+        # Check if they are THE chair (Prof.)
+        is_prof = "prof." in raw_name or "professor" in description
+        is_subordinate = any(x in description for x in ["assistant", "visiting", "adjunct", "associate", "emeritus", "akademischer"])
+        if is_prof and not is_subordinate:
+            return "Chair"
+
     return "Member"
 
 def extract_chair(description):
@@ -116,7 +123,7 @@ def run():
         person_id_map[raw_name] = pid
         
         description = p.get('description', '')
-        role = extract_role(description)
+        role = extract_role(description, raw_name)
         
         # Add Node
         nodes.append({
