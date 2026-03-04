@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import json
 from datetime import datetime, timedelta
-from src.core.engine import ChatEngine
+from src.core.engine import RAGEngine
 from src.utils.logger import log_info, log_error
 
 @st.cache_data
@@ -10,15 +10,6 @@ def load_raw_events():
     """Cached loader for events data to reduce disk I/O."""
     try:
         with open("data/raw_events.json", "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
-
-@st.cache_data
-def load_news():
-    """Cached loader for news data to reduce disk I/O."""
-    try:
-        with open("data/news.json", "r") as f:
             return json.load(f)
     except FileNotFoundError:
         return []
@@ -87,16 +78,6 @@ def save_feedback(name, feedback):
     with open(feedback_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
-
-@st.cache_data
-def load_json_data(filepath):
-    try:
-        with open(filepath, "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
-
-
 def main():
     st.set_page_config(
         page_title="Leopold - The MCMP Chatbot",
@@ -125,9 +106,30 @@ def main():
     """, unsafe_allow_html=True)
 
     st.title("Leopold - The MCMP Chatbot")
-    st.markdown("Ask me anything about the Munich Center for Mathematical Philosophy: our research, people, history, and upcoming events.\n\nThis chatbot uses LLM + structured data tools over the MCMP website ([README](https://github.com/IgnacioOQ/mcmp_chatbot/blob/main/README.md)). It is still very much a demo and it will lack knowledge, but it should be able to provide accurate and up to date information.\n\nPlease use the feedback form on the left to leave comments, it will help improve the bot.")
+    st.markdown("Ask me anything about the Munich Center for Mathematical Philosophy: our research, people, history, and upcoming events.\n\nThis is basically Retrieval-Augmented Generation (RAG) + Web scraping ([README](https://github.com/IgnacioOQ/mcmp_chatbot/blob/main/README.md)). It is still very much a demo and it will lack knowledge, but it should be able to provide accurate and up to date information. It is also a little slow, but it gets the job done.\n\nPlease use the feedback form on the left to leave comments, it will help improve the bot.")
 
+    # Auto-refresh check
+    RAW_DATA_PATH = "data/raw_events.json"
+    needs_refresh = False
+    if not os.path.exists(RAW_DATA_PATH):
+        needs_refresh = True
+    else:
+        # If older than 24 hours
+        mtime = os.path.getmtime(RAW_DATA_PATH)
+        if (datetime.now().timestamp() - mtime) > 86400:
+            needs_refresh = True
 
+    if needs_refresh and "auto_refreshed" not in st.session_state:
+        with st.status("Initializing knowledge base..."):
+            from src.scrapers.mcmp_scraper import MCMPScraper
+            from src.core.vector_store import VectorStore
+            scraper = MCMPScraper()
+            scraper.scrape_events()
+            scraper.save_to_json()
+            vs = VectorStore()
+            vs.add_events()
+            st.session_state.auto_refreshed = True
+            st.rerun()
 
     # Sidebar for configuration
     with st.sidebar:
@@ -183,77 +185,123 @@ def main():
                 except ValueError:
                     pass
         
-        # Scoped, safe CSS to tighten the grid and style the container
+        # Custom CSS for calendar styling
         st.markdown("""
         <style>
-            /* Tighten column spacing for the calendar grid */
-            [data-testid="stSidebar"] [data-testid="column"] {
-                padding: 0 2px;
-            }
-            
-            /* Make calendar buttons perfectly square and uniform */
-            [data-testid="stSidebar"] button {
-                height: 40px !important;
-                padding: 0px !important;
-                border-radius: 8px !important;
-            }
-            
-            /* Subtle text styling for the native headers */
-            .day-header-row {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 8px;
-                padding: 0 10px;
-            }
-            .day-header-item {
-                color: #94a3b8;
-                font-weight: 600;
-                font-size: 12px;
-                width: 14%;
-                text-align: center;
-            }
+        /* Calendar container styling */
+        .calendar-wrapper {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        /* Style the day header row */
+        .day-headers {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 8px;
+        }
+        .day-header {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+            font-size: 11px;
+            color: #8892b0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 6px 0;
+        }
+        /* Base style for ALL calendar buttons (enabled and disabled) */
+        /* Increased specificity to ensure it applies, but allowing overrides */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button {
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            background: #1a1a2e !important;    /* Dark background fixes Light Mode contrast */
+            color: #ccd6f6 !important;
+            font-size: 13px !important;
+            padding: 8px 4px !important;
+            min-height: 36px !important;
+            height: 36px !important;
+            line-height: 20px !important;
+            border-radius: 4px !important;
+        }
+        /* Ensure disabled buttons look the same height */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button:disabled {
+            opacity: 0.5 !important;
+            cursor: default !important;
+            background: #161625 !important; /* Slightly distinct for disabled */
+        }
+        /* Event day buttons - consistent dark teal base */
+        [data-testid="stSidebar"] .event-day-btn button {
+            background: #1a2f2f !important;    /* Dark Teal background */
+            border: 1px solid rgba(100, 255, 218, 0.5) !important;
+            color: #64ffda !important;
+            font-weight: 600 !important;
+            opacity: 1 !important;
+        }
+        [data-testid="stSidebar"] .event-day-btn button:hover {
+            background: #234545 !important;
+        }
+        /* Today highlight */
+        [data-testid="stSidebar"] .today-btn button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4) !important;
+            opacity: 1 !important;
+            border: none !important;
+        }
         </style>
         """, unsafe_allow_html=True)
         
+        # Calendar header
         st.markdown("""
-        <div class="day-header-row">
-            <span class="day-header-item">Mo</span>
-            <span class="day-header-item">Tu</span>
-            <span class="day-header-item">We</span>
-            <span class="day-header-item">Th</span>
-            <span class="day-header-item">Fr</span>
-            <span class="day-header-item">Sa</span>
-            <span class="day-header-item">Su</span>
+        <div class="calendar-wrapper">
+            <div class="day-headers">
+                <span class="day-header">Mo</span>
+                <span class="day-header">Tu</span>
+                <span class="day-header">We</span>
+                <span class="day-header">Th</span>
+                <span class="day-header">Fr</span>
+                <span class="day-header">Sa</span>
+                <span class="day-header">Su</span>
+            </div>
         </div>
         """, unsafe_allow_html=True)
         
-        # Build calendar grid natively
+        # Build calendar grid using native Streamlit columns
         for week in month_days:
             cols = st.columns(7)
             for i, day in enumerate(week):
                 with cols[i]:
                     if day == 0:
-                        # Empty placeholder to maintain grid structure
-                        st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
+                        st.markdown("<div style='height: 36px;'></div>", unsafe_allow_html=True)
                     else:
-                        is_today = (day == today.day and cal_month == today.month and cal_year == today.year)
+                        is_today = day == today.day and cal_month == today.month and cal_year == today.year
                         has_event = day in event_days
                         
-                        # Determine button label and type
-                        # Using emoji or unicode dots is the safest way to indicate events in native Streamlit
-                        button_label = f"{day}\n🔵" if has_event else str(day)
+                        # Apply CSS class wrapper for styling
+                        if has_event and is_today:
+                            wrapper_class = "event-day-btn today-btn"
+                        elif has_event:
+                            wrapper_class = "event-day-btn"
+                        elif is_today:
+                            wrapper_class = "today-btn"
+                        else:
+                            wrapper_class = ""
+
+                        if wrapper_class:
+                            st.markdown(f'<div class="{wrapper_class}">', unsafe_allow_html=True)
                         
-                        # Use primary button type to naturally highlight "today"
-                        btn_type = "primary" if is_today else "secondary"
+                        if has_event:
+                            if st.button(f"{day}", key=f"cal_{cal_year}_{cal_month}_{day}", use_container_width=True):
+                                st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
+                                st.session_state.calendar_query_formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
+                        else:
+                            # Non-clickable day - just show the number
+                            st.button(f"{day}", key=f"cal_{cal_year}_{cal_month}_{day}", use_container_width=True, disabled=True)
                         
-                        if st.button(
-                            button_label, 
-                            key=f"cal_{cal_year}_{cal_month}_{day}", 
-                            use_container_width=True,
-                            type=btn_type
-                        ):
-                            st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
-                            st.session_state.calendar_query_formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
+                        if wrapper_class:
+                            st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("---")
         
@@ -269,20 +317,19 @@ def main():
 
         st.markdown("---")
         
-        # 3. News & Events this week
-        st.header("📆 News & Events this Week")
+        # 3. Events this week
+        st.header("📆 Events this Week")
         
-        # Load and filter events and news
+        # Load and filter events
         try:
+            raw_events = load_raw_events()
+
             today = datetime.now().date()
             start_of_week = today - timedelta(days=today.weekday())
             end_of_week = start_of_week + timedelta(days=6)
             
-            items_this_week = []
+            events_this_week = []
             
-            # --- Load Events ---
-            raw_events = load_raw_events()
-
             for event in raw_events:
                 meta = event.get("metadata", {})
                 date_str = meta.get("date")
@@ -292,30 +339,40 @@ def main():
                 try:
                     event_date = datetime.strptime(date_str, "%Y-%m-%d").date()
                     if start_of_week <= event_date <= end_of_week:
+                        # Enhanced speaker extraction
                         speaker = meta.get("speaker")
                         title = event.get("title", "Untitled")
                         
                         if not speaker or speaker == "Unknown Speaker":
+                            # Heuristic: "Talk: [Speaker Name]" or "Talk (Info): [Speaker Name]"
                             if "Talk" in title and ":" in title:
                                 try:
+                                    # Split by first colon and strip
                                     parts = title.split(":", 1)
                                     if len(parts) > 1:
                                         speaker = parts[1].strip()
-                                except: pass
-                        if not speaker: speaker = "Unknown Speaker"
+                                except:
+                                    pass
 
+                        if not speaker:
+                             speaker = "Unknown Speaker"
+
+                        # Enhanced title extraction from description
                         description = event.get("description", "")
                         if "Title:\n" in description:
                             try:
+                                # Extract text after "Title:\n"
                                 part_after = description.split("Title:\n", 1)[1]
+                                # Stop at "Abstract"
                                 if "Abstract" in part_after:
                                     real_title = part_after.split("Abstract", 1)[0].strip()
+                                    # Clean up newlines if it spans multiple lines
                                     if real_title:
                                         title = real_title.replace("\n", " ")
-                            except: pass
+                            except:
+                                pass
 
-                        items_this_week.append({
-                            "type": "Event",
+                        events_this_week.append({
                             "title": title,
                             "speaker": speaker,
                             "date": event_date,
@@ -324,59 +381,42 @@ def main():
                         })
                 except ValueError:
                     continue
-
-            # --- Load News ---
-            raw_news = load_news()
-
-            for news in raw_news:
-                meta = news.get("metadata", {})
-                date_str = meta.get("date")
-                if not date_str: continue
-
-                try:
-                    news_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-                    # We also include news published this week
-                    if start_of_week <= news_date <= end_of_week:
-                        items_this_week.append({
-                            "type": "News",
-                            "title": news.get("title", "News"),
-                            "date": news_date,
-                            "url": news.get("url", "#")
-                        })
-                except ValueError:
-                    continue
             
-            items_this_week.sort(key=lambda x: x["date"])
+            events_this_week.sort(key=lambda x: x["date"])
             
-            if not items_this_week:
-                st.info("No news or events scheduled for this week.")
+            if not events_this_week:
+                st.info("No events scheduled for this week.")
             else:
-                for item in items_this_week:
-                    date_fmt = item["date"].strftime("%A, %d")
-                    if item["type"] == "Event":
-                        st.markdown(f"🗓️ **Event: {item['speaker']}**")
-                        st.markdown(f"[{item['title']}]({item['url']})")
-                        st.caption(f"📅 {date_fmt} at {item['time']}")
-                    else:
-                        st.markdown(f"📰 **News**")
-                        st.markdown(f"[{item['title']}]({item['url']})")
-                        st.caption(f"📅 published {date_fmt}")
+                for ev in events_this_week:
+                    date_fmt = ev["date"].strftime("%A, %d")
+                    st.markdown(f"**{ev['speaker']}**")
+                    st.markdown(f"[{ev['title']}]({ev['url']})")
+                    st.caption(f"📅 {date_fmt} at {ev['time']}")
                     st.markdown("---")
             
         except Exception as e:
-            st.error(f"Could not load items: {e}")
+            st.error(f"Could not load events: {e}")
 
         st.markdown("---")
         
         # 4. Configuration at the bottom
-        # Configuration UI removed - defaulting to Gemini 2.0 Flash
-        model_choice = "gemini-2.0-flash"
+        st.header("⚙️ Configuration")
+        use_mcp_tools = st.toggle("Enable Structured Data Tools (MCP)", value=True, help="Allows the AI to search specific databases for people, research, and events.")
 
-    # Initialize ChatEngine
+        # Model Selection
+        model_choice = st.radio(
+            "Select Model",
+            options=["gemini-2.0-flash", "gemini-2.0-flash-lite"],
+            index=0,
+            format_func=lambda x: "Gemini 2.0 Flash (Balanced)" if x == "gemini-2.0-flash" else "Gemini 2.0 Flash-Lite (Economy)",
+            help="Flash is better for complex queries. Flash-Lite is cheaper but still powerful."
+        )
+
+    # Initialize RAGEngine
     if "engine" not in st.session_state:
-        # Try to get key from secrets, otherwise ChatEngine will fallback to os.getenv
+        # Try to get key from secrets, otherwise RAGEngine will fallback to os.getenv
         api_key = st.secrets.get("GEMINI_API_KEY") 
-        st.session_state.engine = ChatEngine(provider="gemini", api_key=api_key)
+        st.session_state.engine = RAGEngine(provider="gemini", api_key=api_key, use_mcp=True)
 
     # Chat history
     if "messages" not in st.session_state:
@@ -403,7 +443,7 @@ def main():
         
         with st.chat_message("assistant"):
             with st.spinner("Looking up events..."):
-                response = st.session_state.engine.generate_response(auto_prompt, model_name=model_choice, chat_history=st.session_state.messages[:-1])
+                response = st.session_state.engine.generate_response(auto_prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
 
@@ -415,7 +455,7 @@ def main():
 
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                response = st.session_state.engine.generate_response(prompt, model_name=model_choice, chat_history=st.session_state.messages[:-1])
+                response = st.session_state.engine.generate_response(prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
 

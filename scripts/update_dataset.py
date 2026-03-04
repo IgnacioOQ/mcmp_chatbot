@@ -29,9 +29,6 @@ def main():
     log_info("Scraping Reading Groups...")
     scraper.scrape_reading_groups()
 
-    log_info("Scraping News...")
-    scraper.scrape_news()
-
     # 2. Save Data (This triggers graph build now)
     log_info("Saving data and building graph...")
     scraper.save_to_json()
