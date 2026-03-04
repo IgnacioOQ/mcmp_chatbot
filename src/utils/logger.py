@@ -1,7 +1,5 @@
 import logging
 import os
-import time
-from contextlib import contextmanager
 
 # Configure logger
 logging.basicConfig(
@@ -20,10 +18,3 @@ def log_info(message: str):
 
 def log_error(message: str):
     logger.error(message)
-
-@contextmanager
-def log_latency(stage: str):
-    start = time.perf_counter()
-    yield
-    elapsed_ms = (time.perf_counter() - start) * 1000
-    logger.info(f"[LATENCY] {stage}: {elapsed_ms:.1f}ms")

@@ -2,11 +2,9 @@ import json
 import os
 from typing import List, Dict, Any, Optional
 from datetime import datetime
-from functools import lru_cache
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
 
-@lru_cache(maxsize=None)
 def load_data(filename: str) -> List[Dict[str, Any]]:
     path = os.path.join(DATA_DIR, filename)
     if not os.path.exists(path):
@@ -166,7 +164,7 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
             except ValueError:
                 pass # skip date check if format unknown
         
-        result_entry = {
+        results.append({
             "title": title,
             "date": date_str,
             "time": f"{meta.get('time_start')} - {meta.get('time_end')}",
@@ -175,68 +173,8 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
             "url": event.get("url"),
             "abstract": abstract,
             "description": description
-        }
-        if meta.get("date_end"):
-            result_entry["date_end"] = meta["date_end"]
-        results.append(result_entry)
+        })
         
     # Sort by date
     results.sort(key=lambda x: x.get("date", "9999-99-99"))
     return results[:10]
-
-
-def search_news(query: Optional[str] = None) -> List[Dict[str, Any]]:
-    """
-    Search for MCMP news and announcements (job postings, awards, calls for papers, etc.).
-
-    Args:
-        query: Optional keyword to search for in news titles and descriptions
-               (e.g., "PhD", "postdoc", "award", "call for papers").
-    """
-    news = load_data("news.json")
-    results = []
-
-    query_lower = query.lower() if query else None
-
-    for item in news:
-        title = item.get("title", "")
-        description = item.get("description", "")
-
-        if query_lower:
-            text_content = (title + " " + description).lower()
-            if query_lower not in text_content:
-                continue
-
-        results.append({
-            "title": title,
-            "date": item.get("metadata", {}).get("date", ""),
-            "category": item.get("metadata", {}).get("category", "News"),
-            "url": item.get("url"),
-            "description": description[:1000]
-        })
-
-    results.sort(key=lambda x: x.get("date", ""), reverse=True)
-    return results[:10]
-
-
-def search_graph(query: str) -> str:
-    """
-    Search the MCMP institutional graph for organizational relationships.
-    
-    Args:
-        query: Name of a person, chair, or organizational unit to search for
-               (e.g., "Hannes Leitgeb", "Chair of Logic", "Philosophy of Science").
-    
-    Returns:
-        A natural language description of the institutional relationships found.
-    """
-    from src.core.graph_utils import GraphUtils
-    
-    graph = GraphUtils()
-    subgraph = graph.get_subgraph(query)
-    result = graph.to_natural_language(subgraph)
-    
-    if not result:
-        return f"No institutional relationships found for '{query}'."
-    
-    return result

@@ -2,6 +2,7 @@ streamlit
 pandas
 beautifulsoup4
 requests
+chromadb
 openai
 anthropic
 python-dotenv

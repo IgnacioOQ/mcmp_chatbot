@@ -1,21 +1,18 @@
 from typing import List, Dict, Any
-from src.mcp.tools import search_people, search_research, get_events, search_graph, search_news
-from src.utils.logger import log_latency
+from src.mcp.tools import search_people, search_research, get_events
 import json
 
 class MCPServer:
     """
     In-process MCP Server interface.
-    Exposes MCMP data tools to the LLM via function calling.
+    Exposes MCMP data tools to the RAG functionality.
     """
     
     def __init__(self):
         self.tools = {
             "search_people": search_people,
             "search_research": search_research,
-            "get_events": get_events,
-            "search_graph": search_graph,
-            "search_news": search_news
+            "get_events": get_events
         }
         
     def list_tools(self) -> List[Dict[str, Any]]:
@@ -83,33 +80,6 @@ class MCPServer:
                         }
                     }
                 }
-            },
-            {
-                "name": "search_graph",
-                "description": "Search the MCMP institutional graph for organizational relationships. Use this to find who leads a chair, who supervises whom, or which people belong to which organizational unit.",
-                "input_schema": {
-                    "type": "object",
-                    "properties": {
-                        "query": {
-                            "type": "string",
-                            "description": "Name of a person, chair, or organizational unit (e.g., 'Hannes Leitgeb', 'Chair of Logic', 'Philosophy of Science')."
-                        }
-                    },
-                    "required": ["query"]
-                }
-            },
-            {
-                "name": "search_news",
-                "description": "Search for MCMP news and announcements. Use this for job postings (PhD, postdoc positions), calls for papers/abstracts, awards, prizes, and publication announcements. NOT for events like talks or workshops.",
-                "input_schema": {
-                    "type": "object",
-                    "properties": {
-                        "query": {
-                            "type": "string",
-                            "description": "Optional keyword to search for in news (e.g., 'PhD', 'postdoc', 'award', 'call for papers'). Omit to get all recent news."
-                        }
-                    }
-                }
             }
         ]
 
@@ -122,7 +92,6 @@ class MCPServer:
             
         tool_func = self.tools[name]
         try:
-            with log_latency(f"tool:{name}"):
-                return tool_func(**arguments)
+            return tool_func(**arguments)
         except Exception as e:
             return {"error": str(e)}
