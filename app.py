@@ -5,6 +5,24 @@ from datetime import datetime, timedelta
 from src.core.engine import ChatEngine
 from src.utils.logger import log_info, log_error
 
+@st.cache_data
+def load_raw_events():
+    """Cached loader for events data to reduce disk I/O."""
+    try:
+        with open("data/raw_events.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+@st.cache_data
+def load_news():
+    """Cached loader for news data to reduce disk I/O."""
+    try:
+        with open("data/news.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
 def save_feedback(name, feedback):
     """Saves user feedback to Google Sheets (if configured) or local JSON."""
     timestamp = datetime.now().isoformat()
@@ -144,20 +162,16 @@ def main():
         
         # Load events to highlight days with events
         event_days = set()
-        try:
-            with open("data/raw_events.json", "r") as f:
-                raw_events = json.load(f)
-            for event in raw_events:
-                date_str = event.get("metadata", {}).get("date")
-                if date_str:
-                    try:
-                        ev_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-                        if ev_date.year == cal_year and ev_date.month == cal_month:
-                            event_days.add(ev_date.day)
-                    except ValueError:
-                        pass
-        except:
-            pass
+        raw_events = load_raw_events()
+        for event in raw_events:
+            date_str = event.get("metadata", {}).get("date")
+            if date_str:
+                try:
+                    ev_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                    if ev_date.year == cal_year and ev_date.month == cal_month:
+                        event_days.add(ev_date.day)
+                except ValueError:
+                    pass
         
         # Scoped, safe CSS to tighten the grid and style the container
         st.markdown("""
@@ -257,78 +271,70 @@ def main():
             items_this_week = []
             
             # --- Load Events ---
-            try:
-                with open("data/raw_events.json", "r") as f:
-                    raw_events = json.load(f)
-                
-                for event in raw_events:
-                    meta = event.get("metadata", {})
-                    date_str = meta.get("date")
-                    if not date_str:
-                        continue
-                        
-                    try:
-                        event_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-                        if start_of_week <= event_date <= end_of_week:
-                            speaker = meta.get("speaker")
-                            title = event.get("title", "Untitled")
-                            
-                            if not speaker or speaker == "Unknown Speaker":
-                                if "Talk" in title and ":" in title:
-                                    try:
-                                        parts = title.split(":", 1)
-                                        if len(parts) > 1:
-                                            speaker = parts[1].strip()
-                                    except: pass
-                            if not speaker: speaker = "Unknown Speaker"
-                            
-                            description = event.get("description", "")
-                            if "Title:\n" in description:
-                                try:
-                                    part_after = description.split("Title:\n", 1)[1]
-                                    if "Abstract" in part_after:
-                                        real_title = part_after.split("Abstract", 1)[0].strip()
-                                        if real_title:
-                                            title = real_title.replace("\n", " ")
-                                except: pass
+            raw_events = load_raw_events()
 
-                            items_this_week.append({
-                                "type": "Event",
-                                "title": title,
-                                "speaker": speaker,
-                                "date": event_date,
-                                "time": meta.get("time_start", "Time TBA"),
-                                "url": event.get("url", "#")
-                            })
-                    except ValueError:
-                        continue
-            except FileNotFoundError:
-                pass
+            for event in raw_events:
+                meta = event.get("metadata", {})
+                date_str = meta.get("date")
+                if not date_str:
+                    continue
+
+                try:
+                    event_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                    if start_of_week <= event_date <= end_of_week:
+                        speaker = meta.get("speaker")
+                        title = event.get("title", "Untitled")
+                        
+                        if not speaker or speaker == "Unknown Speaker":
+                            if "Talk" in title and ":" in title:
+                                try:
+                                    parts = title.split(":", 1)
+                                    if len(parts) > 1:
+                                        speaker = parts[1].strip()
+                                except: pass
+                        if not speaker: speaker = "Unknown Speaker"
+
+                        description = event.get("description", "")
+                        if "Title:\n" in description:
+                            try:
+                                part_after = description.split("Title:\n", 1)[1]
+                                if "Abstract" in part_after:
+                                    real_title = part_after.split("Abstract", 1)[0].strip()
+                                    if real_title:
+                                        title = real_title.replace("\n", " ")
+                            except: pass
+
+                        items_this_week.append({
+                            "type": "Event",
+                            "title": title,
+                            "speaker": speaker,
+                            "date": event_date,
+                            "time": meta.get("time_start", "Time TBA"),
+                            "url": event.get("url", "#")
+                        })
+                except ValueError:
+                    continue
 
             # --- Load News ---
-            try:
-                with open("data/news.json", "r") as f:
-                    raw_news = json.load(f)
-                    
-                for news in raw_news:
-                    meta = news.get("metadata", {})
-                    date_str = meta.get("date")
-                    if not date_str: continue
-                    
-                    try:
-                        news_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-                        # We also include news published this week
-                        if start_of_week <= news_date <= end_of_week:
-                            items_this_week.append({
-                                "type": "News",
-                                "title": news.get("title", "News"),
-                                "date": news_date,
-                                "url": news.get("url", "#")
-                            })
-                    except ValueError:
-                        continue
-            except FileNotFoundError:
-                pass
+            raw_news = load_news()
+
+            for news in raw_news:
+                meta = news.get("metadata", {})
+                date_str = meta.get("date")
+                if not date_str: continue
+
+                try:
+                    news_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+                    # We also include news published this week
+                    if start_of_week <= news_date <= end_of_week:
+                        items_this_week.append({
+                            "type": "News",
+                            "title": news.get("title", "News"),
+                            "date": news_date,
+                            "url": news.get("url", "#")
+                        })
+                except ValueError:
+                    continue
             
             items_this_week.sort(key=lambda x: x["date"])
             
