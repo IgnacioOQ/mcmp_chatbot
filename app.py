@@ -277,7 +277,7 @@ def main():
                         classes.append("has-event")
                         # Create clickable link with query parameter
                         date_str = f"{cal_year}-{cal_month:02d}-{day:02d}"
-                        calendar_html += f'<div class="{" ".join(classes)}"><a href="?event_day={date_str}">{day}</a></div>'
+                        calendar_html += f'<div class="{" ".join(classes)}"><a href="?event_day={date_str}" target="_self">{day}</a></div>'
                     else:
                         calendar_html += f'<div class="{" ".join(classes)}">{day}</div>'
         
