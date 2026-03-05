@@ -8,7 +8,7 @@ This file tracks major actions, architectural changes, and features implemented 
 **Task**: Prevent browser hard-reloads while keeping the raw HTML/CSS calendar design.
 
 ### Summary
-The previous raw HTML anchor solution (`target="_self"`) caused full page refreshes when clicked. Implemented a hybrid approach using `st.columns()` and `st.button()` wrapped inside an `st.container()`, targeted by advanced CSS rules. This perfectly mimics the original gradient CSS grid while utilizing Streamlit's fast WebSocket session state for prompt injections.
+The previous raw HTML anchor solution (`target="_self"`) caused full page refreshes when clicked. Implemented a hybrid approach using `st.columns()` and `st.button()` wrapped inside an `st.container()`, targeted by advanced CSS rules. This perfectly mimics the original gradient CSS grid while utilizing Streamlit's fast WebSocket session state for prompt injections. Additionally, added an explicit white ring `border` and full `opacity` rule to the "Today" marker to ensure the current date always stands out prominently, even on days without events.
 
 ## [2026-03-05] Revert Calendar Display to HTML View
 

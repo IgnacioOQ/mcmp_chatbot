@@ -110,6 +110,12 @@ This script will:
 ### 1. Frontend: Streamlit
 The user interface is built entirely in **Streamlit**, providing a clean, responsive chat interface. It handles user sessions, admin access (password protected), and feedback forms directly in the browser.
 
+#### Hybrid Calendar UI
+Streamlit limits raw HTML `<a href="...">` links from natively triggering backend Python callbacks securely without hard page reloads. To maintain our premium gradient calendar aesthetics while preserving instant conversational injections, the application uses a **Hybrid Calendar UI**:
+- The calendar grid is dynamically constructed using native `st.columns` and `st.button` components to ensure fast, socket-driven session behavior.
+- We target these specific components using advanced CSS pseudo-selectors (like `:has(#calendar-wrapper)`) injected via `st.markdown(unsafe_allow_html=True)`, overriding standard Streamlit styling to perfectly mimic complex, glassmorphic raw HTML layouts.
+- Clicking a date silently injects a hidden prompt ("What events are scheduled for X?") into the chat sequence, performing real-time RAG directly within the existing viewer.
+
 ### 2. AI Engine: Google Gemini
 The core logic (`src/core/engine.py`) connects to the **Gemini API** (or others) to generate responses. It prompts the model with retrieved context from the vector store to ensure accuracy and minimize hallucinations.
 

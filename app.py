@@ -269,15 +269,17 @@ def main():
         /* 7. 'Today' Styling (Primary Button) */
         div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="stHorizontalBlock"] button[kind="primary"] {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            color: #fff !important;
+            color: #ffffff !important;
             font-weight: 700 !important;
             box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4) !important;
+            border: 1px solid rgba(255, 255, 255, 0.6) !important;
+            opacity: 1 !important;
         }
         div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="stHorizontalBlock"] button[kind="primary"]:not(:disabled):hover {
             transform: scale(1.1) !important;
         }
         div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="stHorizontalBlock"] button[kind="primary"] p {
-            color: #fff !important;
+            color: #ffffff !important;
         }
         </style>
         """, unsafe_allow_html=True)
