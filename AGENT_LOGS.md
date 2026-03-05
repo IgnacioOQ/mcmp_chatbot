@@ -2,6 +2,18 @@
 
 This file tracks major actions, architectural changes, and features implemented by AI agents functioning on this codebase.
 
+## [2026-03-05] Revert Calendar Display to HTML View
+
+**Agent**: Antigravity
+**Task**: Revert the calendar logic from native Streamlit buttons back to pure HTML/CSS.
+
+### Summary
+Restored the previous raw HTML and CSS implementation of the calendar component `app.py` due to user request, abandoning the native Streamlit button grid that was introduced in commit `b1a18d3`.
+
+### Changes
+- Replaced the Streamlit column-based calendar rendering in `app.py` with the former `calendar-grid` custom HTML logic.
+- Restored URL query parameters (`?event_day=YYYY-MM-DD`) for clicking calendar events instead of Streamlit session state.
+
 ## [2026-03-05] Fix Unicode Misencodings in Scraper
 
 **Agent**: Antigravity
