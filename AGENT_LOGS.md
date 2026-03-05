@@ -2,6 +2,40 @@
 
 This file tracks major actions, architectural changes, and features implemented by AI agents functioning on this codebase.
 
+## [2026-03-05] Fix Unicode Misencodings in Scraper
+
+**Agent**: Antigravity
+**Task**: Standardize German umlauts and fix UTF-8 misencodings during scraping.
+
+### Summary
+Modified `src/scrapers/mcmp_scraper.py` inside the `_clean_text` function to properly map and convert misencoded UTF-8 string sequences (e.g. `Ã¼` to `ue`) into their valid representations, ensuring proper parsing of German names and typography.
+
+### Changes
+- Implemented a broad string replacement map in `_clean_text` prior to processing text lines.
+
+## [2026-03-05] Implement Scraping Logs
+
+**Agent**: Antigravity
+**Task**: Create a mechanism to log additions, removals and updates after each scrape.
+
+### Summary
+Modified `src/scrapers/mcmp_scraper.py` to compare old and new dataset versions during the `save_to_json` process. Differences (added, removed, updated) for `events`, `people`, `research`, and `general` items are now appended to a running log in `data/scraping_logs.json`.
+
+### Changes
+- Implemented `_log_changes(self)` in `MCMPScraper`.
+- Updated dataset saving pipeline to hook into this new method.
+
+## [2026-03-05] Dataset Update via Scraping
+
+**Agent**: Antigravity
+**Task**: Run the data maintenance protocol to scrape and update datasets.
+
+### Summary
+Executed `scripts/update_dataset.py` to scrape the MCMP website and update the localized JSON datasets and institutional graph representations. Saved 54 events, 83 people, 4 research items, and 7 general items.
+
+### Changes
+- Updated `data/*.json` and `data/graph/` files to contain the latest scraped information from the MCMP website.
+
 ## [2026-01-28] Research Data Enhancement
 
 **Agent**: Antigravity

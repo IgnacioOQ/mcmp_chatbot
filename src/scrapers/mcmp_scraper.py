@@ -48,13 +48,47 @@ class MCMPScraper:
         self.important_urls = self.load_important_urls()
 
     def _clean_text(self, text):
-        """Removes common noise from scraped text."""
+        """Removes common noise from scraped text and fixes encodings."""
         if not text:
             return ""
             
+        # Fix common UTF-8 misencodings
+        # Often occurs when UTF-8 is read as ISO-8859-1/Windows-1252
+        replacements = {
+            "Ã¼": "ue",
+            "Ã¤": "ae",
+            "Ã¶": "oe",
+            "Ã\x9f": "ss",
+            "Ã\x9c": "Ue",
+            "Ã\x84": "Ae",
+            "Ã\x96": "Oe",
+            "Ã©": "é",
+            "Ã¨": "è",
+            "Ã²": "ò",
+            "Ã\xa0": "à",
+            "Ã±": "ñ",
+            "â\x80\x93": "-", # en-dash
+            "â\x80\x94": "--", # em-dash
+            "â\x80\x98": "'", # left single quote
+            "â\x80\x99": "'", # right single quote
+            "â\x80\x9c": '"', # left double quote
+            "â\x80\x9d": '"', # right double quote
+            "â\x80¦": "...", # ellipsis
+            # Also replace actual umlauts with their requested equivalents
+            "ü": "ue",
+            "ä": "ae",
+            "ö": "oe",
+            "ß": "ss",
+            "Ü": "Ue",
+            "Ä": "Ae",
+            "Ö": "Oe"
+        }
+        
+        for bad, good in replacements.items():
+            text = text.replace(bad, good)
+            
         lines = text.split('\n')
         cleaned_lines = []
-        skip_mode = False
         
         # Heuristics to skip navigation and footer
         for line in lines:
@@ -74,6 +108,7 @@ class MCMPScraper:
             cleaned_lines.append(line)
             
         return "\n".join(cleaned_lines)
+
 
     def load_important_urls(self):
         """Loads important URLs from data/important_urls.txt."""
@@ -766,9 +801,96 @@ class MCMPScraper:
             log_error(f"Error scraping reading groups: {e}")
             return []
 
+    def _log_changes(self):
+        """Calculates differences between old and new data and logs them."""
+        log_file = "data/scraping_logs.json"
+        
+        datasets = {
+            "events": (self.events, "data/raw_events.json", "url"),
+            "people": (self.people, "data/people.json", "url"),
+            "research": (self.research, "data/research.json", "id"),
+            "general": (self.general, "data/general.json", lambda x: f"{x.get('url', '')}_{x.get('title', '')}")
+        }
+        
+        changes_summary = {}
+        total_changes = 0
+        
+        for name, (new_data, file_path, uuid_key) in datasets.items():
+            old_data = []
+            if os.path.exists(file_path):
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        old_data = json.load(f)
+                except Exception as e:
+                    log_error(f"Error reading old {name} data: {e}")
+            
+            def get_id(item):
+                if callable(uuid_key):
+                    return uuid_key(item)
+                return item.get(uuid_key)
+            
+            old_map = {get_id(item): item for item in old_data if get_id(item)}
+            new_map = {get_id(item): item for item in new_data if get_id(item)}
+            
+            added = []
+            removed = []
+            updated = []
+            
+            for nid, nitem in new_map.items():
+                if nid not in old_map:
+                    title_or_name = nitem.get('title') or nitem.get('name') or nitem.get('id') or nid
+                    added.append(title_or_name)
+                else:
+                    oitem = old_map[nid]
+                    # Ignore scraped_at for comparison
+                    oitem_copy = {k: v for k, v in oitem.items() if k != 'scraped_at'}
+                    nitem_copy = {k: v for k, v in nitem.items() if k != 'scraped_at'}
+                    
+                    if oitem_copy != nitem_copy:
+                        title_or_name = nitem.get('title') or nitem.get('name') or nitem.get('id') or nid
+                        updated.append(title_or_name)
+            
+            for oid, oitem in old_map.items():
+                if oid not in new_map:
+                    title_or_name = oitem.get('title') or oitem.get('name') or oitem.get('id') or oid
+                    removed.append(title_or_name)
+                    
+            if added or removed or updated:
+                changes_summary[name] = {
+                    "added": added,
+                    "removed": removed,
+                    "updated": updated
+                }
+                total_changes += len(added) + len(removed) + len(updated)
+                
+        # Write to log file if there are changes or log file doesn't exist
+        if total_changes > 0 or not os.path.exists(log_file):
+            log_entries = []
+            if os.path.exists(log_file):
+                try:
+                    with open(log_file, 'r', encoding='utf-8') as f:
+                        log_entries = json.load(f)
+                except Exception:
+                    pass
+            
+            new_log_entry = {
+                "timestamp": datetime.now().isoformat(),
+                "changes": changes_summary
+            }
+            log_entries.append(new_log_entry)
+            
+            with open(log_file, 'w', encoding='utf-8') as f:
+                json.dump(log_entries, f, indent=4, ensure_ascii=False)
+            
+            log_info(f"Logged {total_changes} changes to {log_file}")
+        else:
+            log_info("No changes detected in datasets.")
+
     def save_to_json(self):
         """Saves scraped data to JSON files."""
         os.makedirs("data", exist_ok=True)
+        
+        self._log_changes()
         
         with open("data/raw_events.json", 'w', encoding='utf-8') as f:
             json.dump(self.events, f, indent=4, ensure_ascii=False)
