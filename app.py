@@ -219,7 +219,7 @@ def main():
         }
 
         /* Base Button Styling */
-        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button {
+        [data-testid="stSidebar"] [data-testid="column"] button {
             background: rgba(255, 255, 255, 0.03) !important;
             border: 1px solid rgba(255, 255, 255, 0.05) !important;
             color: #94a3b8 !important;         /* slate-400: readable but secondary */
@@ -232,7 +232,7 @@ def main():
         }
 
         /* Hover: subtle background lift */
-        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button:hover {
+        [data-testid="stSidebar"] [data-testid="column"] button:hover:not(:disabled) {
             background: #1e293b !important;    /* slate-800 */
             color: #e2e8f0 !important;
             transform: translateY(-1px) !important;
@@ -240,11 +240,18 @@ def main():
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
         }
 
-        /* Disabled (empty day padding) */
-        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button:disabled {
-            opacity: 0 !important;
+        /* Disabled (non-event days) */
+        [data-testid="stSidebar"] [data-testid="column"] button:disabled {
+            opacity: 0.4 !important;
             cursor: default !important;
+        }
+
+        /* Completely empty padding blocks */
+        [data-testid="stSidebar"] .empty-day-btn button {
+            opacity: 0 !important;
             pointer-events: none !important;
+            background: transparent !important;
+            border: none !important;
         }
 
         /* Event day buttons */
@@ -303,8 +310,10 @@ def main():
 
                     # Empty slot
                     if day == 0:
+                        st.markdown('<div class="empty-day-btn">', unsafe_allow_html=True)
                         st.button(" ", key=f"cal_empty_{cal_year}_{cal_month}_{w}_{i}",
                                   use_container_width=True, disabled=True)
+                        st.markdown('</div>', unsafe_allow_html=True)
                         continue
 
                     is_today = (
