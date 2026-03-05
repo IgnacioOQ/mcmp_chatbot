@@ -295,7 +295,7 @@ def main():
         """, unsafe_allow_html=True)
 
         # Build calendar grid natively
-        for week in month_days:
+        for w, week in enumerate(month_days):
             cols = st.columns(7)  # 7 equal columns, one per day of week
 
             for i, day in enumerate(week):
@@ -303,7 +303,7 @@ def main():
 
                     # Empty slot
                     if day == 0:
-                        st.button(" ", key=f"cal_empty_{cal_year}_{cal_month}_{i}_{day}",
+                        st.button(" ", key=f"cal_empty_{cal_year}_{cal_month}_{w}_{i}",
                                   use_container_width=True, disabled=True)
                         continue
 
