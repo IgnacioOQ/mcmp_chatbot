@@ -2,6 +2,14 @@
 
 This file tracks major actions, architectural changes, and features implemented by AI agents functioning on this codebase.
 
+## [2026-03-05] Refactor Calendar UI to Native Hybrid
+
+**Agent**: Antigravity
+**Task**: Prevent browser hard-reloads while keeping the raw HTML/CSS calendar design.
+
+### Summary
+The previous raw HTML anchor solution (`target="_self"`) caused full page refreshes when clicked. Implemented a hybrid approach using `st.columns()` and `st.button()` wrapped inside an `st.container()`, targeted by advanced CSS rules. This perfectly mimics the original gradient CSS grid while utilizing Streamlit's fast WebSocket session state for prompt injections.
+
 ## [2026-03-05] Revert Calendar Display to HTML View
 
 **Agent**: Antigravity

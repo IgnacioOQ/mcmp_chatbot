@@ -185,105 +185,129 @@ def main():
                 except ValueError:
                     pass
         
-        calendar_html = """
+        # Scoped CSS to tighten Streamlit grid and mimic the raw HTML gradient calendar
+        st.markdown("""
         <style>
-        .calendar-container {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 8px;
+        /* 1. Main Calendar Wrapper Base (Target Streamlit's block container) */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+            border-radius: 12px !important;
+            padding: 16px !important;
+            margin-bottom: 8px !important;
         }
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
+        
+        /* 2. Calendar Header styling */
         .calendar-header {
+            display: flex;
+            justify-content: space-between;
             text-align: center;
             font-weight: 600;
             font-size: 11px;
             color: #8892b0;
-            padding: 8px 0;
+            padding: 0 0 8px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        .calendar-day {
-            text-align: center;
-            padding: 10px 4px;
-            font-size: 13px;
-            color: #ccd6f6;
-            border-radius: 8px;
-            transition: all 0.2s ease;
+        .calendar-header > div {
+            flex: 1;
         }
-        .calendar-day.empty {
-            color: transparent;
+        
+        /* 3. Tighten Streamlit Grid */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] {
+            padding: 0 2px !important;
         }
-        .calendar-day.today {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+
+        /* 4. Base Button Styling (All Days) */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="stHorizontalBlock"] button {
+            border: none !important;
+            background: transparent !important;
+            color: #ccd6f6 !important;
+            font-size: 13px !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            padding: 0 !important;
+            min-height: 36px !important;
+            height: 36px !important;
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 8px !important;
+            transition: all 0.2s ease !important;
+            box-shadow: none !important;
         }
-        .calendar-day.has-event {
-            position: relative;
-            cursor: pointer;
+
+        /* 5. 'Has Event' (Clickable = Not Disabled) */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="stHorizontalBlock"] button:not(:disabled) {
+            cursor: pointer !important;
+            position: relative !important;
         }
-        .calendar-day.has-event::after {
+        /* Add dot for events (clickable) */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="stHorizontalBlock"] button:not(:disabled)::after {
             content: '';
             position: absolute;
             bottom: 4px;
             left: 50%;
             transform: translateX(-50%);
-            width: 5px;
-            height: 5px;
+            width: 4px;
+            height: 4px;
             background: #64ffda;
             border-radius: 50%;
         }
-        .calendar-day a {
-            color: inherit;
-            text-decoration: none;
-            display: block;
-            width: 100%;
-            height: 100%;
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="stHorizontalBlock"] button:not(:disabled):hover {
+            background: rgba(100, 255, 218, 0.15) !important;
+            transform: scale(1.1) !important;
         }
-        .calendar-day.has-event:hover {
-            background: rgba(100, 255, 218, 0.15);
-            transform: scale(1.1);
+
+        /* 6. 'No Event' (Disabled) */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="stHorizontalBlock"] button:disabled {
+            opacity: 1 !important;
+            cursor: default !important;
+            color: #8892b0 !important;
+        }
+
+        /* 7. 'Today' Styling (Primary Button) */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="stHorizontalBlock"] button[kind="primary"] {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4) !important;
+        }
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="stHorizontalBlock"] button[kind="primary"]:not(:disabled):hover {
+            transform: scale(1.1) !important;
+        }
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="stHorizontalBlock"] button[kind="primary"] p {
+            color: #fff !important;
         }
         </style>
-        <div class="calendar-container">
-            <div class="calendar-grid">
-                <div class="calendar-header">Mo</div>
-                <div class="calendar-header">Tu</div>
-                <div class="calendar-header">We</div>
-                <div class="calendar-header">Th</div>
-                <div class="calendar-header">Fr</div>
-                <div class="calendar-header">Sa</div>
-                <div class="calendar-header">Su</div>
-        """
+        """, unsafe_allow_html=True)
         
-        for week in month_days:
-            for day in week:
-                if day == 0:
-                    calendar_html += '<div class="calendar-day empty">·</div>'
-                else:
-                    classes = ["calendar-day"]
-                    is_today = day == today.day and cal_month == today.month and cal_year == today.year
-                    if is_today:
-                        classes.append("today")
-                    
-                    if day in event_days:
-                        classes.append("has-event")
-                        # Create clickable link with query parameter
-                        date_str = f"{cal_year}-{cal_month:02d}-{day:02d}"
-                        calendar_html += f'<div class="{" ".join(classes)}"><a href="?event_day={date_str}" target="_self">{day}</a></div>'
-                    else:
-                        calendar_html += f'<div class="{" ".join(classes)}">{day}</div>'
-        
-        calendar_html += "</div></div>"
-        
-        st.markdown(calendar_html, unsafe_allow_html=True)
+        # Build calendar grid natively wrapped in a container to trigger the CSS rules
+        with st.container():
+            st.markdown('<div id="calendar-wrapper"></div>', unsafe_allow_html=True)
+            
+            st.markdown("""
+                <div class="calendar-header">
+                    <div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            for week in month_days:
+                cols = st.columns(7)
+                for i, day in enumerate(week):
+                    with cols[i]:
+                        if day == 0:
+                            st.markdown("<div style='height: 36px;'></div>", unsafe_allow_html=True)
+                        else:
+                            is_today = day == today.day and cal_month == today.month and cal_year == today.year
+                            has_event = day in event_days
+                            
+                            btn_type = "primary" if is_today else "secondary"
+                            disabled = not has_event
+                            
+                            if st.button(f"{day}", key=f"cal_{cal_year}_{cal_month}_{day}", use_container_width=True, type=btn_type, disabled=disabled):
+                                st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
+                                st.session_state.calendar_query_formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
         
         st.markdown("---")
         
@@ -408,32 +432,26 @@ def main():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Handle calendar day click via query parameter
-    query_params = st.query_params
-    if "event_day" in query_params:
-        event_day_str = query_params["event_day"]
-        # Clear the query param to prevent re-execution on refresh
-        st.query_params.clear()
+    # Handle calendar day click via session state (from button clicks)
+    if "calendar_query_date" in st.session_state:
+        query_formatted = st.session_state.calendar_query_formatted
+        # Clear the trigger to prevent re-execution
+        del st.session_state.calendar_query_date
+        del st.session_state.calendar_query_formatted
         
-        try:
-            event_date = datetime.strptime(event_day_str, "%Y-%m-%d").date()
-            query_formatted = event_date.strftime("%B %d, %Y")
-            
-            # Generate the prompt silently
-            auto_prompt = f"What talks or events are scheduled for {query_formatted}? Please provide details about each event, including an abstract or description."
-            
-            # Add to chat history and generate response
-            st.session_state.messages.append({"role": "user", "content": auto_prompt})
-            with st.chat_message("user"):
-                st.markdown(auto_prompt)
-            
-            with st.chat_message("assistant"):
-                with st.spinner("Looking up events..."):
-                    response = st.session_state.engine.generate_response(auto_prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
-                st.markdown(response)
-                st.session_state.messages.append({"role": "assistant", "content": response})
-        except ValueError:
-            st.error("Invalid date format in calendar link.")
+        # Generate the prompt silently
+        auto_prompt = f"What talks or events are scheduled for {query_formatted}? Please provide details about each event, including an abstract or description."
+        
+        # Add to chat history and generate response
+        st.session_state.messages.append({"role": "user", "content": auto_prompt})
+        with st.chat_message("user"):
+            st.markdown(auto_prompt)
+        
+        with st.chat_message("assistant"):
+            with st.spinner("Looking up events..."):
+                response = st.session_state.engine.generate_response(auto_prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
+            st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
 
     # User input
     if prompt := st.chat_input("What is the next talk about?"):
