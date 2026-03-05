@@ -185,141 +185,162 @@ def main():
                 except ValueError:
                     pass
         
-        # Scoped CSS to tighten Streamlit grid and mimic the raw HTML gradient calendar
+        # Use the exact previous CSS logic that worked flawlessly
         st.markdown("""
         <style>
-        /* 1. Main Calendar Wrapper Base (Target Streamlit's block container) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
-            border-radius: 12px !important;
-            padding: 16px !important;
-            margin-bottom: 8px !important;
+        /* Modern Glassmorphic Calendar Container */
+        .calendar-wrapper {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
         
-        /* 2. Calendar Header styling */
-        .calendar-header {
+        /* Day Headers */
+        .day-headers {
             display: flex;
-            justify-content: space-between;
-            text-align: center;
-            font-weight: 600;
+            justify-content: space-around;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+        }
+        .day-header-item {
+            color: #94a3b8;
             font-size: 11px;
-            color: #8892b0;
-            padding: 0 0 8px 0;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        .calendar-header > div {
-            flex: 1;
-        }
-        
-        /* 3. Tighten Streamlit Grid */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] {
-            padding: 0 2px !important;
+            width: 36px;
+            text-align: center;
         }
 
-        /* 4. Base Button Styling (All Days) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button {
-            border: none !important;
-            background: transparent !important;
-            color: #ccd6f6 !important;
+        /* Base Button Styling */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            color: #94a3b8 !important;         /* slate-400: readable but secondary */
             font-size: 13px !important;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            padding: 0 !important;
-            min-height: 36px !important;
-            height: 36px !important;
-            width: 100% !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            border-radius: 8px !important;
-            transition: all 0.2s ease !important;
-            box-shadow: none !important;
+            font-weight: 500 !important;
+            min-height: 44px !important;
+            height: 44px !important;
+            border-radius: 10px !important;
+            transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease !important;
         }
 
-        /* 5. 'Has Event' (Clickable = Not Disabled) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.event-marker) button {
-            cursor: pointer !important;
-            position: relative !important;
-        }
-        /* Add dot for events (clickable) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.event-marker) button::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 4px;
-            background: #64ffda;
-            border-radius: 50%;
-        }
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.event-marker) button:hover {
-            background: rgba(100, 255, 218, 0.15) !important;
-            transform: scale(1.1) !important;
+        /* Hover: subtle background lift */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button:hover {
+            background: #1e293b !important;    /* slate-800 */
+            color: #e2e8f0 !important;
+            transform: translateY(-1px) !important;
+            border-color: #334155 !important;  /* slate-700 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
         }
 
-        /* 6. 'No Event' (Disabled) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button:disabled {
-            opacity: 1 !important;
+        /* Disabled (empty day padding) */
+        [data-testid="stSidebar"] [data-testid="stHorizontalBlock"] button:disabled {
+            opacity: 0 !important;
             cursor: default !important;
-            color: #8892b0 !important;
+            pointer-events: none !important;
         }
 
-        /* 7. 'Today' Styling (Primary Button Override with Marker) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.today-marker) button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        /* Event day buttons */
+        /* Badge-style: cyan border + tinted background */
+        [data-testid="stSidebar"] .event-day-btn button {
+            background: rgba(6, 182, 212, 0.1) !important; /* cyan-500 @ 10% */
+            border: 1px solid rgba(6, 182, 212, 0.4) !important;
+            color: #22d3ee !important;         /* cyan-400 */
+            font-weight: 600 !important;
+            opacity: 1 !important;
+        }
+        [data-testid="stSidebar"] .event-day-btn button:hover {
+            background: rgba(6, 182, 212, 0.2) !important;
+            border-color: rgba(6, 182, 212, 0.6) !important;
+            color: #67e8f9 !important;         /* cyan-300 */
+            box-shadow: 0 2px 10px rgba(6, 182, 212, 0.2) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        /* Today button */
+        /* Solid cyan pill */
+        [data-testid="stSidebar"] .today-btn button {
+            background: #0891b2 !important;    /* cyan-600 */
+            border: none !important;
             color: #ffffff !important;
             font-weight: 700 !important;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4) !important;
-            border: 1px solid rgba(255, 255, 255, 0.6) !important;
-            opacity: 1 !important;
+            box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.2) !important;  /* soft glow ring */
         }
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.today-marker) button:hover {
-            transform: scale(1.1) !important;
-        }
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.today-marker) button p {
-            color: #ffffff !important;
-        }
-
-        /* Hide markers */
-        .today-marker, .event-marker {
-            display: none !important;
+        [data-testid="stSidebar"] .today-btn button:hover {
+            background: #06b6d4 !important;    /* cyan-500 */
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(8, 145, 178, 0.4) !important;
         }
         </style>
         """, unsafe_allow_html=True)
         
-        # Build calendar grid natively wrapped in a container to trigger the CSS rules
-        with st.container():
-            st.markdown('<div id="calendar-wrapper"></div>', unsafe_allow_html=True)
-            
-            st.markdown("""
-                <div class="calendar-header">
-                    <div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            for week in month_days:
-                cols = st.columns(7)
-                for i, day in enumerate(week):
-                    with cols[i]:
-                        if day == 0:
-                            st.markdown("<div style='height: 36px;'></div>", unsafe_allow_html=True)
-                        else:
-                            is_today = day == today.day and cal_month == today.month and cal_year == today.year
-                            has_event = day in event_days
-                            
-                            disabled = not has_event
-                            
-                            # Inject invisible marker divs to trigger CSS deeply without relying on fragile Streamlit classes
-                            if is_today:
-                                st.markdown('<div class="today-marker"></div>', unsafe_allow_html=True)
-                            if has_event:
-                                st.markdown('<div class="event-marker"></div>', unsafe_allow_html=True)
-                            
-                            if st.button(f"{day}", key=f"cal_{cal_year}_{cal_month}_{day}", use_container_width=True, disabled=disabled):
-                                st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
-                                st.session_state.calendar_query_formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
+        st.markdown('<div class="calendar-wrapper">', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="day-headers">
+            <span class="day-header-item">Mo</span>
+            <span class="day-header-item">Tu</span>
+            <span class="day-header-item">We</span>
+            <span class="day-header-item">Th</span>
+            <span class="day-header-item">Fr</span>
+            <span class="day-header-item">Sa</span>
+            <span class="day-header-item">Su</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Build calendar grid natively
+        for week in month_days:
+            cols = st.columns(7)  # 7 equal columns, one per day of week
+
+            for i, day in enumerate(week):
+                with cols[i]:
+
+                    # Empty slot
+                    if day == 0:
+                        st.button(" ", key=f"cal_empty_{cal_year}_{cal_month}_{i}_{day}",
+                                  use_container_width=True, disabled=True)
+                        continue
+
+                    is_today = (
+                        day == today.day
+                        and cal_month == today.month
+                        and cal_year == today.year
+                    )
+                    has_event = day in event_days
+
+                    css_classes = []
+                    if has_event:
+                        css_classes.append("event-day-btn")
+                    if is_today:
+                        css_classes.append("today-btn")
+                    wrapper_class = " ".join(css_classes)
+
+                    if wrapper_class:
+                        st.markdown(f'<div class="{wrapper_class}">', unsafe_allow_html=True)
+
+                    if has_event:
+                        if st.button(str(day), key=f"cal_{cal_year}_{cal_month}_{day}",
+                                     use_container_width=True):
+                            st.session_state.calendar_query_date = (
+                                f"{cal_year}-{cal_month:02d}-{day:02d}"
+                            )
+                            st.session_state.calendar_query_formatted = (
+                                datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
+                            )
+                    else:
+                        st.button(str(day), key=f"cal_{cal_year}_{cal_month}_{day}",
+                                  use_container_width=True, disabled=True)
+
+                    if wrapper_class:
+                        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown("</div>", unsafe_allow_html=True)
         
         st.markdown("---")
         
