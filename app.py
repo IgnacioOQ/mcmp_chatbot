@@ -271,19 +271,19 @@ def main():
 
         /* 7. 'Today' Styling (Primary Button) */
         div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"] {
-            background: #0891b2 !important;    /* cyan-600 */
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important; /* indigo to purple gradient */
             border: none !important;
             color: #ffffff !important;
             font-weight: 700 !important;
             font-size: 13px !important;
-            box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.2) !important;  
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important;  
             opacity: 1 !important;
             cursor: pointer !important;
         }
         div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]:not(:disabled):hover {
-            background: #06b6d4 !important;    /* cyan-500 */
+            background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%) !important; /* deeper indigo-purple */
             transform: translateY(-2px) !important;
-            box-shadow: 0 4px 12px rgba(8, 145, 178, 0.4) !important;
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.5) !important;
         }
         div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"] p {
             color: #ffffff !important;
