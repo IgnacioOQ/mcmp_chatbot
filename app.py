@@ -269,29 +269,52 @@ def main():
             transform: translateY(-2px) !important;
         }
 
-        /* 7. 'Today' Styling (Primary Button) */
+        /* 7. 'Today' Styling (Primary Button) - Green Text & Dot */
         div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"] {
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important; /* indigo to purple gradient */
-            border: none !important;
-            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(74, 222, 128, 0.4) !important;  /* green border */
+            color: #4ade80 !important; /* green text */
             font-weight: 700 !important;
             font-size: 13px !important;
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important;  
             opacity: 1 !important;
             cursor: pointer !important;
+            position: relative !important;
+            box-shadow: none !important;
         }
+
+        /* Green dot for Today */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: #4ade80; /* green dot */
+            border-radius: 50%;
+        }
+
+        /* Today WITH NO EVENT (Disabled) */
         div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]:disabled {
-            opacity: 1 !important; /* For days that are "Today" but have no event */
+            opacity: 1 !important;
             cursor: default !important;
-            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.03) !important;
+        }
+
+        /* Today WITH EVENT (Clickable) */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]:not(:disabled) {
+            background: rgba(6, 182, 212, 0.15) !important; /* Cyan tint so user knows it's an event */
+            border-color: #4ade80 !important; /* Keep green border */
         }
         div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]:not(:disabled):hover {
-            background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%) !important; /* deeper indigo-purple */
+            background: rgba(6, 182, 212, 0.25) !important;
             transform: translateY(-2px) !important;
-            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.5) !important;
+            box-shadow: 0 4px 12px rgba(74, 222, 128, 0.2) !important;
         }
+
         div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"] p {
-            color: #ffffff !important;
+            color: #4ade80 !important; /* force green text in inner p tag */
         }
 
         /* 8. Invisible padding cells for day 0 (Tertiary Button) */
