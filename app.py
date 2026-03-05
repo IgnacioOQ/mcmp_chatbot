@@ -280,6 +280,11 @@ def main():
             opacity: 1 !important;
             cursor: pointer !important;
         }
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]:disabled {
+            opacity: 1 !important; /* For days that are "Today" but have no event */
+            cursor: default !important;
+            color: #ffffff !important;
+        }
         div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]:not(:disabled):hover {
             background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%) !important; /* deeper indigo-purple */
             transform: translateY(-2px) !important;
