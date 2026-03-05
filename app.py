@@ -241,8 +241,8 @@ def main():
             box-shadow: none !important;
         }
 
-        /* 5. 'No Event' / Normal day (Secondary Disabled) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-secondary"]:disabled {
+        /* 5. 'No Event' / Normal day (Disabled) */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button:disabled {
             color: #94a3b8 !important;         /* slate-400 */
             font-size: 13px !important;
             font-weight: 500 !important;
@@ -250,8 +250,8 @@ def main():
             cursor: default !important;
         }
 
-        /* 6. 'Has Event' (Secondary Clickable) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-secondary"]:not(:disabled) {
+        /* 6. 'Has Event' (Clickable) */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.event-marker) button:not(:disabled) {
             background: rgba(6, 182, 212, 0.1) !important; 
             border: 1px solid rgba(6, 182, 212, 0.4) !important;
             color: #22d3ee !important;         /* cyan-400 */
@@ -261,7 +261,7 @@ def main():
             opacity: 1 !important;
             position: relative !important;
         }
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-secondary"]:not(:disabled):hover {
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.event-marker) button:not(:disabled):hover {
             background: rgba(6, 182, 212, 0.2) !important;
             border-color: rgba(6, 182, 212, 0.6) !important;
             color: #67e8f9 !important;         /* cyan-300 */
@@ -269,8 +269,8 @@ def main():
             transform: translateY(-2px) !important;
         }
 
-        /* 7. 'Today' Styling (Primary Button) - Green Text & Dot */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"] {
+        /* 7. 'Today' Styling - Green Text & Border */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.today-marker) button {
             background: rgba(255, 255, 255, 0.03) !important;
             border: 1px solid rgba(74, 222, 128, 0.4) !important;  /* green border */
             color: #4ade80 !important; /* green text */
@@ -283,7 +283,7 @@ def main():
         }
 
         /* Green dot for Today */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]::after {
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.today-marker) button::after {
             content: '';
             position: absolute;
             bottom: 4px;
@@ -296,33 +296,38 @@ def main():
         }
 
         /* Today WITH NO EVENT (Disabled) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]:disabled {
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.today-marker) button:disabled {
             opacity: 1 !important;
             cursor: default !important;
             background: rgba(255, 255, 255, 0.03) !important;
         }
 
         /* Today WITH EVENT (Clickable) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]:not(:disabled) {
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.today-marker):has(.event-marker) button:not(:disabled) {
             background: rgba(6, 182, 212, 0.15) !important; /* Cyan tint so user knows it's an event */
             border-color: #4ade80 !important; /* Keep green border */
         }
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]:not(:disabled):hover {
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.today-marker):has(.event-marker) button:not(:disabled):hover {
             background: rgba(6, 182, 212, 0.25) !important;
             transform: translateY(-2px) !important;
             box-shadow: 0 4px 12px rgba(74, 222, 128, 0.2) !important;
         }
 
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"] p {
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.today-marker) button p {
             color: #4ade80 !important; /* force green text in inner p tag */
         }
 
-        /* 8. Invisible padding cells for day 0 (Tertiary Button) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-tertiary"] {
+        /* 8. Invisible padding cells for day 0 */
+        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"]:has(.empty-padding-marker) button {
             opacity: 0 !important;
             pointer-events: none !important;
             background: transparent !important;
             border: none !important;
+        }
+
+        /* Hide the injected markers */
+        .today-marker, .event-marker, .empty-padding-marker {
+            display: none !important;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -348,17 +353,22 @@ def main():
                 for i, day in enumerate(week):
                     with cols[i]:
                         if day == 0:
-                            # Tertiary buttons are our invisible placeholders for grid alignment
-                            st.button(" ", key=f"cal_empty_{cal_year}_{cal_month}_{w}_{i}", use_container_width=True, type="tertiary", disabled=True)
+                            # Invisible markers let us style the exact column via CSS :has() safely
+                            st.markdown('<div class="empty-padding-marker"></div>', unsafe_allow_html=True)
+                            st.button(" ", key=f"cal_empty_{cal_year}_{cal_month}_{w}_{i}", use_container_width=True, disabled=True)
                         else:
                             is_today = day == today.day and cal_month == today.month and cal_year == today.year
                             has_event = day in event_days
                             
-                            # Primary means it's today (highlighted), Secondary means it's a normal/event day (dimmed or glow)
-                            btn_type = "primary" if is_today else "secondary"
+                            # Inject invisible marker divs to trigger CSS deeply without relying on fragile Streamlit classes
+                            if is_today:
+                                st.markdown('<div class="today-marker"></div>', unsafe_allow_html=True)
+                            if has_event:
+                                st.markdown('<div class="event-marker"></div>', unsafe_allow_html=True)
+                                
                             disabled = not has_event
                             
-                            if st.button(f"{day}", key=f"cal_{cal_year}_{cal_month}_{day}", use_container_width=True, type=btn_type, disabled=disabled):
+                            if st.button(f"{day}", key=f"cal_{cal_year}_{cal_month}_{day}", use_container_width=True, disabled=disabled):
                                 st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
                                 st.session_state.calendar_query_formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
         
