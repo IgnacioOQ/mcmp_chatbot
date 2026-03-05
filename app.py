@@ -428,20 +428,7 @@ def main():
         except Exception as e:
             st.error(f"Could not load events: {e}")
 
-        st.markdown("---")
-        
-        # 4. Configuration at the bottom
-        st.header("⚙️ Configuration")
-        use_mcp_tools = st.toggle("Enable Structured Data Tools (MCP)", value=True, help="Allows the AI to search specific databases for people, research, and events.")
 
-        # Model Selection
-        model_choice = st.radio(
-            "Select Model",
-            options=["gemini-2.0-flash", "gemini-2.0-flash-lite"],
-            index=0,
-            format_func=lambda x: "Gemini 2.0 Flash (Balanced)" if x == "gemini-2.0-flash" else "Gemini 2.0 Flash-Lite (Economy)",
-            help="Flash is better for complex queries. Flash-Lite is cheaper but still powerful."
-        )
 
     # Initialize RAGEngine
     if "engine" not in st.session_state:
@@ -474,7 +461,11 @@ def main():
         
         with st.chat_message("assistant"):
             with st.spinner("Looking up events..."):
-                response = st.session_state.engine.generate_response(auto_prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
+                response = st.session_state.engine.generate_response(
+                    auto_prompt, 
+                    use_mcp_tools=True, 
+                    model_name="gemini-2.0-flash"
+                )
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
 
@@ -486,7 +477,11 @@ def main():
 
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                response = st.session_state.engine.generate_response(prompt, use_mcp_tools=use_mcp_tools, model_name=model_choice)
+                response = st.session_state.engine.generate_response(
+                    prompt, 
+                    use_mcp_tools=True, 
+                    model_name="gemini-2.0-flash"
+                )
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
 
