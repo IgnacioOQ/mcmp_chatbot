@@ -111,10 +111,11 @@ This script will:
 The user interface is built entirely in **Streamlit**, providing a clean, responsive chat interface. It handles user sessions, admin access (password protected), and feedback forms directly in the browser.
 
 #### Native Streamlit Calendar UI
-Streamlit limits raw HTML `<a href="...">` links from natively triggering backend Python callbacks securely without hard page reloads. To maintain our premium gradient calendar aesthetics while preserving instant conversational injections, the application uses a **Pure Native Calendar UI**:
+Streamlit limits raw HTML `<a href="...">` links from natively triggering backend Python callbacks securely without hard page reloads. To maintain our premium presentation while preserving instant conversational injections, the application uses a **Pure Native Calendar UI**:
 - The calendar grid is dynamically constructed using strictly native `st.columns` and `st.button` components to ensure perfect layout alignment and fast, socket-driven session behavior.
-- We map Streamlit's built-in button types (`type="primary"`, `"secondary"`, and `"tertiary"`) to represent different states: "Today", "Event/Normal Day", and "Empty Padding", respectively.
-- We target these specific built-in component types using advanced CSS pseudo-selectors (like `:has(#calendar-wrapper) button[data-testid="baseButton-primary"]`) injected via `st.markdown(unsafe_allow_html=True)`. This cleanly overrides standard styling to perfectly mimic complex, glassmorphic raw HTML layouts without breaking Streamlit's strict React DOM grid.
+- We map Streamlit's built-in button types to represent different states: `type="primary"` (Today), `type="secondary"` (Normal/Event Day), and `type="tertiary"` (Empty padding to maintain grid shape).
+- Event days are visually indicated natively using standard Unicode emojis (`🔵`) appended to the button text string, removing the need for complex and fragile DOM-breaking CSS injections.
+- We target these specific built-in component types using scoped CSS pseudo-selectors (like `[data-testid="column"] button`) injected via `st.markdown(unsafe_allow_html=True)`. This cleanly overrides standard padding and sizing to create a tight, consistent grid without breaking Streamlit's strict React DOM behavior.
 - Clicking a date silently injects a hidden prompt ("What events are scheduled for X?") into the chat sequence, performing real-time RAG directly within the existing viewer.
 
 ### 2. AI Engine: Google Gemini

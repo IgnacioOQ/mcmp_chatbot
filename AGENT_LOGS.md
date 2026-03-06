@@ -1,5 +1,13 @@
 # AI Agent Logs
 
+## [2026-03-06] Refactor Calendar UI out of HTML DOM
+
+**Agent**: Antigravity
+**Task**: Refactor the calendar DOM in app.py to follow native Streamlit widget semantics.
+
+### Summary
+The previous "Native Hybrid" implementation attempting to use pseudo-selectors alongside native stream buttons was still structurally fragile based on Streamlit's DOM handling wrapper rules. To ensure robust reliability, the system was fully transitioned away from html wrappers. Calendar rendering now relies strictly on pure loops and standard button mappings (primary/secondary/tertiary). Events are cleanly denoted using natively supported unicode string interpolation (the 🔵 emoji), removing the need for complex, bug-prone CSS overlays while retaining a tight layout via standardized test-id padding resets.
+
 This file tracks major actions, architectural changes, and features implemented by AI agents functioning on this codebase.
 
 ## [2026-03-05] Refactor Calendar UI to Native Hybrid
