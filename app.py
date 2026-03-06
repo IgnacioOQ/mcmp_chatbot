@@ -246,7 +246,7 @@ def main():
                         
                         # Determine button label and type
                         # Using emoji or unicode dots is the safest way to indicate events in native Streamlit
-                        button_label = f"{day}\\n🔵" if has_event else str(day)
+                        button_label = f"{day} 🔵" if has_event else str(day)
                         
                         # Use primary button type to naturally highlight "today"
                         btn_type = "primary" if is_today else "secondary"
