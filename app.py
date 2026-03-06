@@ -187,180 +187,78 @@ def main():
         
         # Streamlit 1.53 strictly enforces DOM closure, so we cannot wrap columns with raw 'div' tags.
         # Instead, we identify buttons purely by their standard Streamlit UI type property.
+        
+        # Scoped, safe CSS to tighten the grid and style the container
         st.markdown("""
         <style>
-        /* 1. Main Calendar Wrapper Base (Target Streamlit's block container) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) {
-            background: rgba(30, 41, 59, 0.7) !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            border-radius: 16px !important;
-            padding: 16px !important;
-            margin-bottom: 12px !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
-        }
-
-        /* 2. Calendar Header */
-        .calendar-header {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 8px;
-        }
-        .day-header-item {
-            color: #94a3b8;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            width: 36px;
-            text-align: center;
-        }
-        
-        /* 3. Tighten Streamlit Grid */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] {
-            padding: 0 2px !important;
-        }
-
-        /* 4. Base Button Styling (All Days) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button {
-            background: rgba(255, 255, 255, 0.03) !important;
-            border: 1px solid rgba(255, 255, 255, 0.05) !important;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            padding: 0 !important;
-            min-height: 44px !important;
-            height: 44px !important;
-            width: 100% !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            border-radius: 10px !important;
-            transition: all 0.15s ease !important;
-            box-shadow: none !important;
-        }
-
-        /* 5. 'No Event' / Normal day (Secondary Disabled) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-secondary"]:disabled {
-            color: #94a3b8 !important;         /* slate-400 */
-            font-size: 13px !important;
-            font-weight: 500 !important;
-            opacity: 0.4 !important;
-            cursor: default !important;
-        }
-
-        /* 6. 'Has Event' (Secondary Clickable) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-secondary"]:not(:disabled) {
-            background: rgba(6, 182, 212, 0.1) !important; 
-            border: 1px solid rgba(6, 182, 212, 0.4) !important;
-            color: #22d3ee !important;         /* cyan-400 */
-            font-weight: 600 !important;
-            font-size: 13px !important;
-            cursor: pointer !important;
-            opacity: 1 !important;
-            position: relative !important;
-        }
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-secondary"]:not(:disabled):hover {
-            background: rgba(6, 182, 212, 0.2) !important;
-            border-color: rgba(6, 182, 212, 0.6) !important;
-            color: #67e8f9 !important;         /* cyan-300 */
-            box-shadow: 0 2px 10px rgba(6, 182, 212, 0.2) !important;
-            transform: translateY(-2px) !important;
-        }
-
-        /* 7. 'Today' Styling (Primary Button) - Green Text & Border */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"] {
-            background: rgba(255, 255, 255, 0.03) !important;
-            border: 1px solid rgba(74, 222, 128, 0.4) !important;  /* green border */
-            color: #4ade80 !important; /* green text */
-            font-weight: 700 !important;
-            font-size: 13px !important;
-            opacity: 1 !important;
-            cursor: pointer !important;
-            position: relative !important;
-            box-shadow: none !important;
-        }
-
-        /* Green dot for Today */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 4px;
-            background: #4ade80; /* green dot */
-            border-radius: 50%;
-        }
-
-        /* Today WITH NO EVENT (Disabled) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]:disabled {
-            opacity: 1 !important;
-            cursor: default !important;
-            background: rgba(255, 255, 255, 0.03) !important;
-        }
-
-        /* Today WITH EVENT (Clickable) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]:not(:disabled) {
-            background: rgba(6, 182, 212, 0.15) !important; /* Cyan tint so user knows it's an event */
-            border-color: #4ade80 !important; /* Keep green border */
-        }
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"]:not(:disabled):hover {
-            background: rgba(6, 182, 212, 0.25) !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 4px 12px rgba(74, 222, 128, 0.2) !important;
-        }
-
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-primary"] p {
-            color: #4ade80 !important; /* force green text in inner p tag */
-        }
-
-        /* 8. Invisible padding cells for day 0 (Tertiary Button) */
-        div[data-testid="stSidebar"] div[data-testid="stVerticalBlock"]:has(#calendar-wrapper) [data-testid="column"] button[data-testid="baseButton-tertiary"] {
-            opacity: 0 !important;
-            pointer-events: none !important;
-            background: transparent !important;
-            border: none !important;
-        }
+            /* Tighten column spacing for the calendar grid */
+            [data-testid="stSidebar"] [data-testid="column"] {
+                padding: 0 2px;
+            }
+            
+            /* Make calendar buttons perfectly square and uniform */
+            [data-testid="stSidebar"] [data-testid="column"] button {
+                height: 40px !important;
+                padding: 0px !important;
+                border-radius: 8px !important;
+            }
+            
+            /* Subtle text styling for the native headers */
+            .day-header-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 8px;
+                padding: 0 10px;
+            }
+            .day-header-item {
+                color: #94a3b8;
+                font-weight: 600;
+                font-size: 12px;
+                width: 14%;
+                text-align: center;
+            }
         </style>
         """, unsafe_allow_html=True)
         
-        # Build calendar grid natively wrapped in a container to trigger the CSS rules
-        with st.container():
-            st.markdown('<div id="calendar-wrapper"></div>', unsafe_allow_html=True)
-            
-            st.markdown("""
-                <div class="calendar-header">
-                    <div class="day-header-item">Mo</div>
-                    <div class="day-header-item">Tu</div>
-                    <div class="day-header-item">We</div>
-                    <div class="day-header-item">Th</div>
-                    <div class="day-header-item">Fr</div>
-                    <div class="day-header-item">Sa</div>
-                    <div class="day-header-item">Su</div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            for w, week in enumerate(month_days):
-                cols = st.columns(7)
-                for i, day in enumerate(week):
-                    with cols[i]:
-                        if day == 0:
-                            # Tertiary buttons are our invisible placeholders for grid alignment
-                            st.button(" ", key=f"cal_empty_{cal_year}_{cal_month}_{w}_{i}", use_container_width=True, type="tertiary", disabled=True)
-                        else:
-                            is_today = day == today.day and cal_month == today.month and cal_year == today.year
-                            has_event = day in event_days
-                            
-                            # Primary means it's today (highlighted), Secondary means it's a normal/event day (dimmed or glow)
-                            btn_type = "primary" if is_today else "secondary"
-                            disabled = not has_event
-                            
-                            if st.button(f"{day}", key=f"cal_{cal_year}_{cal_month}_{day}", use_container_width=True, type=btn_type, disabled=disabled):
-                                st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
-                                st.session_state.calendar_query_formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
+        st.markdown("""
+        <div class="day-header-row">
+            <span class="day-header-item">Mo</span>
+            <span class="day-header-item">Tu</span>
+            <span class="day-header-item">We</span>
+            <span class="day-header-item">Th</span>
+            <span class="day-header-item">Fr</span>
+            <span class="day-header-item">Sa</span>
+            <span class="day-header-item">Su</span>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Build calendar grid natively
+        for w, week in enumerate(month_days):
+            cols = st.columns(7)
+            for i, day in enumerate(week):
+                with cols[i]:
+                    if day == 0:
+                        # Empty placeholder to maintain grid structure
+                        st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
+                    else:
+                        is_today = (day == today.day and cal_month == today.month and cal_year == today.year)
+                        has_event = day in event_days
+                        
+                        # Determine button label and type
+                        # Using emoji or unicode dots is the safest way to indicate events in native Streamlit
+                        button_label = f"{day}\\n🔵" if has_event else str(day)
+                        
+                        # Use primary button type to naturally highlight "today"
+                        btn_type = "primary" if is_today else "secondary"
+                        
+                        if st.button(
+                            button_label, 
+                            key=f"cal_{cal_year}_{cal_month}_{day}", 
+                            use_container_width=True,
+                            type=btn_type
+                        ):
+                            st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
+                            st.session_state.calendar_query_formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
         
         st.markdown("---")
         
