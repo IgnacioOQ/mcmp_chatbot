@@ -22,13 +22,13 @@ class MCPServer:
         return [
             {
                 "name": "search_people",
-                "description": "Search for people, faculty, and researchers at the MCMP. Use this to find contact info, roles, or research interests of specific individuals.",
+                "description": "Search for people, faculty, and researchers at the MCMP. Use this to find contact info, roles, or research interests of specific individuals. ALWAYS use this tool if the user asks about a person and the context is insufficient, even if they only provide a first name.",
                 "input_schema": {
                     "type": "object",
                     "properties": {
                         "query": {
                             "type": "string",
-                            "description": "Name or keyword to search for (e.g., 'Julian Nida-Rumelin', 'Logic')."
+                            "description": "Name or keyword to search for (e.g., 'Ignacio', 'Julian Nida-Rumelin', 'Logic')."
                         },
                         "role_filter": {
                             "type": "string",

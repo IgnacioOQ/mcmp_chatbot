@@ -14,10 +14,11 @@ def load_data(filename: str) -> List[Dict[str, Any]]:
 
 def search_people(query: str, role_filter: Optional[str] = None) -> List[Dict[str, Any]]:
     """
-    Search for people in the MCMP database.
+    Search for people, faculty, and researchers at the MCMP. Use this to find contact info, roles, or research interests of specific individuals.
+    ALWAYS use this tool if the user asks about a person and the context is insufficient, even if they only provide a first name.
     
     Args:
-        query: Name or keyword to search for in people's profiles.
+        query: Name or keyword to search for in people's profiles (e.g., 'Ignacio', 'Julian Nida-Rumelin', 'Logic').
         role_filter: Optional filter for role (e.g., "chair", "fellow", "student").
     """
     people = load_data("people.json")
