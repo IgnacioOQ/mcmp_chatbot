@@ -193,7 +193,7 @@ def main():
         <style>
             /* Tighten column spacing for the calendar grid */
             [data-testid="stSidebar"] [data-testid="column"] {
-                padding: 0 2px;
+                padding: 0 2px !important;
             }
             
             /* Make calendar buttons perfectly square and uniform */
@@ -201,6 +201,15 @@ def main():
                 height: 40px !important;
                 padding: 0px !important;
                 border-radius: 8px !important;
+                background: rgba(255, 255, 255, 0.03) !important;
+                border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            }
+
+            /* Style Specific Types (e.g., Primary = Today) */
+            [data-testid="stSidebar"] [data-testid="column"] button[data-testid="baseButton-primary"] {
+                border: 1px solid rgba(74, 222, 128, 0.4) !important;
+                color: #4ade80 !important; 
+                font-weight: 700 !important;
             }
             
             /* Subtle text styling for the native headers */
