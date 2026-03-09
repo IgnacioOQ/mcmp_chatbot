@@ -12,34 +12,23 @@ def load_data(filename: str) -> List[Dict[str, Any]]:
     with open(path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def search_people(query: str, role_filter: Optional[str] = None) -> List[Dict[str, Any]]:
+def search_people(query: str) -> List[Dict[str, Any]]:
     """
     Search for people, faculty, and researchers at the MCMP. Use this to find contact info, roles, or research interests of specific individuals.
     ALWAYS use this tool if the user asks about a person and the context is insufficient, even if they only provide a first name.
     
     Args:
         query: Name or keyword to search for in people's profiles (e.g., 'Ignacio', 'Julian Nida-Rumelin', 'Logic').
-        role_filter: Optional filter for role (e.g., "chair", "fellow", "student").
     """
     people = load_data("people.json")
     results = []
     
     query = query.lower()
-    role_filter = role_filter.lower() if role_filter else None
     
     for person in people:
         name = person.get("name", "").lower()
         desc = person.get("description", "").lower()
-        # Look for 'role' or 'position' (scraper uses 'position')
-        role = person.get("metadata", {}).get("role", "")
-        if not role:
-             role = person.get("metadata", {}).get("position", "")
-        role = role.lower()
         
-        # Apply role filter if specified
-        if role_filter and role_filter not in role:
-            continue
-            
         # Apply text query
         if query in name or query in desc:
             display_role = person.get("metadata", {}).get("role") or person.get("metadata", {}).get("position") or "Unknown"

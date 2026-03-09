@@ -29,10 +29,6 @@ class MCPServer:
                         "query": {
                             "type": "string",
                             "description": "Name or keyword to search for (e.g., 'Ignacio', 'Julian Nida-Rumelin', 'Logic')."
-                        },
-                        "role_filter": {
-                            "type": "string",
-                            "description": "Optional filter for role (e.g., 'Chair', 'Postdoc', 'Fellow')."
                         }
                     },
                     "required": ["query"]
