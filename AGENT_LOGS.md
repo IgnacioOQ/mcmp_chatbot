@@ -1,5 +1,13 @@
 # AI Agent Logs
 
+## [2026-03-09] Parallel HTML Scraper Implementation
+
+**Agent**: Antigravity
+**Task**: Develop an HTML-only scraper and integrate it into the data pipeline.
+
+### Summary
+Created a parallel scraper (`html_mcmp_scraper.py`) that strictly uses HTML requests without Selenium, extracting data across events, people, research, and general information. Modified `scripts/update_dataset.py` to run both the primary `MCMPScraper` and the `HTMLMCMPScraper` concurrently, merge their results, deduplicate by unique identifiers (`url` or `id`), and output the combined data. Changes are automatically logged to `data/scraping_logs.json` during the `save_to_json()` step.
+
 ## [2026-03-06] Refactor Calendar UI out of HTML DOM
 
 **Agent**: Antigravity
