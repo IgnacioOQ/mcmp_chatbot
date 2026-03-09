@@ -3,10 +3,9 @@ import functools
 import json
 from dotenv import load_dotenv
 from src.core.vector_store import VectorStore
-from src.core.graph_utils import GraphUtils
 from src.core.personality import load_personality
 from src.mcp.server import MCPServer
-from src.utils.logger import log_info, log_error
+from src.utils.logger import log_info, log_error, log_latency
 import openai
 from anthropic import Anthropic
 from datetime import datetime
@@ -16,7 +15,6 @@ load_dotenv()
 class RAGEngine:
     def __init__(self, provider="openai", api_key=None, use_mcp=True):
         self.vs = VectorStore()
-        self.graph_utils = GraphUtils()
         self.provider = provider
         self.use_mcp = use_mcp
 
@@ -126,6 +124,7 @@ If the question is already simple, just return it as-is."""
 
         return all_chunks
 
+    @log_latency("total_generate_response")
     def generate_response(self, query, use_mcp_tools=False, model_name="gemini-2.0-flash"):
         """
         Generates a response using the configured LLM provider.
@@ -165,16 +164,11 @@ If the question is already simple, just return it as-is."""
 
         context_text = "\n\n---\n\n".join(formatted_context)
 
-        # 2. Retrieve graph context
-        graph_data = self.graph_utils.get_subgraph(query)
-        graph_context_text = self.graph_utils.to_natural_language(graph_data)
-        if not graph_context_text:
-            graph_context_text = "No specific institutional relationships found."
-
         current_date = datetime.now().strftime("%A, %B %d, %Y")
 
         # Load static personality from file
-        personality = load_personality()
+        with log_latency("load_personality"):
+            personality = load_personality()
 
         # Compose system instruction: static personality + dynamic context
         system_instruction = f"""{personality}
@@ -182,45 +176,43 @@ If the question is already simple, just return it as-is."""
 ---
 Current Date: {current_date}
 ---
-### INSTITUTIONAL CONTEXT (GRAPH):
-{graph_context_text}
----
 ### CONTEXT FROM MCMP WEBSITE:
 {context_text}
 ---
 """
 
         # Prepare tools if enabled and available
-        tools = []
-        tools_description_str = ""
+        with log_latency("build_tools"):
+            tools = []
+            tools_description_str = ""
 
-        if use_mcp_tools and self.mcp_server:
-            # 1. Get tool definitions
-            tool_defs = self.mcp_server.list_tools()
+            if use_mcp_tools and self.mcp_server:
+                # 1. Get tool definitions
+                tool_defs = self.mcp_server.list_tools()
 
-            # 2. Build text description for the System Prompt
-            tools_description_str = "### AVAILABLE DATA TOOLS (MCP):\n"
-            tools_description_str += "You have access to the following tools to fetch real-time data.\n"
-            tools_description_str += "IMPORTANT: You have permission to use these tools. Do NOT ask the user if they want you to check. Just check.\n"
-            tools_description_str += "If the text context is insufficient OR provides only partial information (like a title without an abstract), proceed IMMEDIATELY to calling the relevant tool to get the full details:\n"
-            for t in tool_defs:
-                tools_description_str += f"- `{t['name']}`: {t['description']}\n"
-            tools_description_str += "---\n"
+                # 2. Build text description for the System Prompt
+                tools_description_str = "### AVAILABLE DATA TOOLS (MCP):\n"
+                tools_description_str += "You have access to the following tools to fetch real-time data.\n"
+                tools_description_str += "IMPORTANT: You have permission to use these tools. Do NOT ask the user if they want you to check. Just check.\n"
+                tools_description_str += "If the text context is insufficient OR provides only partial information (like a title without an abstract), proceed IMMEDIATELY to calling the relevant tool to get the full details:\n"
+                for t in tool_defs:
+                    tools_description_str += f"- `{t['name']}`: {t['description']}\n"
+                tools_description_str += "---\n"
 
-            # 3. Prepare provider-specific tool objects
-            if self.provider == "gemini":
-                tools = list(self.mcp_server.tools.values())
-            elif self.provider == "openai":
-                tools = []
-                for tool_def in tool_defs:
-                    tools.append({
-                        "type": "function",
-                        "function": {
-                            "name": tool_def["name"],
-                            "description": tool_def["description"],
-                            "parameters": tool_def["input_schema"]
-                        }
-                    })
+                # 3. Prepare provider-specific tool objects
+                if self.provider == "gemini":
+                    tools = list(self.mcp_server.tools.values())
+                elif self.provider == "openai":
+                    tools = []
+                    for tool_def in tool_defs:
+                        tools.append({
+                            "type": "function",
+                            "function": {
+                                "name": tool_def["name"],
+                                "description": tool_def["description"],
+                                "parameters": tool_def["input_schema"]
+                            }
+                        })
 
         try:
             # Update system instruction to include tools description
@@ -245,7 +237,8 @@ Current Date: {current_date}
                 if tools:
                     completion_args["tools"] = tools
 
-                response = client.chat.completions.create(**completion_args)
+                with log_latency("llm_api_call"):
+                    response = client.chat.completions.create(**completion_args)
                 message = response.choices[0].message
 
                 # Check for tool calls
@@ -266,11 +259,12 @@ Current Date: {current_date}
                         })
 
                     # Second Call (with tool results)
-                    response = client.chat.completions.create(
-                        model="gpt-4o",
-                        messages=messages,
-                        temperature=0
-                    )
+                    with log_latency("llm_api_call_2"):
+                        response = client.chat.completions.create(
+                            model="gpt-4o",
+                            messages=messages,
+                            temperature=0
+                        )
                     return response.choices[0].message.content
                 else:
                     return message.content
@@ -287,14 +281,17 @@ Current Date: {current_date}
                 return response.content[0].text
 
             elif self.provider == "gemini":
-                from google import genai
-                from google.genai import types
+                with log_latency("gemini_import"):
+                    from google import genai
+                    from google.genai import types
 
-                client = genai.Client(api_key=self.api_key)
+                with log_latency("gemini_client_init"):
+                    client = genai.Client(api_key=self.api_key)
 
-                config = {}
-                if tools:
-                    config['tools'] = tools
+                with log_latency("format_history"):
+                    config = {}
+                    if tools:
+                        config['tools'] = tools
 
                 # We need to construct the chat history manually to include system instruction context
                 # Gemini doesn't support 'system' role in chat history often, usually config.
@@ -305,19 +302,21 @@ Current Date: {current_date}
 
                 # Actually newer genai client supports system_instruction='...'
 
-                chat = client.chats.create(
-                    model=model_name,
-                    config=types.GenerateContentConfig(
-                        system_instruction=final_system_instruction,
-                        tools=tools,
-                        automatic_function_calling=types.AutomaticFunctionCallingConfig(
-                            disable=False,
-                            maximum_remote_calls=3
+                with log_latency("gemini_chat_create"):
+                    chat = client.chats.create(
+                        model=model_name,
+                        config=types.GenerateContentConfig(
+                            system_instruction=final_system_instruction,
+                            tools=tools,
+                            automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                                disable=False,
+                                maximum_remote_calls=1
+                            )
                         )
                     )
-                )
 
-                response = chat.send_message(query)
+                with log_latency("llm_api_call"):
+                    response = chat.send_message(query)
                 return response.text
 
         except Exception as e:

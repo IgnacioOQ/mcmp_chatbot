@@ -1,5 +1,6 @@
 from typing import List, Dict, Any
-from src.mcp.tools import search_people, search_research, get_events
+from src.mcp.tools import search_people, search_research, get_events, search_graph
+from src.utils.logger import log_latency
 import json
 
 class MCPServer:
@@ -12,7 +13,8 @@ class MCPServer:
         self.tools = {
             "search_people": search_people,
             "search_research": search_research,
-            "get_events": get_events
+            "get_events": get_events,
+            "search_graph": search_graph
         }
         
     def list_tools(self) -> List[Dict[str, Any]]:
@@ -45,6 +47,20 @@ class MCPServer:
                             "description": "Research topic to filter by (e.g., 'Philosophy of Physics', 'Decision Theory')."
                         }
                     }
+                }
+            },
+            {
+                "name": "search_graph",
+                "description": "Search the institutional graph to find relationships for people (e.g. who they supervise) or organizational units (e.g. who leads them).",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "Name or part of the name of the person or unit to find relationships for."
+                        }
+                    },
+                    "required": ["query"]
                 }
             },
             {
@@ -88,6 +104,7 @@ class MCPServer:
             
         tool_func = self.tools[name]
         try:
-            return tool_func(**arguments)
+            with log_latency(f"tool:{name}"):
+                return tool_func(**arguments)
         except Exception as e:
             return {"error": str(e)}

@@ -165,6 +165,79 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
             "description": description
         })
         
+        
     # Sort by date
     results.sort(key=lambda x: x.get("date", "9999-99-99"))
     return results[:10]
+
+def search_graph(query: str) -> List[Dict[str, Any]]:
+    """
+    Search the institutional graph for relationships between people and organizational units.
+    
+    Args:
+        query: Name of the person or organizational unit to search for.
+    """
+    graph_data = load_data("graph/mcmp_jgraph.json")
+    if not graph_data:
+        return []
+
+    # Handle the fact that json.load might return a dict with "nodes" and "edges"
+    if isinstance(graph_data, list) and len(graph_data) > 0 and isinstance(graph_data[0], dict) and "nodes" in graph_data[0]:
+        graph_dict = graph_data[0]
+    elif isinstance(graph_data, dict):
+        graph_dict = graph_data
+    else:
+        return []
+
+    nodes = graph_dict.get("nodes", [])
+    edges = graph_dict.get("edges", [])
+    
+    query_lower = query.lower()
+    
+    # 1. Find matching nodes
+    matching_nodes = []
+    for node in nodes:
+        if query_lower in node.get("name", "").lower() or query_lower in node.get("id", "").lower():
+            matching_nodes.append(node)
+            
+    if not matching_nodes:
+        return []
+        
+    results = []
+    
+    # 2. For each matching node, find all connected edges and the corresponding other node
+    for target_node in matching_nodes:
+        node_id = target_node.get("id")
+        
+        node_relationships = []
+        
+        for edge in edges:
+            if edge.get("source") == node_id:
+                # Find the target node
+                related_node = next((n for n in nodes if n.get("id") == edge.get("target")), None)
+                if related_node:
+                    node_relationships.append({
+                        "relationship": edge.get("relationship", "connected_to"),
+                        "details": edge.get("properties", ""),
+                        "with": related_node.get("name"),
+                        "type": related_node.get("type", "Unknown")
+                    })
+            elif edge.get("target") == node_id:
+                # Find the source node
+                related_node = next((n for n in nodes if n.get("id") == edge.get("source")), None)
+                if related_node:
+                    node_relationships.append({
+                        "relationship": f"is {edge.get('relationship', 'connected_to')} by",
+                        "details": edge.get("properties", ""),
+                        "with": related_node.get("name"),
+                        "type": related_node.get("type", "Unknown")
+                    })
+                    
+        results.append({
+            "entity": target_node.get("name"),
+            "type": target_node.get("type"),
+            "properties": target_node.get("properties", ""),
+            "relationships": node_relationships
+        })
+        
+    return results
