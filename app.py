@@ -102,6 +102,10 @@ def main():
             max-width: 900px;
             margin: 0 auto;
         }
+        /* Justify LLM (assistant) response text */
+        [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid="stMarkdownContainer"] p {
+            text-align: justify;
+        }
         </style>
     """, unsafe_allow_html=True)
 
