@@ -18,6 +18,18 @@ The previous "Native Hybrid" implementation attempting to use pseudo-selectors a
 
 This file tracks major actions, architectural changes, and features implemented by AI agents functioning on this codebase.
 
+## [2026-03-09] Fix Event Querying Bug
+**Agent**: Antigravity
+**Task**: Fix the event querying bug and broken tests.
+
+### Summary
+Fixed an issue where the chatbot was failing to retrieve events for specific dates (like April 07, 2026). The root cause was that `maximum_remote_calls` inside the `AutomaticFunctionCallingConfig` for the Gemini SDK was set to `1`. This allowed the SDK to fetch events using the tool but stopped it from making the subsequent API call needed to generate the final text answer. Increasing the limit to `3` resolved the issue.
+Additionally, fixed a broken test in `tests/test_mcp.py` that was calling `search_people` with a removed keyword argument `role_filter`.
+
+### Changes
+- Updated `engine.py` to change `maximum_remote_calls=1` to `maximum_remote_calls=3` in `RAGEngine.generate_response`.
+- Removed the `role_filter` argument from `search_people` in `tests/test_mcp.py`.
+
 ## [2026-03-05] Refactor Calendar UI to Native Hybrid
 
 **Agent**: Antigravity

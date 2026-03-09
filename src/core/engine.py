@@ -310,7 +310,7 @@ Current Date: {current_date}
                             tools=tools,
                             automatic_function_calling=types.AutomaticFunctionCallingConfig(
                                 disable=False,
-                                maximum_remote_calls=1
+                                maximum_remote_calls=3
                             )
                         )
                     )
