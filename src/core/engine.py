@@ -1,8 +1,6 @@
 import os
-import functools
 import json
 from dotenv import load_dotenv
-from src.core.vector_store import VectorStore
 from src.core.personality import load_personality
 from src.mcp.server import MCPServer
 from src.utils.logger import log_info, log_error, log_latency
@@ -13,227 +11,115 @@ from datetime import datetime
 load_dotenv()
 
 class RAGEngine:
+    """
+    Core chatbot engine. Uses MCP structured tools to answer queries.
+    No RAG / vector search — all data access goes through the MCP tools
+    (search_people, search_research, get_events, search_graph).
+    """
+
     def __init__(self, provider="openai", api_key=None, use_mcp=True):
-        self.vs = VectorStore()
         self.provider = provider
         self.use_mcp = use_mcp
 
-        if self.use_mcp:
-            self.mcp_server = MCPServer()
-        else:
-            self.mcp_server = None
+        # ── MCP server ──────────────────────────────────────────────────────
+        self.mcp_server = MCPServer() if use_mcp else None
 
-        # 1. Try passed key
+        # ── API key resolution ───────────────────────────────────────────────
         self.api_key = api_key
-
-        # 2. Try environment variables if not passed
         if not self.api_key:
-            if provider == "openai":
-                self.api_key = os.getenv("OPENAI_API_KEY")
-            elif provider == "anthropic":
-                self.api_key = os.getenv("ANTHROPIC_API_KEY")
-            elif provider == "gemini":
-                self.api_key = os.getenv("GEMINI_API_KEY")
+            key_map = {
+                "openai":    "OPENAI_API_KEY",
+                "anthropic": "ANTHROPIC_API_KEY",
+                "gemini":    "GEMINI_API_KEY",
+            }
+            self.api_key = os.getenv(key_map.get(provider, ""))
 
         if not self.api_key:
-            error_msg = f"API Key for {provider} not found. Please set it in .env or pass it explicitly."
-            log_error(error_msg)
-            raise ValueError(error_msg)
+            msg = f"API Key for {provider} not found. Set it in .env or pass explicitly."
+            log_error(msg)
+            raise ValueError(msg)
 
-    @functools.lru_cache(maxsize=128)
-    def decompose_query(self, user_question):
-        """
-        Decomposes a complex question into simpler sub-queries.
-        """
-        decomposition_prompt = f"""Given this question about MCMP (Munich Center for Mathematical Philosophy):
-"{user_question}"
+        # ── Personality (cached once at startup) ─────────────────────────────
+        self._personality = load_personality()
 
-Break it into 1-3 simple search queries that would help find relevant information.
-Return ONLY the queries, one per line, no numbering or bullets.
-If the question is already simple, just return it as-is."""
+        # ── Pre-built tool list (static, no need to rebuild every call) ──────
+        self._tool_defs = self.mcp_server.list_tools() if self.mcp_server else []
+        self._tools_description_str = self._build_tools_description_str()
 
-        try:
-            if self.provider == "gemini":
-                from google import genai
-                client = genai.Client(api_key=self.api_key)
-                response = client.models.generate_content(
-                    model='gemini-flash-latest',
-                    contents=decomposition_prompt
-                )
-                text = response.text
-            elif self.provider == "openai":
-                client = openai.OpenAI(api_key=self.api_key)
-                response = client.chat.completions.create(
-                    model="gpt-3.5-turbo", # Use cheaper model for decomposition
-                    messages=[{"role": "user", "content": decomposition_prompt}],
-                    temperature=0
-                )
-                text = response.choices[0].message.content
-            elif self.provider == "anthropic":
-                client = Anthropic(api_key=self.api_key)
-                response = client.messages.create(
-                    model="claude-3-haiku-20240307", # Use cheaper model
-                    max_tokens=200,
-                    messages=[{"role": "user", "content": decomposition_prompt}]
-                )
-                text = response.content[0].text
-            else:
-                return [user_question]
+        # ── Gemini client (created once, reused across all calls) ────────────
+        self._gemini_client = None
+        if provider == "gemini":
+            from google import genai
+            self._gemini_client = genai.Client(api_key=self.api_key)
+            log_info("Gemini client initialised at startup.")
 
-            queries = [q.strip() for q in text.strip().split('\n') if q.strip()]
-            # Ensure original is included if list is empty or logical
-            if user_question not in queries:
-                queries.insert(0, user_question)
+    # ── Private helpers ──────────────────────────────────────────────────────
 
-            return queries[:4]
+    def _build_tools_description_str(self) -> str:
+        """Build the MCP tools section for the system prompt (done once at init)."""
+        if not self._tool_defs:
+            return ""
+        lines = [
+            "### AVAILABLE DATA TOOLS (MCP):",
+            "You have access to the following tools to fetch real-time data.",
+            "IMPORTANT: You have permission to use these tools. Do NOT ask the user if they want you to check. Just check.",
+            "If the text context is insufficient OR provides only partial information (like a title without an abstract), proceed IMMEDIATELY to calling the relevant tool to get the full details:",
+        ]
+        for t in self._tool_defs:
+            lines.append(f"- `{t['name']}`: {t['description']}")
+        lines.append("---")
+        return "\n".join(lines)
 
-        except Exception as e:
-            log_error(f"Error in decomposition: {e}")
-            return [user_question]
-
-    def retrieve_with_decomposition(self, user_question, top_k=3):
-        """
-        Retrieve relevant chunks using query decomposition.
-        """
-        queries = self.decompose_query(user_question)
-        log_info(f"Decomposed queries: {queries}")
-
-        all_chunks = []
-        seen_ids = set()
-
-        if not queries:
-            return []
-
-        results = self.vs.query(queries, n_results=top_k)
-
-        # Iterate over each query's results
-        for q_idx, query_ids in enumerate(results['ids']):
-            if not query_ids:
-                continue
-
-            query_text = queries[q_idx]
-
-            for i, doc_id in enumerate(query_ids):
-                if doc_id not in seen_ids:
-                    seen_ids.add(doc_id)
-                    all_chunks.append({
-                        'text': results['documents'][q_idx][i],
-                        'metadata': results['metadatas'][q_idx][i] if results['metadatas'] else {},
-                        'source_query': query_text
-                    })
-
-        return all_chunks
-
-    @log_latency("total_generate_response")
-    def generate_response(self, query, use_mcp_tools=False, model_name="gemini-2.0-flash"):
-        """
-        Generates a response using the configured LLM provider.
-        """
-        log_info(f"Generating response for query: {query}. Tools enabled: {use_mcp_tools}. Model: {model_name}")
-
-        # 1. Retrieve context with decomposition
-        context_chunks = self.retrieve_with_decomposition(query)
-
-        formatted_context = []
-        for chunk in context_chunks:
-            meta = chunk['metadata']
-            source_url = meta.get('url', 'No URL available')
-            title = meta.get('title', 'Untitled')
-
-            # Extract rich fields if available
-            description = meta.get('meta_description', '')
-            abstract = meta.get('meta_abstract', '')
-            role = meta.get('meta_role', '')
-
-            # Construct a rich context entry
-            formatted_entry = f"Title: {title}\nSource URL: {source_url}"
-
-            if role:
-                 formatted_entry += f"\nRole: {role}"
-
-            # Add content text (which is usually a summary or full text depending on ingestion)
-            formatted_entry += f"\nContent: {chunk['text']}"
-
-            # Append description/abstract if not already in text (simple heuristic) or just append for completeness
-            if description and len(description) > 50:
-                formatted_entry += f"\nDescription: {description}"
-            if abstract and len(abstract) > 50:
-                formatted_entry += f"\nAbstract: {abstract}"
-
-            formatted_context.append(formatted_entry)
-
-        context_text = "\n\n---\n\n".join(formatted_context)
-
+    def _build_system_instruction(self) -> str:
+        """Compose the full system instruction for each call (only dynamic part is the date)."""
         current_date = datetime.now().strftime("%A, %B %d, %Y")
+        return (
+            f"{self._personality}\n\n"
+            f"---\nCurrent Date: {current_date}\n---\n"
+            f"{self._tools_description_str}\n"
+        )
 
-        # Load static personality from file
-        with log_latency("load_personality"):
-            personality = load_personality()
+    # ── Public API ───────────────────────────────────────────────────────────
 
-        # Compose system instruction: static personality + dynamic context
-        system_instruction = f"""{personality}
+    def generate_response(self, query: str, use_mcp_tools: bool = False,
+                          model_name: str = "gemini-2.0-flash") -> str:
+        """
+        Generate a response using the configured LLM provider.
+        Answers are grounded via MCP tool calls against the structured JSON data files.
+        """
+        log_info(f"Generating response. Query: '{query}' | Tools: {use_mcp_tools} | Model: {model_name}")
 
----
-Current Date: {current_date}
----
-### CONTEXT FROM MCMP WEBSITE:
-{context_text}
----
-"""
+        with log_latency("build_system_instruction"):
+            system_instruction = self._build_system_instruction()
 
-        # Prepare tools if enabled and available
+        # ── Resolve tools for this call ──────────────────────────────────────
         with log_latency("build_tools"):
             tools = []
-            tools_description_str = ""
-
             if use_mcp_tools and self.mcp_server:
-                # 1. Get tool definitions
-                tool_defs = self.mcp_server.list_tools()
-
-                # 2. Build text description for the System Prompt
-                tools_description_str = "### AVAILABLE DATA TOOLS (MCP):\n"
-                tools_description_str += "You have access to the following tools to fetch real-time data.\n"
-                tools_description_str += "IMPORTANT: You have permission to use these tools. Do NOT ask the user if they want you to check. Just check.\n"
-                tools_description_str += "If the text context is insufficient OR provides only partial information (like a title without an abstract), proceed IMMEDIATELY to calling the relevant tool to get the full details:\n"
-                for t in tool_defs:
-                    tools_description_str += f"- `{t['name']}`: {t['description']}\n"
-                tools_description_str += "---\n"
-
-                # 3. Prepare provider-specific tool objects
                 if self.provider == "gemini":
                     tools = list(self.mcp_server.tools.values())
                 elif self.provider == "openai":
-                    tools = []
-                    for tool_def in tool_defs:
-                        tools.append({
+                    tools = [
+                        {
                             "type": "function",
                             "function": {
-                                "name": tool_def["name"],
-                                "description": tool_def["description"],
-                                "parameters": tool_def["input_schema"]
-                            }
-                        })
+                                "name": td["name"],
+                                "description": td["description"],
+                                "parameters": td["input_schema"],
+                            },
+                        }
+                        for td in self._tool_defs
+                    ]
 
         try:
-            # Update system instruction to include tools description
-            final_system_instruction = f"""{system_instruction}
-{tools_description_str}
-"""
-
+            # ── OpenAI ───────────────────────────────────────────────────────
             if self.provider == "openai":
                 client = openai.OpenAI(api_key=self.api_key)
-
                 messages = [
-                    {"role": "system", "content": final_system_instruction},
-                    {"role": "user", "content": query}
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user",   "content": query},
                 ]
-
-                # First Call
-                completion_args = {
-                    "model": "gpt-4o",
-                    "messages": messages,
-                    "temperature": 0
-                }
+                completion_args = {"model": "gpt-4o", "messages": messages, "temperature": 0}
                 if tools:
                     completion_args["tools"] = tools
 
@@ -241,78 +127,51 @@ Current Date: {current_date}
                     response = client.chat.completions.create(**completion_args)
                 message = response.choices[0].message
 
-                # Check for tool calls
                 if message.tool_calls:
-                    messages.append(message) # Add assistant's tool-call message
-
-                    for tool_call in message.tool_calls:
-                        function_name = tool_call.function.name
-                        arguments = json.loads(tool_call.function.arguments)
-                        log_info(f"Executing Tool: {function_name} with args {arguments}")
-
-                        result = self.mcp_server.call_tool(function_name, arguments)
-
+                    messages.append(message)
+                    for tc in message.tool_calls:
+                        fn   = tc.function.name
+                        args = json.loads(tc.function.arguments)
+                        log_info(f"Tool call: {fn}({args})")
+                        result = self.mcp_server.call_tool(fn, args)
                         messages.append({
                             "role": "tool",
-                            "tool_call_id": tool_call.id,
-                            "content": json.dumps(result)
+                            "tool_call_id": tc.id,
+                            "content": json.dumps(result),
                         })
-
-                    # Second Call (with tool results)
                     with log_latency("llm_api_call_2"):
                         response = client.chat.completions.create(
-                            model="gpt-4o",
-                            messages=messages,
-                            temperature=0
+                            model="gpt-4o", messages=messages, temperature=0
                         )
                     return response.choices[0].message.content
-                else:
-                    return message.content
+                return message.content
 
+            # ── Anthropic ────────────────────────────────────────────────────
             elif self.provider == "anthropic":
-                # Basic implementation without tools for now to keep it safe
                 client = Anthropic(api_key=self.api_key)
                 response = client.messages.create(
                     model="claude-3-5-sonnet-20240620",
                     max_tokens=1024,
-                    system=final_system_instruction,
-                    messages=[{"role": "user", "content": query}]
+                    system=system_instruction,
+                    messages=[{"role": "user", "content": query}],
                 )
                 return response.content[0].text
 
+            # ── Gemini ───────────────────────────────────────────────────────
             elif self.provider == "gemini":
-                with log_latency("gemini_import"):
-                    from google import genai
-                    from google.genai import types
-
-                with log_latency("gemini_client_init"):
-                    client = genai.Client(api_key=self.api_key)
-
-                with log_latency("format_history"):
-                    config = {}
-                    if tools:
-                        config['tools'] = tools
-
-                # We need to construct the chat history manually to include system instruction context
-                # Gemini doesn't support 'system' role in chat history often, usually config.
-                # simpler to just prepend context to user message or use system_instruction argument
-
-                # Note: 'gemini-flash-latest' might accept system_instruction in config or init.
-                # Let's try passing it in config if possible, or contents.
-
-                # Actually newer genai client supports system_instruction='...'
+                from google.genai import types
 
                 with log_latency("gemini_chat_create"):
-                    chat = client.chats.create(
+                    chat = self._gemini_client.chats.create(
                         model=model_name,
                         config=types.GenerateContentConfig(
-                            system_instruction=final_system_instruction,
+                            system_instruction=system_instruction,
                             tools=tools,
                             automatic_function_calling=types.AutomaticFunctionCallingConfig(
                                 disable=False,
-                                maximum_remote_calls=3
-                            )
-                        )
+                                maximum_remote_calls=3,
+                            ),
+                        ),
                     )
 
                 with log_latency("llm_api_call"):
@@ -323,10 +182,7 @@ Current Date: {current_date}
             log_error(f"Error generating response: {e}")
             return f"Error: {e}"
 
+
 if __name__ == "__main__":
-    engine = RAGEngine(use_mcp=True)
-    # Mock run if API key is missing
-    if not os.getenv("OPENAI_API_KEY"):
-       pass
-    else:
-        print(engine.generate_response("List all upcoming events", use_mcp_tools=True))
+    engine = RAGEngine(use_mcp=True, provider="gemini")
+    print(engine.generate_response("List all upcoming events", use_mcp_tools=True))

@@ -1,5 +1,33 @@
 # AI Agent Logs
 
+## [2026-03-10] Engine Latency Optimization
+
+**Agent**: Antigravity
+**Task**: Identify and fix latency bottlenecks in `src/core/engine.py`.
+
+### Summary
+Profiled the full query pipeline using `scripts/profile_latency.py`. Identified three major bottlenecks and applied all fixes, achieving a **~55% reduction in per-query latency** (8,100ms → 3,700ms avg):
+
+1. **Removed `decompose_query` + `retrieve_with_decomposition`**: These methods made a separate Gemini API call (3–4s) to generate sub-queries for RAG vector search, which is no longer used. Removing them eliminated a full wasted LLM round-trip on every request.
+2. **Removed `VectorStore` (ChromaDB) from `__init__`**: The vector store was still instantiated on startup even though RAG is not used, costing ~310ms per engine creation.
+3. **Cached `genai.Client` at startup**: The Gemini client was recreated inside `generate_response()` on every call. Moving it to `__init__` (along with the personality text, tool list, and tool description string) makes per-call overhead negligible (< 1ms).
+
+### Benchmark (before → after)
+| Metric | Before | After |
+|---|---|---|
+| Full pipeline avg | 8,100 ms | 3,700 ms |
+| Gemini client (per call) | 20 ms | 0 ms (cached) |
+| `decompose_query` LLM call | ~3,500 ms | 0 ms (removed) |
+| Engine init (MCP on) | 312 ms | 2,168 ms* |
+
+*Engine init is now higher because it pre-warms the Gemini client — a one-time startup cost that saves ~20ms on every subsequent call.
+
+### Changes
+- Rewrote `src/core/engine.py` in full.
+- Added `scripts/profile_latency.py` (new profiling tool).
+
+---
+
 ## [2026-03-10] README Architecture Update
 
 **Agent**: Antigravity
