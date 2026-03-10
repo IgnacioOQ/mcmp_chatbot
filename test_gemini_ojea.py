@@ -6,8 +6,8 @@ import logging
 
 logging.basicConfig(level=logging.DEBUG)
 
-from src.core.engine import RAGEngine
-engine = RAGEngine(use_mcp=True, provider="gemini")
+from src.core.engine import ChatEngine
+engine = ChatEngine(use_mcp=True, provider="gemini")
 print("Response:")
 try:
     print(engine.generate_response("who is ojea?", use_mcp_tools=True))

@@ -85,7 +85,7 @@ class VectorStore:
                     "title": item.get('title') or item.get('name') or "Untitled",
                     "url": url,
                     "scraped_at": item.get('scraped_at', ''),
-                    # Explicitly add rich text fields to metadata for RAG retrieval
+                    # Explicitly add rich text fields to metadata for tool retrieval
                     "meta_description": item.get('description', ''),
                     "meta_abstract": item.get('abstract', '')
                 }

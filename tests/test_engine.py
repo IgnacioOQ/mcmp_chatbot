@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from src.core.engine import RAGEngine
+from src.core.engine import ChatEngine
 
 @pytest.fixture
 def mock_vector_store():
@@ -12,7 +12,7 @@ def mock_vector_store():
 @pytest.fixture
 def engine(mock_vector_store):
     # Initialize with a dummy key to bypass the environment check error
-    return RAGEngine(provider="openai", api_key="dummy-key")
+    return ChatEngine(provider="openai", api_key="dummy-key")
 
 def test_decompose_query_no_decomposition(engine):
     # Test fallback

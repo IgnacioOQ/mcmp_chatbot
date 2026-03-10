@@ -2,20 +2,20 @@
 import sys
 import os
 import json
-from src.core.engine import RAGEngine
+from src.core.engine import ChatEngine
 from src.mcp.tools import search_people, get_events
 
 # Add src to path just in case
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-def test_rag_retrieval():
-    print("--- Testing RAG Retrieval (Vector Store) ---")
+def test_retrieval():
+    print("--- Testing Retrieval (Vector Store) ---")
     try:
-        engine = RAGEngine(provider="dummy", api_key="dummy") # We don't need real API key for retrieval test
+        engine = ChatEngine(provider="dummy", api_key="dummy") # We don't need real API key for retrieval test
     except ValueError:
         # If it fails due to missing key, we might need to mock it or just set a dummy env var
         os.environ["OPENAI_API_KEY"] = "dummy"
-        engine = RAGEngine(provider="openai", api_key="dummy", use_mcp=False)
+        engine = ChatEngine(provider="openai", api_key="dummy", use_mcp=False)
 
     query = "Anne Deng"
     print(f"Querying for: {query}")
@@ -49,5 +49,5 @@ def test_mcp_tools():
         print("No upcoming events found.")
 
 if __name__ == "__main__":
-    test_rag_retrieval()
+    test_retrieval()
     test_mcp_tools()

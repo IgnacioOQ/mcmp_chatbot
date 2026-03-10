@@ -6,7 +6,7 @@ import json
 class MCPServer:
     """
     In-process MCP Server interface.
-    Exposes MCMP data tools to the RAG functionality.
+    Exposes MCMP data tools to the chat engine.
     """
     
     def __init__(self):
@@ -24,13 +24,24 @@ class MCPServer:
         return [
             {
                 "name": "search_people",
-                "description": "Search for people, faculty, and researchers at the MCMP. Use this to find contact info, roles, or research interests of specific individuals. ALWAYS use this tool if the user asks about a person and the context is insufficient, even if they only provide a first name.",
+                "description": (
+                    "Search for MCMP researchers, faculty, staff, and doctoral fellows by name or research keyword. "
+                    "Use for any question about a specific person — their role, email, office, publications, or research. "
+                    "ALWAYS call this when the user mentions a person's name, even if partial (first name, last name, or with a title like Dr./Prof.). "
+                    "Also use to find people working on a specific topic (e.g. 'who works on Bayesianism?'). "
+                    "IMPORTANT: extract only the name or keyword from the user's message — do NOT pass the full user sentence as the query."
+                ),
                 "input_schema": {
                     "type": "object",
                     "properties": {
                         "query": {
                             "type": "string",
-                            "description": "Name or keyword to search for (e.g., 'Ignacio', 'Julian Nida-Rumelin', 'Logic')."
+                            "description": (
+                                "The person's name or a research keyword — extracted from the user's message. "
+                                "If the user says 'tell me about a researcher named Landes', pass 'Landes'. "
+                                "If they say 'who works on probability', pass 'probability'. "
+                                "Examples: 'Landes', 'Christian List', 'Hannes Leitgeb', 'logic', 'decision theory'."
+                            )
                         }
                     },
                     "required": ["query"]
@@ -38,26 +49,42 @@ class MCPServer:
             },
             {
                 "name": "search_research",
-                "description": "Explore research topics, areas, and projects at the MCMP.",
+                "description": (
+                    "Explore MCMP research areas, topics, and projects. "
+                    "Use when the user asks about a field of research rather than a specific person — "
+                    "e.g. 'What does the MCMP work on?', 'Tell me about the Philosophy of Science group', 'What subtopics exist under Logic?'. "
+                    "Covers Logic & Philosophy of Language, Philosophy of Science, Decision Theory, Mathematical Philosophy, and their subtopics."
+                ),
                 "input_schema": {
                     "type": "object",
                     "properties": {
                         "topic": {
                             "type": "string",
-                            "description": "Research topic to filter by (e.g., 'Philosophy of Physics', 'Decision Theory')."
+                            "description": (
+                                "Research area or keyword to filter by. Leave empty to list all areas. "
+                                "Examples: 'Logic', 'Bayesianism', 'Philosophy of Physics', 'Decision Theory'."
+                            )
                         }
                     }
                 }
             },
             {
                 "name": "search_graph",
-                "description": "Search the institutional graph to find relationships for people (e.g. who they supervise) or organizational units (e.g. who leads them).",
+                "description": (
+                    "Search the MCMP institutional graph for organizational relationships. "
+                    "Use to answer: who leads a chair, who supervises whom, which chair a person belongs to, "
+                    "or who is affiliated with an organizational unit. "
+                    "Best used AFTER search_people when you need organizational context beyond biographical info."
+                ),
                 "input_schema": {
                     "type": "object",
                     "properties": {
                         "query": {
                             "type": "string",
-                            "description": "Name or part of the name of the person or unit to find relationships for."
+                            "description": (
+                                "Name of the person or organizational unit. "
+                                "Examples: 'Hannes Leitgeb', 'Chair of Logic and Philosophy of Language', 'MCMP'."
+                            )
                         }
                     },
                     "required": ["query"]
@@ -65,30 +92,38 @@ class MCPServer:
             },
             {
                 "name": "get_events",
-                "description": "Get a list of upcoming or past events, talks, and workshops. Returns DETAILED information including titles, speakers, abstracts, and descriptions. Can filter by specific date ranges.",
+                "description": (
+                    "Get upcoming events, talks, workshops, and reading groups at the MCMP. "
+                    "Returns detailed info: title, speaker, date, location, abstract. "
+                    "Use for any question about schedule, upcoming talks, or events involving a specific person or topic."
+                ),
                 "input_schema": {
                     "type": "object",
                     "properties": {
                         "date_range": {
                             "type": "string",
                             "enum": ["upcoming", "today", "this_week"],
-                            "description": "Preset relative time range. Default is 'upcoming'. Ignored if specific dates are provided."
+                            "description": "Preset time range. Default is 'upcoming'. Ignored if start_date/end_date are provided."
                         },
                         "query": {
                             "type": "string",
-                            "description": "Keyword to search for in event title, speaker name, abstract, or description. Useful for topic-specific event searches (e.g. 'events about quantum mechanics') or finding talks by specific people."
+                            "description": (
+                                "Keyword to search in event title, speaker name, or abstract. "
+                                "Extract just the name or topic — not the full user sentence. "
+                                "Examples: 'quantum mechanics', 'Landes', 'decision theory'."
+                            )
                         },
                         "start_date": {
                             "type": "string",
-                            "description": "Start date for filtering events (format: YYYY-MM-DD). Useful for queries like 'events after Oct 5th' or 'events in December'."
+                            "description": "Start date in YYYY-MM-DD format. Use for 'events after March 10th' or 'events in April'."
                         },
                         "end_date": {
                             "type": "string",
-                            "description": "End date for filtering events (format: YYYY-MM-DD). Use with start_date for specific ranges."
+                            "description": "End date in YYYY-MM-DD format. Use with start_date for a specific range."
                         },
                         "type_filter": {
                             "type": "string",
-                            "description": "Filter by event type (e.g., 'Talk', 'Workshop')."
+                            "description": "Filter by event type. Examples: 'Talk', 'Workshop', 'Reading Group'."
                         }
                     }
                 }

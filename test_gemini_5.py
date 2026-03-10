@@ -6,7 +6,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-from src.core.engine import RAGEngine
-engine = RAGEngine(use_mcp=True, provider="gemini")
+from src.core.engine import ChatEngine
+engine = ChatEngine(use_mcp=True, provider="gemini")
 print("Response:")
 print(engine.generate_response("Hi, who is Ignacio?", use_mcp_tools=True))

@@ -57,15 +57,15 @@ def timer(label: str, fn, *args, **kwargs):
 
 def bench_engine_init():
     banner("Stage 1 · Engine Initialisation")
-    from src.core.engine import RAGEngine
+    from src.core.engine import ChatEngine
 
     _, ms_mcp_on = timer(
-        "RAGEngine(use_mcp=True)",
-        RAGEngine, use_mcp=True, provider="gemini"
+        "ChatEngine(use_mcp=True)",
+        ChatEngine, use_mcp=True, provider="gemini"
     )
     _, ms_mcp_off = timer(
-        "RAGEngine(use_mcp=False)",
-        RAGEngine, use_mcp=False, provider="gemini"
+        "ChatEngine(use_mcp=False)",
+        ChatEngine, use_mcp=False, provider="gemini"
     )
     print(f"    MCP overhead on init: {ms_mcp_on - ms_mcp_off:.1f} ms")
     return {"engine_init_mcp_on_ms": ms_mcp_on, "engine_init_mcp_off_ms": ms_mcp_off}
@@ -154,12 +154,12 @@ def bench_gemini_client():
 
 def bench_full_pipeline(query: str, runs: int = 2):
     banner(f"Stage 5 · Full generate_response() — {runs} runs")
-    from src.core.engine import RAGEngine
+    from src.core.engine import ChatEngine
 
     print(f"  Query: \"{query}\"")
 
     # Pre-create engine so we measure per-call not init
-    engine = RAGEngine(use_mcp=True, provider="gemini")
+    engine = ChatEngine(use_mcp=True, provider="gemini")
     print()
 
     results = {}

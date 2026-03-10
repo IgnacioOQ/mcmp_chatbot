@@ -1,9 +1,25 @@
 import json
 import os
+import unicodedata
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
+
+# Words that carry no semantic meaning for name/topic searches.
+# The LLM sometimes passes the full user utterance as the query (e.g. "a researcher named landes"),
+# so we strip these before matching to avoid false negatives.
+_STOP_WORDS = {
+    "a", "an", "the", "is", "at", "of", "in", "on", "for", "to", "and", "or", "by",
+    "named", "called", "researcher", "person", "professor", "faculty", "staff", "member",
+    "dr", "prof", "mr", "ms", "mrs", "who", "what", "find", "search", "tell", "me",
+    "about", "with", "from", "has", "have", "does", "do", "any", "some", "their",
+    "his", "her", "its", "our", "work", "works", "working", "know", "information",
+}
+
+def _normalize(text: str) -> str:
+    """Lowercase and strip diacritics so 'gonzalez' matches 'González'."""
+    return unicodedata.normalize("NFD", text.lower()).encode("ascii", "ignore").decode("ascii")
 
 def load_data(filename: str) -> List[Dict[str, Any]]:
     path = os.path.join(DATA_DIR, filename)
@@ -23,19 +39,25 @@ def search_people(query: str) -> List[Dict[str, Any]]:
     people = load_data("people.json")
     results = []
     
-    query = query.lower()
-    
+    # Normalise and strip stop words so natural-language queries like
+    # "a researcher named landes" reduce to ["landes"] before matching,
+    # and accent variants like "gonzalez" match "González".
+    raw_tokens = _normalize(query).split()
+    meaningful_tokens = [t for t in raw_tokens if t not in _STOP_WORDS and len(t) > 1]
+    # Fall back to all tokens if everything was stripped (e.g. very short queries)
+    search_tokens = meaningful_tokens if meaningful_tokens else raw_tokens
+
     for person in people:
-        name = person.get("name", "").lower()
-        desc = person.get("description", "").lower()
-        
-        # Word-based AND match on name: all query tokens must appear in the name
-        # This handles titles like "Prof. Dr. Christian List" when query is "christian list"
-        query_tokens = query.split()
-        name_match = all(tok in name for tok in query_tokens)
-        # Fallback: full query substring in description
-        desc_match = query in desc
-        
+        name = _normalize(person.get("name", ""))
+        desc = _normalize(person.get("description", ""))
+
+        # AND match on name: all tokens must appear (handles "christian list" precisely).
+        # Stop-word stripping means natural-language noise is already removed, so AND
+        # still works for single-token queries like "landes".
+        name_match = all(tok in name for tok in search_tokens)
+        # Substring match on description using the full cleaned query
+        desc_match = " ".join(search_tokens) in desc
+
         if name_match or desc_match:
             display_role = person.get("metadata", {}).get("role") or person.get("metadata", {}).get("position") or "Unknown"
 

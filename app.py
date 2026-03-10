@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import json
 from datetime import datetime, timedelta
-from src.core.engine import RAGEngine
+from src.core.engine import ChatEngine
 from src.utils.logger import log_info, log_error
 
 @st.cache_data
@@ -369,11 +369,11 @@ def main():
 
 
 
-    # Initialize RAGEngine
+    # Initialize ChatEngine
     if "engine" not in st.session_state:
-        # Try to get key from secrets, otherwise RAGEngine will fallback to os.getenv
+        # Try to get key from secrets, otherwise ChatEngine will fallback to os.getenv
         api_key = st.secrets.get("GEMINI_API_KEY") 
-        st.session_state.engine = RAGEngine(provider="gemini", api_key=api_key, use_mcp=True)
+        st.session_state.engine = ChatEngine(provider="gemini", api_key=api_key, use_mcp=True)
 
     # Chat history
     if "messages" not in st.session_state:

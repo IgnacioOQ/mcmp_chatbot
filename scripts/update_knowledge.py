@@ -6,7 +6,7 @@ def parse_markdown_file(filepath):
     """
     Parses a markdown file to extract title, content, and metadata.
     Assumes MD_CONVENTIONS.md style: Headers are ignored for now, just taking the whole content 
-    or basic splitting. For RAG definition, we want the whole text.
+    or basic splitting. We want the whole text for each document.
     """
     filename = os.path.basename(filepath)
     title = filename.replace(".md", "").replace("_", " ").title()

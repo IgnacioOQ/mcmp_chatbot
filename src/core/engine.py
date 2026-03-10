@@ -10,11 +10,11 @@ from datetime import datetime
 
 load_dotenv()
 
-class RAGEngine:
+class ChatEngine:
     """
     Core chatbot engine. Uses MCP structured tools to answer queries.
-    No RAG / vector search — all data access goes through the MCP tools
-    (search_people, search_research, get_events, search_graph).
+    All data access goes through the MCP tools:
+    search_people, search_research, get_events, search_graph.
     """
 
     def __init__(self, provider="openai", api_key=None, use_mcp=True):
@@ -60,10 +60,22 @@ class RAGEngine:
         if not self._tool_defs:
             return ""
         lines = [
-            "### AVAILABLE DATA TOOLS (MCP):",
-            "You have access to the following tools to fetch real-time data.",
-            "IMPORTANT: You have permission to use these tools. Do NOT ask the user if they want you to check. Just check.",
-            "If the text context is insufficient OR provides only partial information (like a title without an abstract), proceed IMMEDIATELY to calling the relevant tool to get the full details:",
+            "### AVAILABLE DATA TOOLS (MCP)",
+            "You have permission to call these tools at any time. Do NOT ask the user for permission. Just call them.",
+            "If context is partial or missing, call the relevant tool immediately to get full details.",
+            "",
+            "**TOOL SELECTION GUIDE** — pick the right tool for the query type:",
+            "- User asks about a **person** (name, role, contact, publications, research) → `search_people(query='<name or keyword>')`, then optionally `search_graph(query='<name>')` for organizational context.",
+            "- User asks about an **event, talk, or schedule** → `get_events(...)` with date range or keyword.",
+            "- User asks about a **research area or field** (not a specific person) → `search_research(topic='<field>')`.",
+            "- User asks about **organizational structure** (who leads what, supervisor, chair affiliation) → `search_graph(query='<name or unit>')`.",
+            "",
+            "**QUERY EXTRACTION RULE**: Always extract only the relevant name or keyword for the query parameter.",
+            "  ✓ User says 'tell me about a researcher named Landes' → query='Landes'",
+            "  ✓ User says 'who works on probability' → query='probability'",
+            "  ✗ Never pass the full user sentence as the query.",
+            "",
+            "**Tools:**",
         ]
         for t in self._tool_defs:
             lines.append(f"- `{t['name']}`: {t['description']}")
@@ -204,5 +216,5 @@ class RAGEngine:
 
 
 if __name__ == "__main__":
-    engine = RAGEngine(use_mcp=True, provider="gemini")
+    engine = ChatEngine(use_mcp=True, provider="gemini")
     print(engine.generate_response("List all upcoming events", use_mcp_tools=True))
