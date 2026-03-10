@@ -1,5 +1,18 @@
 # AI Agent Logs
 
+## [2026-03-10] README Architecture Update
+
+**Agent**: Antigravity
+**Task**: Update `README.md` to accurately reflect the MCP + web scraping architecture.
+
+### Summary
+Rewrote `README.md` to remove all references to RAG, ChromaDB, vector databases, embeddings, and query decomposition, as the project no longer uses those components. The README now accurately describes the two-layer architecture: (1) **Web Scraping** via `scripts/update_dataset.py` to keep JSON data files fresh, and (2) **MCP Structured Tools** (`search_people`, `search_research`, `get_events`, `search_graph`) that the LLM calls to answer structured queries. Updated the Mermaid diagram, Features list, Technical Architecture sections, project structure tree, and all in-line prose to reflect this.
+
+### Changes
+- Rewrote `README.md` in full (removed ~80 lines of RAG/embedding content, rewrote all architecture sections).
+
+---
+
 ## [2026-03-09] Parallel HTML Scraper Implementation
 
 **Agent**: Antigravity
