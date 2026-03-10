@@ -1,5 +1,26 @@
 # AI Agent Logs
 
+## [2026-03-10] People Search Regression Fix
+
+**Agent**: Antigravity
+**Task**: Fix chatbot returning "cannot find [person]" despite person being in `data/people.json`.
+
+### Root Cause (3 issues)
+1. **`generate_response` missing `chat_history`**: The MCP-only refactor dropped the parameter; Gemini received each message as a fresh single-turn session.
+2. **`app.py` not passing history**: `st.session_state.messages` was never wired into the engine call.
+3. **`search_people` substring fragility**: `query in name` failed for reversed or partial names (though for "christian list" it technically matched — the problem was reproducible via conversation context loss).
+
+### Fix
+- Restored `chat_history: list = None` in `RAGEngine.generate_response` (`engine.py`) with full Gemini history conversion.
+- Updated both `generate_response` call sites in `app.py` to pass `st.session_state.messages[:-1]`.
+- Changed `search_people` in `tools.py` to use **word-token AND matching** on names (all tokens must appear anywhere in name), with full-substring fallback on descriptions.
+
+### Verification
+- `search_people('christian list')` → returns 8 results including `Prof. Dr. Christian List`.
+- End-to-end `generate_response('who is christian list?', use_mcp_tools=True)` → full correct profile.
+
+---
+
 ## [2026-03-10] Engine Latency Optimization
 
 **Agent**: Antigravity

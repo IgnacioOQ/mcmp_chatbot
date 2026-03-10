@@ -403,7 +403,8 @@ def main():
                 response = st.session_state.engine.generate_response(
                     auto_prompt, 
                     use_mcp_tools=True, 
-                    model_name="gemini-2.0-flash"
+                    model_name="gemini-2.0-flash",
+                    chat_history=st.session_state.messages[:-1]  # history before this auto-prompt
                 )
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
@@ -419,7 +420,8 @@ def main():
                 response = st.session_state.engine.generate_response(
                     prompt, 
                     use_mcp_tools=True, 
-                    model_name="gemini-2.0-flash"
+                    model_name="gemini-2.0-flash",
+                    chat_history=st.session_state.messages[:-1]  # exclude the just-appended user message
                 )
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})

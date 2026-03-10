@@ -82,10 +82,11 @@ class RAGEngine:
     # ── Public API ───────────────────────────────────────────────────────────
 
     def generate_response(self, query: str, use_mcp_tools: bool = False,
-                          model_name: str = "gemini-2.0-flash") -> str:
+                          model_name: str = "gemini-2.0-flash",
+                          chat_history: list = None) -> str:
         """
         Generate a response using the configured LLM provider.
-        Answers are grounded via MCP tool calls against the structured JSON data files.
+        chat_history: list of dicts with 'role' ('user'/'assistant') and 'content' keys.
         """
         log_info(f"Generating response. Query: '{query}' | Tools: {use_mcp_tools} | Model: {model_name}")
 
@@ -117,8 +118,12 @@ class RAGEngine:
                 client = openai.OpenAI(api_key=self.api_key)
                 messages = [
                     {"role": "system", "content": system_instruction},
-                    {"role": "user",   "content": query},
                 ]
+                if chat_history:
+                    for msg in chat_history:
+                        if msg.get("role") in ("user", "assistant"):
+                            messages.append({"role": msg["role"], "content": msg["content"]})
+                messages.append({"role": "user", "content": query})
                 completion_args = {"model": "gpt-4o", "messages": messages, "temperature": 0}
                 if tools:
                     completion_args["tools"] = tools
@@ -162,6 +167,20 @@ class RAGEngine:
                 from google.genai import types
 
                 with log_latency("gemini_chat_create"):
+                    # Build history for multi-turn conversation
+                    gemini_history = []
+                    if chat_history:
+                        for msg in chat_history:
+                            role = msg.get("role")
+                            content = msg.get("content", "")
+                            if role == "user":
+                                gemini_history.append(
+                                    types.Content(role="user", parts=[types.Part.from_text(text=content)])
+                                )
+                            elif role == "assistant":
+                                gemini_history.append(
+                                    types.Content(role="model", parts=[types.Part.from_text(text=content)])
+                                )
                     chat = self._gemini_client.chats.create(
                         model=model_name,
                         config=types.GenerateContentConfig(
@@ -172,6 +191,7 @@ class RAGEngine:
                                 maximum_remote_calls=3,
                             ),
                         ),
+                        history=gemini_history,
                     )
 
                 with log_latency("llm_api_call"):

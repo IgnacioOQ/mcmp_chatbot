@@ -29,8 +29,14 @@ def search_people(query: str) -> List[Dict[str, Any]]:
         name = person.get("name", "").lower()
         desc = person.get("description", "").lower()
         
-        # Apply text query
-        if query in name or query in desc:
+        # Word-based AND match on name: all query tokens must appear in the name
+        # This handles titles like "Prof. Dr. Christian List" when query is "christian list"
+        query_tokens = query.split()
+        name_match = all(tok in name for tok in query_tokens)
+        # Fallback: full query substring in description
+        desc_match = query in desc
+        
+        if name_match or desc_match:
             display_role = person.get("metadata", {}).get("role") or person.get("metadata", {}).get("position") or "Unknown"
 
             results.append({
