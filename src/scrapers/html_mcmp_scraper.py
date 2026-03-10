@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import ftfy
 import json
 import os
 from datetime import datetime
@@ -31,52 +32,18 @@ class HTMLMCMPScraper:
         self.important_urls = self.load_important_urls()
 
     def _fetch_page(self, url: str) -> BeautifulSoup:
-        """Helper to fetch a page and enforce UTF-8 avoiding mojibake."""
+        """Fetch a page and enforce UTF-8 to prevent mojibake."""
         response = requests.get(url)
         response.raise_for_status()
-        response.encoding = "utf-8"  # ENFORCE UTF-8 BEFORE .text
-        return BeautifulSoup(response.text, 'html.parser')
+        response.encoding = "utf-8"  # Force before .text — prevents mojibake
+        fixed = ftfy.fix_text(response.text)  # Repair any residual encoding issues
+        return BeautifulSoup(fixed, 'html.parser')
 
     def _clean_text(self, text):
-        """Removes common noise from scraped text and fixes encodings."""
+        """Removes common navigation noise from scraped text."""
         if not text:
             return ""
-            
-        # Fix common UTF-8 misencodings
-        # Often occurs when UTF-8 is read as ISO-8859-1/Windows-1252
-        replacements = {
-            "Ã¼": "ue",
-            "Ã¤": "ae",
-            "Ã¶": "oe",
-            "Ã\x9f": "ss",
-            "Ã\x9c": "Ue",
-            "Ã\x84": "Ae",
-            "Ã\x96": "Oe",
-            "Ã©": "é",
-            "Ã¨": "è",
-            "Ã²": "ò",
-            "Ã\xa0": "à",
-            "Ã±": "ñ",
-            "â\x80\x93": "-", # en-dash
-            "â\x80\x94": "--", # em-dash
-            "â\x80\x98": "'", # left single quote
-            "â\x80\x99": "'", # right single quote
-            "â\x80\x9c": '"', # left double quote
-            "â\x80\x9d": '"', # right double quote
-            "â\x80¦": "...", # ellipsis
-            # Also replace actual umlauts with their requested equivalents
-            "ü": "ue",
-            "ä": "ae",
-            "ö": "oe",
-            "ß": "ss",
-            "Ü": "Ue",
-            "Ä": "Ae",
-            "Ö": "Oe"
-        }
-        
-        for bad, good in replacements.items():
-            text = text.replace(bad, good)
-            
+
         lines = text.split('\n')
         cleaned_lines = []
         

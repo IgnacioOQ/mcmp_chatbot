@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import ftfy
 import json
 import os
 from datetime import datetime
@@ -47,46 +48,19 @@ class MCMPScraper:
         self.general = []
         self.important_urls = self.load_important_urls()
 
+    def _fetch_page(self, url: str) -> BeautifulSoup:
+        """Fetch a page and enforce UTF-8 to prevent mojibake."""
+        response = requests.get(url)
+        response.raise_for_status()
+        response.encoding = "utf-8"  # Force before .text — prevents mojibake
+        fixed = ftfy.fix_text(response.text)  # Repair any residual encoding issues
+        return BeautifulSoup(fixed, 'html.parser')
+
     def _clean_text(self, text):
-        """Removes common noise from scraped text and fixes encodings."""
+        """Removes common navigation noise from scraped text."""
         if not text:
             return ""
-            
-        # Fix common UTF-8 misencodings
-        # Often occurs when UTF-8 is read as ISO-8859-1/Windows-1252
-        replacements = {
-            "Ã¼": "ue",
-            "Ã¤": "ae",
-            "Ã¶": "oe",
-            "Ã\x9f": "ss",
-            "Ã\x9c": "Ue",
-            "Ã\x84": "Ae",
-            "Ã\x96": "Oe",
-            "Ã©": "é",
-            "Ã¨": "è",
-            "Ã²": "ò",
-            "Ã\xa0": "à",
-            "Ã±": "ñ",
-            "â\x80\x93": "-", # en-dash
-            "â\x80\x94": "--", # em-dash
-            "â\x80\x98": "'", # left single quote
-            "â\x80\x99": "'", # right single quote
-            "â\x80\x9c": '"', # left double quote
-            "â\x80\x9d": '"', # right double quote
-            "â\x80¦": "...", # ellipsis
-            # Also replace actual umlauts with their requested equivalents
-            "ü": "ue",
-            "ä": "ae",
-            "ö": "oe",
-            "ß": "ss",
-            "Ü": "Ue",
-            "Ä": "Ae",
-            "Ö": "Oe"
-        }
-        
-        for bad, good in replacements.items():
-            text = text.replace(bad, good)
-            
+
         lines = text.split('\n')
         cleaned_lines = []
         
@@ -160,9 +134,7 @@ class MCMPScraper:
 
             log_info(f"Starting static scrape of {source_url}")
             try:
-                response = requests.get(source_url)
-                response.raise_for_status()
-                soup = BeautifulSoup(response.text, 'html.parser')
+                soup = self._fetch_page(source_url)
 
                 # Primary method: Use CSS class for event links
                 event_links = soup.select('a.filterable-list__list-item-link.is-events')
@@ -289,9 +261,7 @@ class MCMPScraper:
     def scrape_event_details(self, event):
         """Scrapes details for a single event with structured field extraction."""
         try:
-            response = requests.get(event['url'])
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = self._fetch_page(event['url'])
 
             metadata = {}
 
@@ -407,9 +377,7 @@ class MCMPScraper:
         for people_url in sources:
             log_info(f"Starting scrape of people from {people_url}")
             try:
-                response = requests.get(people_url)
-                response.raise_for_status()
-                soup = BeautifulSoup(response.text, 'html.parser')
+                soup = self._fetch_page(people_url)
 
                 person_links = soup.find_all('a', href=True)
                 profiles_to_visit = set()
@@ -456,9 +424,7 @@ class MCMPScraper:
             if url in [p['url'] for p in self.people]:
                 return
 
-            response = requests.get(url)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = self._fetch_page(url)
 
             # Name
             name_elem = soup.find('h1', class_='header-person__name')
@@ -597,9 +563,7 @@ class MCMPScraper:
                 "structure": {"name": "Mathematical Philosophy", "keywords": ["mathematical", "formal"], "items": []} # Fallback
             }
 
-            response = requests.get(self.RESEARCH_URL)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = self._fetch_page(self.RESEARCH_URL)
             
             subpage_links = set()
             for link in soup.find_all('a', href=True):
@@ -665,9 +629,7 @@ class MCMPScraper:
     def _scrape_single_research_page(self, url):
         """Helper to scrape a specific research page. Returns dict or None."""
         try:
-            response = requests.get(url)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = self._fetch_page(url)
 
             title_elem = soup.find('h1')
             title = title_elem.get_text(strip=True) if title_elem else "Research Project"
@@ -690,9 +652,7 @@ class MCMPScraper:
         home_url = f"{self.BASE_URL}/mcmp/en/index.html"
         log_info(f"Starting scrape of {home_url}")
         try:
-            response = requests.get(home_url)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = self._fetch_page(home_url)
             
             main_content = soup.find('div', id='r-main') or soup.find('main')
             if main_content:
@@ -730,9 +690,7 @@ class MCMPScraper:
         url = f"{self.BASE_URL}/mcmp/en/events/index.html"
         log_info(f"Starting scrape of reading groups from {url}")
         try:
-            response = requests.get(url)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = self._fetch_page(url)
 
             # Reading groups seem to be in an accordion or headers under "Reading groups" section
             # We look for the "Reading groups" header and then parse subsequent content

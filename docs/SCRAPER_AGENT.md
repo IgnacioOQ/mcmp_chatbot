@@ -152,8 +152,34 @@ match = re.search(r'(\d{1,2})\s+(\w+)\s+(\d{4})', date_text)
 
 ---
 
+## Encoding: UTF-8 Enforcement
+
+> [!CAUTION]
+> `requests` may guess the wrong encoding from HTTP headers, causing **mojibake** (e.g. `Jürgen` → `JÃ¼rgen`, `Ludwigstraße` → `LudwigstraÃe`). The MCMP has researchers from all over the world — their names and addresses must be stored exactly as written.
+
+**Rules:**
+
+1. **Always use `_fetch_page()`** — never call `requests.get()` directly in scraping methods.
+2. **`_fetch_page()` must enforce UTF-8** and run `ftfy.fix_text()` before parsing:
+   ```python
+   import ftfy
+
+   def _fetch_page(self, url: str) -> BeautifulSoup:
+       response = requests.get(url)
+       response.raise_for_status()
+       response.encoding = "utf-8"   # Force before .text
+       fixed = ftfy.fix_text(response.text)  # Repair residual issues
+       return BeautifulSoup(fixed, 'html.parser')
+   ```
+3. **Never transliterate Unicode.** Store `Jürgen` as `Jürgen`, not `Juergen`. Store `Ludwigstraße` as `Ludwigstraße`, not `Ludwigstrasse`. The `_clean_text()` method must only remove navigation noise — never touch character encoding.
+4. **JSON output** must always use `ensure_ascii=False` so characters are stored as real Unicode, not `\u00fc` escapes.
+5. **One-time DB repair**: If existing JSON files contain mojibake, run `python scripts/fix_encoding.py` to repair them using `ftfy` without re-scraping.
+
+---
+
 ## Verification
 - [x] All 53+ events captured
 - [x] Abstracts extracted from individual pages
 - [x] No duplicate URLs
 - [x] Dates in ISO format
+- [x] UTF-8 enforced — no mojibake in names, addresses, or abstracts
