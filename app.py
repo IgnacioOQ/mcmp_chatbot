@@ -301,6 +301,11 @@ def main():
             events_this_week = []
             
             for event in raw_events:
+                # Skip cancelled events
+                outer_title = event.get("title", "")
+                if outer_title.upper().startswith("[CANCEL"):
+                    continue
+
                 meta = event.get("metadata", {})
                 date_str = meta.get("date")
                 if not date_str:
@@ -309,38 +314,23 @@ def main():
                 try:
                     event_date = datetime.strptime(date_str, "%Y-%m-%d").date()
                     if start_of_week <= event_date <= end_of_week:
-                        # Enhanced speaker extraction
                         speaker = meta.get("speaker")
-                        title = event.get("title", "Untitled")
-                        
+
+                        # Use talk_title if available, otherwise fall back to outer title
+                        title = event.get("talk_title") or outer_title or "Untitled"
+
                         if not speaker or speaker == "Unknown Speaker":
                             # Heuristic: "Talk: [Speaker Name]" or "Talk (Info): [Speaker Name]"
-                            if "Talk" in title and ":" in title:
+                            if "Talk" in outer_title and ":" in outer_title:
                                 try:
-                                    # Split by first colon and strip
-                                    parts = title.split(":", 1)
+                                    parts = outer_title.split(":", 1)
                                     if len(parts) > 1:
                                         speaker = parts[1].strip()
                                 except:
                                     pass
 
                         if not speaker:
-                             speaker = "Unknown Speaker"
-
-                        # Enhanced title extraction from description
-                        description = event.get("description", "")
-                        if "Title:\n" in description:
-                            try:
-                                # Extract text after "Title:\n"
-                                part_after = description.split("Title:\n", 1)[1]
-                                # Stop at "Abstract"
-                                if "Abstract" in part_after:
-                                    real_title = part_after.split("Abstract", 1)[0].strip()
-                                    # Clean up newlines if it spans multiple lines
-                                    if real_title:
-                                        title = real_title.replace("\n", " ")
-                            except:
-                                pass
+                            speaker = "Unknown Speaker"
 
                         events_this_week.append({
                             "title": title,
