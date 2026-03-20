@@ -102,8 +102,8 @@ def main():
             max-width: 900px;
             margin: 0 auto;
         }
-        /* Justify LLM (assistant) response text */
-        [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid="stMarkdownContainer"] p {
+        /* Justify chat message text */
+        [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p {
             text-align: justify;
         }
         </style>
