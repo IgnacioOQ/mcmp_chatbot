@@ -79,9 +79,12 @@ python scripts/update_dataset.py
 ```
 This script will:
 1.  Scrape the MCMP website (Events, People, Research).
-2.  Update JSON datasets (`data/*.json`).
+2.  **Accumulate** JSON datasets (`data/*.json`) — existing entries are updated or kept; **entries are never removed**.
 3.  **Enrich Metadata**: Run internal utilities to extract structured metadata (dates, roles) from text descriptions.
 4.  Rebuild the Institutional Graph (`data/graph/mcmp_graph.md` and `mcmp_jgraph.json`).
+
+> [!IMPORTANT]
+> **Accumulation, not replacement.** The datasets grow monotonically. If an event disappears from the website (e.g. dynamic "Load more" button not triggered, or the event page is taken down), the entry is still preserved in the JSON file. The `scraping_logs.json` `"removed"` field records what was absent in the current scrape but does **not** reflect a deletion from the dataset.
 
 ## Technical Architecture
 

@@ -60,6 +60,24 @@ def _fetch_events_with_selenium(self, url):
 
 ---
 
+## Data Accumulation Policy
+
+> [!CAUTION]
+> **Entries are NEVER removed from the JSON datasets.** The scraper accumulates data over time. If an event or person is no longer on the website, their entry is still kept in the JSON file — it simply will not be updated by a future scrape. This ensures the dataset only grows.
+
+**Why:** The website's events overview uses a "Load more" button (requires Selenium). Static scraping only captures the first ~3 events. Without accumulation, a static run would wipe out dozens of previously scraped events.
+
+**How `save_to_json` works:**
+1. Load the existing JSON file from disk.
+2. Build a map of existing entries by unique key (`url` or `id`).
+3. For each newly scraped entry: **update** if the key exists, **add** if it is new.
+4. Existing entries with no match in the current scrape are **kept unchanged**.
+5. Save the merged result.
+
+The `_log_changes()` method still records `removed` for auditing purposes (entries absent from this scrape), but they are not deleted from the file.
+
+---
+
 ## Implementation Patterns
 
 ### 1. Deduplication (URL-based)

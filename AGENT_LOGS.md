@@ -1,5 +1,34 @@
 # AI Agent Logs
 
+## [2026-03-20] Data Accumulation Fix & Dataset Recovery
+
+**Agent**: Claude (Sonnet 4.6)
+**Task**: Recover data removed by static scraper, fix the scraper to never remove entries, and update documentation.
+
+### Root Cause
+`MCMPScraper.save_to_json` was overwriting JSON files with only the freshly scraped data. Since the events overview page requires Selenium to click "Load more" (4+ times to reveal 53+ events) and Selenium was not available, the static scrape captured only 3 events. The overwrite reduced `raw_events.json` from 55 events to 3, and `people.json` lost 2 entries.
+
+### Fix
+
+1. **Data recovered**: Fetched `data/raw_events.json` and `data/people.json` from the GitHub remote (`origin/main`) and merged them with today's scrape — resulting in 55 events and 84 people (net +1 new person from this run).
+
+2. **`MCMPScraper._accumulate()` added** (`src/scrapers/mcmp_scraper.py`): New helper that loads the existing file from disk, builds a map by unique key (`url` or `id`), updates matching entries with freshly scraped data, adds new entries, and leaves unmatched existing entries untouched. Returns the merged list.
+
+3. **`MCMPScraper.save_to_json()` updated**: Now calls `_accumulate()` for all four datasets (`events`, `people`, `research`, `general`) before logging and writing to disk. The `_log_changes()` call was moved after accumulation so the log reflects the true diff against prior state (removed count will always be 0).
+
+### Documentation Updated
+- `docs/SCRAPER_AGENT.md`: Added "Data Accumulation Policy" section with caution callout, rationale, and step-by-step description of the merge logic.
+- `README.md`: Updated "Data Maintenance" section to state entries are never removed, with a note clarifying the meaning of `"removed"` in `scraping_logs.json`.
+- `docs/HTML_SCRAPING_SKILL.md`: Added explicit "never remove" caution callout to the "Single Output File + Incremental Merge" pattern.
+
+### Changes
+- `src/scrapers/mcmp_scraper.py`: Added `_accumulate()`, refactored `save_to_json()`.
+- `data/raw_events.json`: Restored to 55 events.
+- `data/people.json`: Restored to 84 people.
+- `docs/SCRAPER_AGENT.md`, `README.md`, `docs/HTML_SCRAPING_SKILL.md`: Documentation updated.
+
+---
+
 ## [2026-03-10] People Search Regression Fix
 
 **Agent**: Antigravity

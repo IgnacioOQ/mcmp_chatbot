@@ -334,13 +334,16 @@ if lang is not None and url_lang != lang:
 
 All stories from all sections are stored in **one JSON file** (`data/raw/ayoreoorg/ayoreoorg.json`), keyed by `story_id`. Running the scraper section by section builds up the file incrementally without overwriting previously scraped sections.
 
+> [!CAUTION]
+> **Entries are NEVER removed.** The merge must only update existing entries or add new ones. Stories absent from the current scrape (e.g. because only one section was scraped) must be left untouched. The dataset grows monotonically.
+
 ```python
 STORIES_PATH = PROJECT_ROOT / "data" / "raw" / "ayoreoorg" / "ayoreoorg.json"
 
 # Load existing stories
 stories = json.loads(STORIES_PATH.read_text()) if STORIES_PATH.exists() else {}
 
-# Merge new results (update or add by story_id)
+# Merge new results: update or add by story_id — never delete existing entries
 for page_data in new_results:
     stories[page_data["story_id"]] = page_data
 

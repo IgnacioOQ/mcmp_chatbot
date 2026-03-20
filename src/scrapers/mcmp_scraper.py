@@ -844,18 +844,60 @@ class MCMPScraper:
         else:
             log_info("No changes detected in datasets.")
 
+    def _accumulate(self, new_data, file_path, key):
+        """Merge new_data into existing file: update matching entries, add new ones, never remove.
+
+        Args:
+            new_data: Freshly scraped list of items.
+            file_path: Path to the existing JSON file on disk.
+            key: Field name (str) or callable used as the unique identifier.
+        Returns:
+            Merged list with all existing entries preserved.
+        """
+        existing = []
+        if os.path.exists(file_path):
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    existing = json.load(f)
+            except Exception as e:
+                log_error(f"Error reading {file_path} for accumulation: {e}")
+
+        def get_id(item):
+            return key(item) if callable(key) else item.get(key)
+
+        merged = {get_id(item): item for item in existing if get_id(item)}
+        for item in new_data:
+            item_id = get_id(item)
+            if item_id:
+                merged[item_id] = item  # update or add; existing entries without a match are kept
+        return list(merged.values())
+
     def save_to_json(self):
-        """Saves scraped data to JSON files."""
+        """Saves scraped data to JSON files, accumulating with existing data.
+
+        Entries are NEVER removed. Newly scraped data updates existing entries
+        (by URL/id) and adds new ones. Entries absent from the current scrape
+        are preserved as-is. This ensures the dataset only grows over time.
+        """
         os.makedirs("data", exist_ok=True)
-        
+
+        # Accumulate: merge new scraped data into existing files before logging/saving
+        self.events = self._accumulate(self.events, "data/raw_events.json", "url")
+        self.people = self._accumulate(self.people, "data/people.json", "url")
+        self.research = self._accumulate(self.research, "data/research.json", "id")
+        self.general = self._accumulate(
+            self.general, "data/general.json",
+            lambda x: f"{x.get('url', '')}_{x.get('title', '')}"
+        )
+
         self._log_changes()
-        
+
         with open("data/raw_events.json", 'w', encoding='utf-8') as f:
             json.dump(self.events, f, indent=4, ensure_ascii=False)
-        
+
         with open("data/people.json", 'w', encoding='utf-8') as f:
             json.dump(self.people, f, indent=4, ensure_ascii=False)
-            
+
         with open("data/research.json", 'w', encoding='utf-8') as f:
             json.dump(self.research, f, indent=4, ensure_ascii=False)
 
