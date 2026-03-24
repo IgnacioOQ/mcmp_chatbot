@@ -10,14 +10,23 @@ from src.scrapers.html_mcmp_scraper import HTMLMCMPScraper
 from src.utils.logger import log_info
 
 def merge_datasets(primary_list, secondary_list, unique_key="url"):
-    """Merges secondary list into primary list, avoiding duplicates by unique_key."""
-    seen_keys = {item[unique_key] for item in primary_list if unique_key in item}
-    
+    """Merges secondary list into primary list, avoiding duplicates by unique_key.
+
+    unique_key can be a field name (str) or a callable that takes an item and returns a key.
+    """
+    def get_key(item):
+        if callable(unique_key):
+            return unique_key(item)
+        return item.get(unique_key)
+
+    seen_keys = {get_key(item) for item in primary_list if get_key(item)}
+
     for item in secondary_list:
-        if unique_key in item and item[unique_key] not in seen_keys:
+        k = get_key(item)
+        if k and k not in seen_keys:
             primary_list.append(item)
-            seen_keys.add(item[unique_key])
-            
+            seen_keys.add(k)
+
     return primary_list
 
 def main():
@@ -62,7 +71,10 @@ def main():
     # but theoretically it might need deep merging if we were changing categories. 
     # For now, we favor primary structure but we could also add missing categories.
     scraper.research = merge_datasets(scraper.research, html_scraper.research, unique_key="id")
-    scraper.general = merge_datasets(scraper.general, html_scraper.general)
+    scraper.general = merge_datasets(
+        scraper.general, html_scraper.general,
+        unique_key=lambda x: f"{x.get('url', '')}_{x.get('title', '')}"
+    )
 
     # 4. Save Data (This triggers graph build now)
     log_info("Saving merged data and building graph...")
