@@ -2,7 +2,7 @@
 - status: active
 - type: agent_skill
 - id: scraping-skill
-- last_checked: 2026-04-01
+- last_checked: 2026-04-02
 - context_dependencies: {"conventions": "docs/MD_CONVENTIONS.md", "mcmp_scraper": "docs/SCRAPER_AGENT.md", "html_scraping": "docs/HTML_SCRAPING_SKILL.md"}
 <!-- content -->
 
@@ -413,49 +413,105 @@ STORIES_PATH.write_text(json.dumps(stories, ensure_ascii=False, indent=2))
 
 ---
 
-## Base Class Architecture
+## Single-Class Scraper Architecture
 - status: active
 - type: context
-- id: scraping-skill.base-class
+- id: scraping-skill.architecture
 <!-- content -->
 
-When two scrapers share the majority of their logic, extract a base class. Subclasses override only the method(s) that differ.
+The MCMP scraper lives entirely in **`src/scrapers/mcmp_scraper.py`** as a single `MCMPScraper` class. No inheritance, no parallel scrapers.
 
-**Structure for the MCMP scrapers:**
+**Why a single class is sufficient**: `MCMPScraper.scrape_events()` already tries Selenium first (to handle the "Load more" button), then falls back to static `requests` scraping for all other EVENT_SOURCES. A separate static-only scraper (`HTMLMCMPScraper`) was redundant because Selenium's fallback path covers the same pages.
+
+**Structure:**
 
 ```
-BaseMCMPScraper                   # src/scrapers/base_scraper.py
-├── __init__()                    # shared attributes + _scraped_person_urls set
-├── _fetch_page()                 # UTF-8 + ftfy
+MCMPScraper                         # src/scrapers/mcmp_scraper.py
+├── __init__()                      # all state + _scraped_person_urls set
+│
+├── # Core helpers
+├── _fetch_page()                   # UTF-8 + ftfy — never call requests.get() directly
 ├── _clean_text()
 ├── load_important_urls()
-├── scrape_people()               # with anchor-fragment filter
-├── _scrape_single_person_page()  # O(1) dedup via set
+├── _normalize_url()
+├── _is_event_link()
+│
+├── # Scraping methods
+├── scrape_events()                 # Selenium for events-overview + static fallback
+├── _fetch_events_with_selenium()
 ├── scrape_event_details()
 ├── _extract_section_content()
 ├── _parse_date_time()
+├── scrape_people()                 # anchor-fragment filter included
+├── _scrape_single_person_page()    # O(1) dedup via _scraped_person_urls set
 ├── scrape_research()
 ├── _scrape_single_research_page()
-├── scrape_general()              # append OUTSIDE while loop
+├── scrape_general()                # append OUTSIDE the while loop
 ├── scrape_reading_groups()
-├── _is_event_link()
-└── _normalize_url()
-
-MCMPScraper(BaseMCMPScraper)      # src/scrapers/mcmp_scraper.py
-├── scrape_events()               # Selenium + static fallback
-├── _fetch_events_with_selenium()
-├── _accumulate()
-├── _log_changes()
-└── save_to_json()
-
-HTMLMCMPScraper(BaseMCMPScraper)  # src/scrapers/html_mcmp_scraper.py
-└── scrape_events()               # static HTML only
+│
+└── # Persistence
+    ├── _accumulate()
+    ├── _log_changes()
+    └── save_to_json()
 ```
 
 **Key design rules:**
-- Base `__init__` initializes ALL shared state (events, people, research, general, `_scraped_person_urls`). Subclass `__init__` calls `super().__init__()` and nothing else.
 - Module-level imports only — no `import x` inside function bodies.
-- Constants (`BASE_URL`, `EVENT_SOURCES`, etc.) live on the base class.
+- `_scraped_person_urls: set` is initialized in `__init__` for O(1) person deduplication.
+- Constants (`BASE_URL`, `EVENT_SOURCES`, etc.) are class-level attributes.
+- `update_dataset.py` calls this class directly — no merge logic needed.
+
+---
+
+## End-to-End Pipeline Verification
+- status: active
+- type: context
+- id: scraping-skill.pipeline
+<!-- content -->
+
+> [!CAUTION]
+> **Correct scraping is necessary but not sufficient.** A field can be scraped perfectly and stored in JSON, yet the LLM still reports "Unknown" — if the MCP tool reads a different field name than the one the scraper wrote.
+
+### The MCP field name mismatch anti-pattern
+
+**Production incident (2026-04-01):** The scraper stored `metadata.organizational_unit` for every person. The `search_people()` MCP tool read `metadata.chair` — a key that never existed. Result: the LLM reported `"Unknown"` for every person's chair, even though the data was correct in `people.json`.
+
+The fix was a one-liner in `src/mcp/tools.py`:
+```python
+# Before (broken)
+"chair": person.get("metadata", {}).get("chair", "Unknown"),
+# After (correct)
+"chair": person.get("metadata", {}).get("organizational_unit", "Unknown"),
+```
+
+**Root cause pattern**: the scraper and the MCP tool were written independently with no shared schema. When debugging LLM output, always check the full chain:
+
+```
+scraper writes       MCP tool reads      LLM sees
+─────────────────    ─────────────────   ──────────────
+metadata.organizational_unit  →  metadata.chair  →  "Unknown"  ✗
+metadata.organizational_unit  →  metadata.organizational_unit  →  "Chair of X"  ✓
+```
+
+### Debugging checklist when the LLM returns wrong data
+
+1. **Check `people.json` directly** — is the field present and correct?
+2. **Run the MCP tool in isolation** — does it return the expected value?
+3. **Check field name alignment** — does the key the MCP tool reads match what the scraper writes?
+4. **Check the tool's output schema** — is the field included in the returned dict at all?
+
+### 404 pages and the accumulation policy
+
+Pages that return HTTP 404 (e.g., people who left MCMP) are handled gracefully:
+- `_fetch_page()` calls `raise_for_status()` → raises exception
+- `_scrape_single_person_page()` catches it and logs the error → no new entry added
+- The accumulation policy (`_accumulate()`) **preserves the existing entry** from the last successful scrape
+
+This means data for departed people is kept in `people.json` rather than silently deleted — consistent with the never-remove policy.
+
+### What "MCMP" as org unit means
+
+Some profiles on the MCMP website list their department as just `"MCMP"` in `p.header-person__department`. This is accurate — those individuals are not affiliated with a specific Chair in the website's own data. Do not attempt to infer a Chair from the description text; capture exactly what the website shows.
 
 ---
 
@@ -477,4 +533,6 @@ HTMLMCMPScraper(BaseMCMPScraper)  # src/scrapers/html_mcmp_scraper.py
 - [ ] Accumulation policy preserved — `_accumulate()` never removes entries
 - [ ] For WPML sites: language URLs sourced from switcher, not positional pairing
 - [ ] For sequential content: safe resumption implemented (skip already-scraped IDs)
+- [ ] MCP tool field names match the keys written by the scraper (no silent "Unknown")
+- [ ] MCP tool output verified in isolation before trusting LLM responses
 - [ ] Tests pass: `pytest tests/test_scraper.py -v`
