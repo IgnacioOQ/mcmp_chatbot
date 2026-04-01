@@ -271,3 +271,11 @@ Improved Python CLIs in `manager` and `language` to be POSIX-friendly and suppor
 
 ### Summary
 Created a generic shell wrapper `sh2py3.sh` and symlinks for python scripts in `bin/` directory.
+
+## [2026-04-01] Caching in MCP Tools
+
+**Agent**: Jules
+**Task**: Implement caching for `load_data` in MCP tools to improve execution speed.
+
+### Summary
+Added `@functools.lru_cache` to `load_data` in `src/mcp/tools.py` to prevent repeated disk I/O when reading JSON files across tool calls during the same session, reducing execution latency. Also removed stale tests from `tests/test_engine.py` referencing removed code (`VectorStore`, `retrieve_with_decomposition`, `decompose_query`).
