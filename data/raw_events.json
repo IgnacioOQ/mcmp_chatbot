@@ -12,9 +12,9 @@
         "description": "23\nMar\n—\n24\nMar\nModel Choice in Bayesian Inference\nDate:\n23 March 2026\n- 24 March 2026\nLocation:\nCenter for Advanced Studies\nSeestr. 13\n80802 Munich\nWorkshop organized by Dr. Andreas Döpp and Dr. Tom Sterkenburg (CAS Young Center/LMU).\nBayesian inference is often said to begin with a prior, yet an even earlier step – the articulation of a statistical model – quietly fixes the outcome space, the likelihood, the data representation, and the structural assumptions that make inference possible. This workshop asks whether and how that step can be principled or partly formalized: what counts as a good modeling choice? How can simplicity and expressiveness be negotiated given the available evidence?\nParticipants include\nthe members of the CAS Research Focus\n\"Bayesian Reasoning\"\n.\nRegistration\nParticipation by invitation only.\nBluesky"
     },
     {
-        "title": "Talk: Armin Schulz (Kansas)",
+        "title": "Talk:  Armin Schulz (Kansas)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-armin-schulz-kansas-22d40995.html",
-        "scraped_at": "2026-03-24T12:35:46.002596",
+        "scraped_at": "2026-04-01T11:37:31.203088",
         "talk_title": "What is an Agent? The Case for a Null Answer",
         "abstract": "Concepts of agency are invoked in explanations, models, theories, and predictions in many different sciences, from evolutionary biology to computer science and economics. In order to understand and assess the work in these sciences, therefore, it is crucial to understand these appeals to \"agency.\" To make progress in this, the paper makes the case for three interrelated conclusions. First, the best way to understand the question about the nature of agency is as a question about defensible scientific uses of the concept of agency—not a purely metaphysical-philosophical question, nor a purely interpretationist question. Second, the paper seeks to show that there is not one right answer about what an agent, in general, is (and so we should be eliminativists about the general concept of agency). Third, though, it also shows that this is not problematic, as in specific scientific contexts such as economics and biology, there are defensible views of agency in that context. In short: there is no need for a general concept of agency.",
         "metadata": {
@@ -31,7 +31,7 @@
     {
         "title": "Postwar Physics Across Scales",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/postwar-physics-across-scales-bbb6de32.html",
-        "scraped_at": "2026-03-24T12:35:46.003326",
+        "scraped_at": "2026-04-01T11:37:31.203100",
         "metadata": {
             "year": 2026,
             "month": "April",
@@ -915,7 +915,7 @@
     {
         "title": "Talk (Work in Progress): Timo Freiesleben (MCMP)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-timo-freiesleben-mcmp-cc31d6e4.html",
-        "scraped_at": "2026-03-24T12:35:46.003333",
+        "scraped_at": "2026-04-01T11:37:31.203104",
         "talk_title": "Algorithmic Contestability: Overturning Decisions on Epistemic Grounds",
         "abstract": "Machine learning systems increasingly make life-changing decisions about individuals, such as loan approvals, hiring, cheating detection, raising a pressing question: how can individuals respond to negative decisions made by these opaque systems? While explainable artificial intelligence (XAI) has largely focused on algorithmic recourse—helping individuals change their features to obtain a desired outcome—the parallel problem of algorithmic contestability—helping individuals review and correct erroneous algorithmic decisions—has received far less attention, despite its central ethical and legal importance. We trace this neglect to the absence of clear formal definitions and a systematic operationalization of contestability as an algorithmic problem. To address this gap, we conceptualize contestability as the counterpart to recourse: whereas recourse assumes the decision is correct and shows how to change it, contestability begins from the belief that the decision is wrong and seeks evidence to overturn it. We prove that XAI explanations can reveal violations of epistemic norms in a model's reasoning, but that such violations alone do not justify reversing decisions. Going beyond traditional XAI, we identify three types of evidence warranting reversal according to the decision maker's own ethical standards: predictive multiplicity, incorrect feature values, and neglected overruling evidence. We argue that these render decisions normatively indefensible and thus successfully contestable. Finally, we analyze how existing EU legislation connects to our framework and argue that individuals already hold some legal rights to these forms of evidence.",
         "metadata": {

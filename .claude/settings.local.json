@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"c:/Users/LokalAdmin/Documents/GitRepositories/mcmp_chatbot\" remote -v)"
+    ]
+  }
+}
