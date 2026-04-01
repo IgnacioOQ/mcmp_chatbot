@@ -1,8 +1,9 @@
 import functools
 import json
 import os
+import re
 import unicodedata
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
@@ -270,4 +271,132 @@ def search_graph(query: str) -> List[Dict[str, Any]]:
             "relationships": node_relationships
         })
         
+    return results
+
+
+# ── Grep helpers ─────────────────────────────────────────────────────────────
+
+_GREP_DB_MAP: Dict[str, Tuple[str, Any]] = {
+    "people":   ("people.json",     lambda e: e.get("name",  e.get("url", "?"))),
+    "research": ("research.json",   lambda e: e.get("name",  "?")),
+    "events":   ("raw_events.json", lambda e: e.get("title", "?")),
+}
+
+_SNIPPET_RADIUS = 80  # characters to show either side of the match
+
+
+def _flatten(obj: Any, prefix: str = ""):
+    """Recursively yield (dotted_key, str_value) pairs from a JSON object."""
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            yield from _flatten(v, f"{prefix}.{k}" if prefix else k)
+    elif isinstance(obj, list):
+        for i, item in enumerate(obj):
+            if isinstance(item, str):
+                yield (f"{prefix}[{i}]", item)
+            else:
+                yield from _flatten(item, f"{prefix}[{i}]")
+    elif isinstance(obj, str) and obj.strip():
+        yield (prefix, obj)
+
+
+def _match_span(pattern: str, text: str, use_regex: bool) -> Optional[Tuple[int, int]]:
+    """Return (start, end) of the first match in text, or None."""
+    if use_regex:
+        try:
+            m = re.search(pattern, text, re.IGNORECASE)
+            return (m.start(), m.end()) if m else None
+        except re.error:
+            # Fall back to literal substring on bad regex
+            idx = text.lower().find(pattern.lower())
+            return (idx, idx + len(pattern)) if idx != -1 else None
+    else:
+        idx = text.lower().find(pattern.lower())
+        return (idx, idx + len(pattern)) if idx != -1 else None
+
+
+def _snippet(text: str, span: Tuple[int, int]) -> str:
+    """Extract a short context window around the matched span."""
+    start, end = span
+    lo = max(0, start - _SNIPPET_RADIUS)
+    hi = min(len(text), end + _SNIPPET_RADIUS)
+    prefix = "..." if lo > 0 else ""
+    suffix = "..." if hi < len(text) else ""
+    excerpt = text[lo:start] + ">>>" + text[start:end] + "<<<" + text[end:hi]
+    return prefix + excerpt + suffix
+
+
+def grep_data(
+    pattern: str,
+    database: str = "all",
+    fields: Optional[List[str]] = None,
+    use_regex: bool = False,
+    max_results: int = 10,
+) -> List[Dict[str, Any]]:
+    """
+    Flexible grep-style search across MCMP databases.
+    Scans the text content of records and returns compact snippets
+    showing exactly where the pattern occurs.
+
+    Use this when the other tools (search_people, get_events, etc.) are too
+    narrow — e.g. to find anyone who mentions a specific institution, grant,
+    journal, or exact phrase across bios and publications.
+
+    Args:
+        pattern:     Keyword or regex pattern to search for.
+        database:    Which database to search — "people", "research", "events",
+                     or "all" (default).
+        fields:      Optional list of field names to restrict the search
+                     (e.g. ["description", "metadata.email"]). Searches all
+                     string fields when omitted.
+        use_regex:   If True, treat pattern as a Python regex (case-insensitive).
+                     Defaults to False (plain case-insensitive substring match).
+        max_results: Maximum number of matching snippets to return (default 10).
+    """
+    if not pattern or not pattern.strip():
+        return [{"error": "pattern must be a non-empty string"}]
+
+    dbs = (
+        list(_GREP_DB_MAP.items())
+        if database == "all"
+        else [(database, _GREP_DB_MAP[database])] if database in _GREP_DB_MAP
+        else []
+    )
+
+    if not dbs:
+        return [{"error": f"Unknown database '{database}'. Choose from: people, research, events, all."}]
+
+    results: List[Dict[str, Any]] = []
+    seen_ids: set = set()  # one snippet per (db, record, field) at most
+
+    for db_name, (filename, id_fn) in dbs:
+        for entry in load_data(filename):
+            entry_id = id_fn(entry)
+            for field_path, value in _flatten(entry):
+                # Respect optional field filter
+                if fields and not any(f in field_path for f in fields):
+                    continue
+                # Skip very short values
+                if len(value) < 3:
+                    continue
+
+                span = _match_span(pattern, value, use_regex)
+                if span is None:
+                    continue
+
+                key = (db_name, entry_id, field_path)
+                if key in seen_ids:
+                    continue
+                seen_ids.add(key)
+
+                results.append({
+                    "database": db_name,
+                    "id":       entry_id,
+                    "field":    field_path,
+                    "snippet":  _snippet(value, span),
+                })
+
+                if len(results) >= max_results:
+                    return results
+
     return results

@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from src.mcp.tools import search_people, search_research, get_events, search_graph
+from src.mcp.tools import search_people, search_research, get_events, search_graph, grep_data
 from src.utils.logger import log_latency
 import json
 
@@ -14,7 +14,8 @@ class MCPServer:
             "search_people": search_people,
             "search_research": search_research,
             "get_events": get_events,
-            "search_graph": search_graph
+            "search_graph": search_graph,
+            "grep_data": grep_data,
         }
         
     def list_tools(self) -> List[Dict[str, Any]]:
@@ -126,6 +127,52 @@ class MCPServer:
                             "description": "Filter by event type. Examples: 'Talk', 'Workshop', 'Reading Group'."
                         }
                     }
+                }
+            },
+            {
+                "name": "grep_data",
+                "description": (
+                    "Flexible grep-style search across MCMP databases. "
+                    "Scans the full text of records (bios, abstracts, publications, metadata) "
+                    "and returns snippets showing exactly where the pattern occurs. "
+                    "Use this when the other tools are too narrow — e.g. to find anyone who "
+                    "mentions a specific institution, grant, journal name, or exact phrase. "
+                    "Prefer plain substring (use_regex=false) unless you specifically need "
+                    "a regex pattern. Narrow the search with 'database' to avoid noise."
+                ),
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "pattern": {
+                            "type": "string",
+                            "description": (
+                                "The keyword or regex pattern to search for. "
+                                "Examples: 'Bayesianism', 'DFG', 'quantum gravity', r'\\bLogic\\b'."
+                            )
+                        },
+                        "database": {
+                            "type": "string",
+                            "enum": ["all", "people", "research", "events"],
+                            "description": "Which database to search. Default is 'all'."
+                        },
+                        "fields": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": (
+                                "Optional list of field name substrings to restrict search. "
+                                "E.g. ['description', 'selected_publications'] to skip metadata fields."
+                            )
+                        },
+                        "use_regex": {
+                            "type": "boolean",
+                            "description": "If true, treat pattern as a Python regex (case-insensitive). Default false."
+                        },
+                        "max_results": {
+                            "type": "integer",
+                            "description": "Maximum number of snippets to return. Default 10."
+                        }
+                    },
+                    "required": ["pattern"]
                 }
             }
         ]
