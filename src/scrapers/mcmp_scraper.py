@@ -1,12 +1,10 @@
-import requests
-from bs4 import BeautifulSoup
-import ftfy
 import json
 import os
 from datetime import datetime
 import time
 
 from src.utils.logger import log_info, log_error
+from src.scrapers.base_scraper import BaseMCMPScraper
 
 # Optional Selenium imports for dynamic page loading
 try:
@@ -26,77 +24,25 @@ except ImportError:
 try:
     from src.utils import build_graph
 except ImportError:
-    # Fallback/warnings if needed, but assuming structure holds
     import src.utils.build_graph as build_graph
 
-class MCMPScraper:
-    BASE_URL = "https://www.philosophie.lmu.de"
-    EVENT_SOURCES = [
-        f"{BASE_URL}/mcmp/en/latest-news/events-overview/index.html",
-        f"{BASE_URL}/mcmp/en/events/index.html",
-        f"{BASE_URL}/mcmp/en/index.html"
-    ]
-    # Fallback if file not found, but we prefer reading from file
-    PEOPLE_URLS = [f"{BASE_URL}/mcmp/en/people/index.html"]
-    RESEARCH_URL = f"{BASE_URL}/mcmp/en/research/index.html"
+
+class MCMPScraper(BaseMCMPScraper):
+    """
+    Primary MCMP scraper.
+
+    Uses Selenium to handle the dynamic 'Load more' button on the events-overview
+    page, then falls back to static scraping for all other sources. Inherits all
+    shared scraping logic from BaseMCMPScraper. Owns data persistence (save_to_json)
+    and change logging (_log_changes).
+    """
 
     def __init__(self):
-        self.events = []
-        self.people = []
-        self.research = []
-        self.general = []
-        self.general = []
-        self.important_urls = self.load_important_urls()
+        super().__init__()
 
-    def _fetch_page(self, url: str) -> BeautifulSoup:
-        """Fetch a page and enforce UTF-8 to prevent mojibake."""
-        response = requests.get(url)
-        response.raise_for_status()
-        response.encoding = "utf-8"  # Force before .text — prevents mojibake
-        fixed = ftfy.fix_text(response.text)  # Repair any residual encoding issues
-        return BeautifulSoup(fixed, 'html.parser')
-
-    def _clean_text(self, text):
-        """Removes common navigation noise from scraped text."""
-        if not text:
-            return ""
-
-        lines = text.split('\n')
-        cleaned_lines = []
-        
-        # Heuristics to skip navigation and footer
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-                
-            # Skip breadcrumbs start
-            if "You are in the following website hierarchy" in line or "You are here:" in line:
-                continue
-            if line in ["Home", "Latest news", "Events overview", "Event", "up", "Share", "To share copy", "Link", "Share on"]:
-                continue
-            # Skip footer links
-            if line in ["Facebook", "X", "LinkedIn", "Instagram"]:
-                continue
-            
-            cleaned_lines.append(line)
-            
-        return "\n".join(cleaned_lines)
-
-
-    def load_important_urls(self):
-        """Loads important URLs from data/important_urls.txt."""
-        urls = []
-        try:
-            with open("data/important_urls.txt", "r") as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith("#"):
-                        urls.append(line)
-            log_info(f"Loaded {len(urls)} important URLs from file.")
-        except FileNotFoundError:
-            log_error("data/important_urls.txt not found. Using defaults.")
-        return urls
+    # ------------------------------------------------------------------
+    # Events scraping (Selenium + static fallback)
+    # ------------------------------------------------------------------
 
     def scrape_events(self):
         """Scrapes multiple sources for event links with exhaustive nested search.
@@ -104,12 +50,10 @@ class MCMPScraper:
         Uses Selenium for pages with dynamic 'Load more' buttons (like events-overview).
         Falls back to requests.get() for other pages.
         """
-        seen_urls = set()  # URL-based deduplication
+        seen_urls = set()
 
-        # Events overview page needs dynamic loading (has "Load more" button)
         events_overview_url = f"{self.BASE_URL}/mcmp/en/latest-news/events-overview/index.html"
 
-        # First, scrape the events overview with Selenium (if available)
         if SELENIUM_AVAILABLE:
             log_info(f"Using Selenium to scrape {events_overview_url} (dynamic loading)")
             try:
@@ -120,15 +64,13 @@ class MCMPScraper:
                         self.events.append({
                             "title": title,
                             "url": url,
-                            "scraped_at": datetime.now().isoformat()
+                            "scraped_at": datetime.now().isoformat(),
                         })
                 log_info(f"Selenium found {len(self.events)} events from events-overview")
             except Exception as e:
                 log_error(f"Selenium failed, falling back to static scraping: {e}")
 
-        # Scrape remaining sources with requests (static pages)
         for source_url in self.EVENT_SOURCES:
-            # Skip events-overview if already scraped with Selenium
             if "events-overview" in source_url and SELENIUM_AVAILABLE and len(self.events) > 0:
                 continue
 
@@ -136,18 +78,16 @@ class MCMPScraper:
             try:
                 soup = self._fetch_page(source_url)
 
-                # Primary method: Use CSS class for event links
-                event_links = soup.select('a.filterable-list__list-item-link.is-events')
+                event_links = soup.select("a.filterable-list__list-item-link.is-events")
 
-                # Fallback: Heuristic matching
                 if not event_links:
                     event_links = [
-                        link for link in soup.find_all('a', href=True)
-                        if self._is_event_link(link['href'])
+                        link for link in soup.find_all("a", href=True)
+                        if self._is_event_link(link["href"])
                     ]
 
                 for link in event_links:
-                    href = link.get('href', '')
+                    href = link.get("href", "")
                     text = link.get_text(strip=True)
                     full_url = self._normalize_url(href, source_url)
 
@@ -155,54 +95,50 @@ class MCMPScraper:
                         continue
                     seen_urls.add(full_url)
 
-                    title = text or href.split('/')[-1].replace('.html', '').replace('-', ' ').title()
+                    title = text or href.split("/")[-1].replace(".html", "").replace("-", " ").title()
                     self.events.append({
                         "title": title,
                         "url": full_url,
-                        "scraped_at": datetime.now().isoformat()
+                        "scraped_at": datetime.now().isoformat(),
                     })
 
             except Exception as e:
                 log_error(f"Error scraping {source_url}: {e}")
 
         log_info(f"Found {len(self.events)} unique event links in total.")
-        
-        # Now scrape details for all found events
+
         for i, event in enumerate(self.events):
             log_info(f"Scraping event {i+1}/{len(self.events)}: {event['title']}")
             self.scrape_event_details(event)
-            
+
         return self.events
-    
+
     def _fetch_events_with_selenium(self, url):
         """Uses Selenium to load all events from a page with 'Load more' button.
-        
+
         Returns list of (url, title) tuples.
         """
-        # Setup headless Chrome
         chrome_options = ChromeOptions()
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
-        
+
         driver = None
         event_links = []
-        
+
         try:
             driver = webdriver.Chrome(
                 service=ChromeService(ChromeDriverManager().install()),
-                options=chrome_options
+                options=chrome_options,
             )
             driver.get(url)
-            
-            # Wait for initial content to load
+
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "a.filterable-list__list-item-link.is-events"))
             )
-            
-            # Click "Load more" button repeatedly until it disappears
-            max_clicks = 10  # Safety limit
+
+            max_clicks = 10
             clicks = 0
             while clicks < max_clicks:
                 try:
@@ -210,15 +146,14 @@ class MCMPScraper:
                     if load_more_btn.is_displayed():
                         driver.execute_script("arguments[0].scrollIntoView();", load_more_btn)
                         driver.execute_script("arguments[0].click();", load_more_btn)
-                        time.sleep(1)  # Wait for new content
+                        time.sleep(1)
                         clicks += 1
                         log_info(f"Clicked 'Load more' button ({clicks} times)")
                     else:
                         break
                 except (NoSuchElementException, TimeoutException):
-                    break  # No more "Load more" button
-            
-            # Extract all event links
+                    break
+
             links = driver.find_elements(By.CSS_SELECTOR, "a.filterable-list__list-item-link.is-events")
             for link in links:
                 try:
@@ -228,618 +163,84 @@ class MCMPScraper:
                         event_links.append((href, title))
                 except Exception:
                     pass
-            
+
             log_info(f"Selenium extracted {len(event_links)} event links")
-            
+
         finally:
             if driver:
                 driver.quit()
-        
+
         return event_links
-    
-    def _is_event_link(self, href):
-        """Checks if a URL looks like an event page."""
-        if not href:
-            return False
-        lower_href = href.lower()
-        if "/event/" in href:
-            return True
-        if any(kw in lower_href for kw in ["talk-", "workshop-", "conference-", "colloquium-", "seminar-", "reading-group"]):
-            return ".html" in href
-        return False
-    
-    def _normalize_url(self, href, source_url):
-        """Normalizes a URL to absolute form."""
-        if href.startswith("http"):
-            return href
-        elif href.startswith("/"):
-            return f"{self.BASE_URL}{href}"
-        else:
-            base_path = source_url.rsplit('/', 1)[0]
-            return f"{base_path}/{href}".replace("/./", "/")
 
-    def scrape_event_details(self, event):
-        """Scrapes details for a single event with structured field extraction."""
-        try:
-            soup = self._fetch_page(event['url'])
-
-            metadata = {}
-
-            # Extract speaker from main H1 (e.g., "Talk: Simon Saunders (Oxford)")
-            h1 = soup.find('h1')
-            if h1:
-                speaker_text = h1.get_text(strip=True)
-                # Parse speaker from title like "Talk: Name (Affiliation)"
-                if ':' in speaker_text:
-                    speaker_part = speaker_text.split(':', 1)[1].strip()
-                    metadata['speaker'] = speaker_part
-            
-            # Extract labeled sections (Title, Abstract, Date, Location)
-            for h2 in soup.find_all('h2'):
-                label = h2.get_text(strip=True).rstrip(':').lower()
-                
-                if label == 'title':
-                    event['talk_title'] = self._extract_section_content(h2)
-                elif label == 'abstract':
-                    event['abstract'] = self._extract_section_content(h2)
-                elif label == 'date':
-                    date_text = self._extract_section_content(h2)
-                    metadata.update(self._parse_date_time(date_text))
-            
-            # Extract location from address tag (most reliable)
-            address = soup.find('address')
-            if address:
-                location = address.get_text(' ', strip=True)
-                # Clean up location string
-                location = ' '.join(location.split())  # Normalize whitespace
-                metadata['location'] = location
-            
-            # Fallback: Try dl/dt/dd structure for any missing metadata
-            for dl in soup.find_all('dl'):
-                for dt, dd in zip(dl.find_all('dt'), dl.find_all('dd')):
-                    key = dt.get_text(strip=True).lower().replace(':', '')
-                    val = dd.get_text(' ', strip=True)
-                    if key and val and key not in metadata:
-                        metadata[key] = val
-            
-            event['metadata'] = metadata
-            
-            # Build a clean description from abstract + title
-            desc_parts = []
-            if event.get('talk_title'):
-                desc_parts.append(f"Title: {event['talk_title']}")
-            if event.get('abstract'):
-                desc_parts.append(f"Abstract: {event['abstract']}")
-            if desc_parts:
-                event['description'] = '\n\n'.join(desc_parts)
-            else:
-                # Fallback to raw content
-                main_content = soup.find('div', id='r-main') or soup.find('main')
-                if main_content:
-                    event['description'] = self._clean_text(main_content.get_text(separator='\n', strip=True))
-            
-        except Exception as e:
-            log_error(f"Error scraping event details for {event['url']}: {e}")
-    
-    def _extract_section_content(self, header_elem):
-        """Extracts all text content following a header until the next header."""
-        content_parts = []
-        sibling = header_elem.find_next_sibling()
-        
-        while sibling and sibling.name not in ['h1', 'h2', 'h3']:
-            text = sibling.get_text(' ', strip=True)
-            if text:
-                content_parts.append(text)
-            sibling = sibling.find_next_sibling()
-        
-        return ' '.join(content_parts).strip()
-    
-    def _parse_date_time(self, date_text):
-        """Parses date/time string into structured metadata."""
-        import re
-        
-        result = {}
-        
-        # Try to extract ISO date (e.g., "4 February 2026")
-        date_match = re.search(r'(\d{1,2})\s+(\w+)\s+(\d{4})', date_text)
-        if date_match:
-            day, month_name, year = date_match.groups()
-            result['year'] = int(year)
-            result['month'] = month_name
-            
-            # Convert to ISO date
-            month_map = {
-                'january': '01', 'february': '02', 'march': '03', 'april': '04',
-                'may': '05', 'june': '06', 'july': '07', 'august': '08',
-                'september': '09', 'october': '10', 'november': '11', 'december': '12'
-            }
-            month_num = month_map.get(month_name.lower(), '01')
-            result['date'] = f"{year}-{month_num}-{int(day):02d}"
-        
-        # Try to extract time (e.g., "4:00 pm" or "10:00 am - 12:00 pm")
-        time_match = re.search(r'(\d{1,2}:\d{2}\s*[ap]m)', date_text, re.IGNORECASE)
-        if time_match:
-            result['time_start'] = time_match.group(1).strip()
-        
-        end_time_match = re.search(r'-\s*(\d{1,2}:\d{2}\s*[ap]m)', date_text, re.IGNORECASE)
-        if end_time_match:
-            result['time_end'] = end_time_match.group(1).strip()
-        
-        return result
-
-    def scrape_people(self):
-        """Scrapes the people directory and individual profiles."""
-        # Use important URLs if available, otherwise default
-        sources = [u for u in self.important_urls if "people" in u]
-        if not sources:
-            sources = self.PEOPLE_URLS
-
-        for people_url in sources:
-            log_info(f"Starting scrape of people from {people_url}")
-            try:
-                soup = self._fetch_page(people_url)
-
-                person_links = soup.find_all('a', href=True)
-                profiles_to_visit = set()
-
-                for link in person_links:
-                    href = link['href']
-                    # Heuristic for people profiles
-                    # The links observed are relative like "contact-page/..."
-                    if "contact-page/" in href or "/faculty/" in href or "/staff/" in href:
-                         # Exclude the index page itself
-                         if href.endswith("people/index.html") or href == people_url:
-                             continue
-
-                         if href.startswith("http"):
-                             full_url = href
-                         elif href.startswith("/"):
-                             full_url = f"{self.BASE_URL}{href}"
-                         else:
-                             # Relative to the people_url (which should end in / or /index.html)
-                             if people_url.endswith("index.html"):
-                                 base = people_url.rsplit('/', 1)[0]
-                             elif people_url.endswith("/"):
-                                 base = people_url.rstrip('/')
-                             else:
-                                 base = people_url
-                             
-                             full_url = f"{base}/{href}"
-
-                         profiles_to_visit.add(full_url)
-                
-                log_info(f"Found {len(profiles_to_visit)} potential people profiles to scrape.")
-
-                for url in profiles_to_visit:
-                     self._scrape_single_person_page(url)
-
-            except Exception as e:
-                log_error(f"Error scraping people index {people_url}: {e}")
-        
-        return self.people
-
-    def _scrape_single_person_page(self, url):
-        """Scrapes a single person's profile page."""
-        try:
-            if url in [p['url'] for p in self.people]:
-                return
-
-            soup = self._fetch_page(url)
-
-            # Name
-            name_elem = soup.find('h1', class_='header-person__name')
-            name = name_elem.get_text(strip=True) if name_elem else "Unknown Person"
-            
-            # New Fields Extraction
-            metadata = {}
-            
-            # 1. Position/Role
-            job_elem = soup.find('p', class_='header-person__job')
-            if job_elem:
-                metadata['position'] = job_elem.get_text(strip=True)
-                
-            # 2. Organizational Unit
-            dept_elem = soup.find('p', class_='header-person__department')
-            if dept_elem:
-                metadata['organizational_unit'] = dept_elem.get_text(strip=True)
-                
-            # 3. Image URL
-            img_elem = soup.select_one('img.picture__image')
-            if img_elem and img_elem.get('src'):
-                metadata['image_url'] = img_elem['src']
-
-            # 4. Email
-            email_elem = soup.select_one('a.header-person__contentlink.is-email')
-            if email_elem:
-                email = email_elem.get_text(strip=True).replace("Send an email", "")
-                # If text was just "Send an email", try mailto
-                if not email or "@" not in email:
-                    href = email_elem.get('href', '')
-                    if href.startswith('mailto:'):
-                        email = href.replace('mailto:', '')
-                if email:
-                    metadata['email'] = email.strip()
-
-            # 5. Phone
-            phone_elem = soup.select_one('a.header-person__contentlink.is-phone')
-            if phone_elem:
-                metadata['phone'] = phone_elem.get_text(strip=True)
-
-            # 6. Room / Office Address
-            # Look for div.header-person__detail_area and check p tags
-            detail_areas = soup.find_all('div', class_='header-person__detail_area')
-            for area in detail_areas:
-                p_tags = area.find_all('p')
-                for p in p_tags:
-                    text = p.get_text(strip=True)
-                    if "Room" in text and "Room finder" not in text:
-                        metadata['room'] = text
-                    # Fallback for office if not found yet
-                    if "Ludwigstr" in text or "Geschwister-Scholl" in text:
-                         if 'office_address' not in metadata:
-                             metadata['office_address'] = text
-
-            # 7. Website
-            # Look for link with text "Personal website"
-            website_link = soup.find('a', string=lambda t: t and "Personal website" in t)
-            if website_link:
-                metadata['website'] = website_link.get('href')
-
-            # 8. Selected Publications
-            # Find h2 with text "Selected publications" and get next sibling list
-            pub_header = soup.find('h2', string=lambda t: t and "Selected publications" in t)
-            if pub_header:
-                # The list is usually in the next sibling or container
-                # Structure: h2 -> p -> ol/ul  OR h2 -> div -> ol/ul
-                # We can try to find the next ol or ul
-                pub_list_container = pub_header.find_parent('div', class_='rte__content')
-                if pub_list_container:
-                    pub_list = pub_list_container.find(['ol', 'ul'])
-                    if pub_list:
-                        publications = []
-                        for li in pub_list.find_all('li'):
-                            publications.append(li.get_text(" ", strip=True))
-                        metadata['selected_publications'] = publications
-
-            # Main content for description (fallback/additional)
-            main_content = soup.find('div', id='r-main') or soup.find('main')
-            description = ""
-            
-            if main_content:
-                # Clean description: remove the header person part which we already scraped
-                # We can just extract text from rte__content divs which usually hold the main text
-                rte_divs = main_content.find_all('div', class_='rte__content')
-                desc_text = []
-                for div in rte_divs:
-                    # Skip if it's the publications section we already handled
-                    if div.find('h2', string=lambda t: t and "Selected publications" in t):
-                        continue
-                    
-                    # Extract text
-                    text = div.get_text(separator=' ', strip=True)
-                    if text:
-                        desc_text.append(text)
-                
-                description = "\n\n".join(desc_text)
-                
-                # Fallback if no rte content found (some pages might differ)
-                if not description:
-                     description = self._clean_text(main_content.get_text(separator=' ', strip=True))
-
-                # Extract Research Interests specifically if not already caught (usually in rte)
-                # But we can look for specific header in the description text or structure
-                ri_header = main_content.find(lambda tag: tag.name in ['h2', 'h3'] and "Research interests" in tag.get_text())
-                if ri_header:
-                    interests_text = ""
-                    curr = ri_header.find_next_sibling()
-                    while curr and curr.name not in ['h1', 'h2', 'h3']:
-                        interests_text += curr.get_text(separator=' ', strip=True) + " "
-                        curr = curr.find_next_sibling()
-                    metadata['research_interests_text'] = interests_text.strip()
-
-            self.people.append({
-                "name": name,
-                "url": url,
-                "description": description[:5000],
-                "metadata": metadata,
-                "type": "person",
-                "scraped_at": datetime.now().isoformat()
-            })
-        except Exception as e:
-            log_error(f"Error scraping person {url}: {e}")
-
-    def scrape_research(self):
-        """Scrapes the research projects and structures them."""
-        log_info(f"Starting scrape of {self.RESEARCH_URL}")
-        try:
-            self.research = [] # Reset
-            
-            # Defined High-Level Categories (Chairs/Areas)
-            # We will try to bin scraped pages into these
-            categories = {
-                "logic": {"name": "Logic and Philosophy of Language", "keywords": ["logic", "language", "semantic", "truth"], "items": []},
-                "philsc": {"name": "Philosophy of Science", "keywords": ["science", "physics", "biology", "explanation"], "items": []},
-                "decision": {"name": "Decision Theory", "keywords": ["decision", "game theory", "rationality", "choice"], "items": []},
-                "structure": {"name": "Mathematical Philosophy", "keywords": ["mathematical", "formal"], "items": []} # Fallback
-            }
-
-            soup = self._fetch_page(self.RESEARCH_URL)
-            
-            subpage_links = set()
-            for link in soup.find_all('a', href=True):
-                href = link['href']
-                if "/research/" in href and href != self.RESEARCH_URL:
-                     if "/mcmp/en/research/" in href and "publications" not in href:
-                         full_url = href if href.startswith("http") else f"{self.BASE_URL}{href}"
-                         subpage_links.add(full_url)
-            
-            # Ensure the specific ML page requested is included
-            ml_page = f"{self.BASE_URL}/mcmp/en/research/philosophy-of-machine-learning/"
-            subpage_links.add(ml_page)
-
-            scraped_items = []
-            for url in subpage_links:
-                try:
-                    item = self._scrape_single_research_page(url)
-                    if item:
-                        scraped_items.append(item)
-                except Exception as e:
-                    log_error(f"Failed to scrape research subpage {url}: {e}")
-
-            # Categorize items
-            for item in scraped_items:
-                title_lower = item['title'].lower()
-                desc_lower = item['description'].lower()
-                
-                assigned = False
-                for cat_id, cat_data in categories.items():
-                    if any(k in title_lower for k in cat_data['keywords']):
-                        cat_data['items'].append(item)
-                        assigned = True
-                        break
-                
-                if not assigned:
-                    # Fallback to general or mapped to content keywords
-                    categories['structure']['items'].append(item)
-
-            # Transform to new hierarchical structure for research.json
-            final_structure = []
-            for cat_id, cat_data in categories.items():
-                # Always include the core categories so TopicMatcher can use them
-                # Extract subtopics names from items
-                subtopics = [i['title'] for i in cat_data['items']]
-                
-                final_structure.append({
-                    "id": cat_id,
-                    "name": cat_data['name'],
-                    "description": f"Research area focusing on {cat_data['name']}",
-                    "subtopics": subtopics,
-                    "projects": cat_data['items'], # Keep full details nested
-                    "url": self.RESEARCH_URL
-                })
-            
-            self.research = final_structure
-            log_info(f"Structured research into {len(self.research)} categories.")
-            return self.research
-            
-        except Exception as e:
-            log_error(f"Error scraping research: {e}")
-            return []
-
-    def _scrape_single_research_page(self, url):
-        """Helper to scrape a specific research page. Returns dict or None."""
-        try:
-            soup = self._fetch_page(url)
-
-            title_elem = soup.find('h1')
-            title = title_elem.get_text(strip=True) if title_elem else "Research Project"
-            
-            main_content = soup.find('div', id='r-main') or soup.find('main')
-            if main_content:
-                text = main_content.get_text(separator=' ', strip=True)
-                return {
-                    "title": title,
-                    "description": text[:5000],
-                    "url": url,
-                    "type": "research_project",
-                    "scraped_at": datetime.now().isoformat()
-                }
-        except Exception as e:
-            return None
-
-    def scrape_general(self):
-        """Scrapes the home page for general info (About, History)."""
-        home_url = f"{self.BASE_URL}/mcmp/en/index.html"
-        log_info(f"Starting scrape of {home_url}")
-        try:
-            soup = self._fetch_page(home_url)
-            
-            main_content = soup.find('div', id='r-main') or soup.find('main')
-            if main_content:
-                # Extract sections like "About the MCMP", "Our history", etc.
-                # CAPTURE ALL SECTIONS regardless of typo in title
-                headers = main_content.find_all(['h2'])
-                for header in headers:
-                    section_title = header.get_text(strip=True)
-                    # Skip empty titles or navigation elements if necessary
-                    if len(section_title) < 3: 
-                        continue
-
-                    content = ""
-                    curr = header.find_next_sibling()
-                    while curr and curr.name not in ['h2', 'h1']:
-                        content += curr.get_text(separator=' ', strip=True) + "\n"
-                        curr = curr.find_next_sibling()
-                        
-                        if content.strip():
-                            self.general.append({
-                                "title": f"General: {section_title}",
-                                "description": content.strip(),
-                                "url": home_url,
-                                "type": "general",
-                                "scraped_at": datetime.now().isoformat()
-                            })
-            
-            return self.general
-        except Exception as e:
-             log_error(f"Error scraping general info: {e}")
-             return []
-
-    def scrape_reading_groups(self):
-        """Scrapes reading groups from the events page."""
-        url = f"{self.BASE_URL}/mcmp/en/events/index.html"
-        log_info(f"Starting scrape of reading groups from {url}")
-        try:
-            soup = self._fetch_page(url)
-
-            # Reading groups seem to be in an accordion or headers under "Reading groups" section
-            # We look for the "Reading groups" header and then parse subsequent content
-            
-            main_content = soup.find('div', id='r-main') or soup.find('main')
-            if main_content:
-                # Find the "Reading groups" header
-                header = main_content.find(lambda tag: tag.name in ['h2', 'h1'] and "Reading groups" in tag.get_text())
-                
-                if header:
-                    # Iterate through siblings to find groups
-                    # Structure might be: Header -> p/div (content) -> Header -> ...
-                    curr = header.find_next_sibling()
-                    current_group = {}
-                    
-                    while curr:
-                        # Stop if we hit a new major section (e.g. "Event policy")
-                        if curr.name in ['h1', 'h2'] and "Reading groups" not in curr.get_text():
-                            break
-                        
-                        # In the observed chunk, group titles were links or text followed by description
-                        # e.g. [Philosophy of machine learning]... We meet...
-                        
-                        text = curr.get_text(separator=' ', strip=True)
-                        if text:
-                            # Heuristic: If it looks like a title (short, maybe has link)
-                            is_title = False
-                            link = curr.find('a')
-                            if link and len(text) < 100:
-                                is_title = True
-                            
-                            if is_title:
-                                # Save previous if exists
-                                if current_group:
-                                    self.general.append(current_group)
-                                
-                                title = text
-                                link_url = link['href'] if link else url
-                                if not link_url.startswith("http"):
-                                    link_url = f"{self.BASE_URL}{link_url}"
-                                
-                                # Ensure uniqueness if multiple groups share the same base URL (e.g. no specific anchor)
-                                if link_url == url or link_url.endswith("/events/index.html"):
-                                     slug = title.lower().replace(" ", "-").replace(":", "")[:30]
-                                     link_url = f"{link_url}#{slug}"
-
-                                current_group = {
-                                    "title": f"Reading Group: {title}",
-                                    "description": "",
-                                    "url": link_url,
-                                    "type": "reading_group",
-                                    "scraped_at": datetime.now().isoformat()
-                                }
-                            elif current_group:
-                                current_group["description"] += "\n" + text
-                        
-                        curr = curr.find_next_sibling()
-                    
-                    # Append the last one
-                    if current_group:
-                         self.general.append(current_group)
-
-            log_info(f"Scraped reading groups into general/events.")
-            return self.general
-        except Exception as e:
-            log_error(f"Error scraping reading groups: {e}")
-            return []
+    # ------------------------------------------------------------------
+    # Persistence
+    # ------------------------------------------------------------------
 
     def _log_changes(self):
         """Calculates differences between old and new data and logs them."""
         log_file = "data/scraping_logs.json"
-        
+
         datasets = {
             "events": (self.events, "data/raw_events.json", "url"),
             "people": (self.people, "data/people.json", "url"),
             "research": (self.research, "data/research.json", "id"),
-            "general": (self.general, "data/general.json", lambda x: f"{x.get('url', '')}_{x.get('title', '')}")
+            "general": (self.general, "data/general.json", lambda x: f"{x.get('url', '')}_{x.get('title', '')}"),
         }
-        
+
         changes_summary = {}
         total_changes = 0
-        
+
         for name, (new_data, file_path, uuid_key) in datasets.items():
             old_data = []
             if os.path.exists(file_path):
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
+                    with open(file_path, "r", encoding="utf-8") as f:
                         old_data = json.load(f)
                 except Exception as e:
                     log_error(f"Error reading old {name} data: {e}")
-            
-            def get_id(item):
-                if callable(uuid_key):
-                    return uuid_key(item)
-                return item.get(uuid_key)
-            
+
+            def get_id(item, key=uuid_key):
+                return key(item) if callable(key) else item.get(key)
+
             old_map = {get_id(item): item for item in old_data if get_id(item)}
             new_map = {get_id(item): item for item in new_data if get_id(item)}
-            
-            added = []
-            removed = []
-            updated = []
-            
+
+            added, removed, updated = [], [], []
+
             for nid, nitem in new_map.items():
                 if nid not in old_map:
-                    title_or_name = nitem.get('title') or nitem.get('name') or nitem.get('id') or nid
-                    added.append(title_or_name)
+                    added.append(nitem.get("title") or nitem.get("name") or nitem.get("id") or nid)
                 else:
-                    oitem = old_map[nid]
-                    # Ignore scraped_at for comparison
-                    oitem_copy = {k: v for k, v in oitem.items() if k != 'scraped_at'}
-                    nitem_copy = {k: v for k, v in nitem.items() if k != 'scraped_at'}
-                    
+                    oitem_copy = {k: v for k, v in old_map[nid].items() if k != "scraped_at"}
+                    nitem_copy = {k: v for k, v in nitem.items() if k != "scraped_at"}
                     if oitem_copy != nitem_copy:
-                        title_or_name = nitem.get('title') or nitem.get('name') or nitem.get('id') or nid
-                        updated.append(title_or_name)
-            
+                        updated.append(nitem.get("title") or nitem.get("name") or nitem.get("id") or nid)
+
             for oid, oitem in old_map.items():
                 if oid not in new_map:
-                    title_or_name = oitem.get('title') or oitem.get('name') or oitem.get('id') or oid
-                    removed.append(title_or_name)
-                    
+                    removed.append(oitem.get("title") or oitem.get("name") or oitem.get("id") or oid)
+
             if added or removed or updated:
-                changes_summary[name] = {
-                    "added": added,
-                    "removed": removed,
-                    "updated": updated
-                }
+                changes_summary[name] = {"added": added, "removed": removed, "updated": updated}
                 total_changes += len(added) + len(removed) + len(updated)
-                
-        # Write to log file if there are changes or log file doesn't exist
+
         if total_changes > 0 or not os.path.exists(log_file):
             log_entries = []
             if os.path.exists(log_file):
                 try:
-                    with open(log_file, 'r', encoding='utf-8') as f:
+                    with open(log_file, "r", encoding="utf-8") as f:
                         log_entries = json.load(f)
                 except Exception:
                     pass
-            
-            new_log_entry = {
+
+            log_entries.append({
                 "timestamp": datetime.now().isoformat(),
-                "changes": changes_summary
-            }
-            log_entries.append(new_log_entry)
-            
-            with open(log_file, 'w', encoding='utf-8') as f:
+                "changes": changes_summary,
+            })
+
+            with open(log_file, "w", encoding="utf-8") as f:
                 json.dump(log_entries, f, indent=4, ensure_ascii=False)
-            
+
             log_info(f"Logged {total_changes} changes to {log_file}")
         else:
             log_info("No changes detected in datasets.")
@@ -857,7 +258,7 @@ class MCMPScraper:
         existing = []
         if os.path.exists(file_path):
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     existing = json.load(f)
             except Exception as e:
                 log_error(f"Error reading {file_path} for accumulation: {e}")
@@ -869,7 +270,7 @@ class MCMPScraper:
         for item in new_data:
             item_id = get_id(item)
             if item_id:
-                merged[item_id] = item  # update or add; existing entries without a match are kept
+                merged[item_id] = item
         return list(merged.values())
 
     def save_to_json(self):
@@ -881,38 +282,40 @@ class MCMPScraper:
         """
         os.makedirs("data", exist_ok=True)
 
-        # Accumulate: merge new scraped data into existing files before logging/saving
         self.events = self._accumulate(self.events, "data/raw_events.json", "url")
         self.people = self._accumulate(self.people, "data/people.json", "url")
         self.research = self._accumulate(self.research, "data/research.json", "id")
         self.general = self._accumulate(
             self.general, "data/general.json",
-            lambda x: f"{x.get('url', '')}_{x.get('title', '')}"
+            lambda x: f"{x.get('url', '')}_{x.get('title', '')}",
         )
 
         self._log_changes()
 
-        with open("data/raw_events.json", 'w', encoding='utf-8') as f:
+        with open("data/raw_events.json", "w", encoding="utf-8") as f:
             json.dump(self.events, f, indent=4, ensure_ascii=False)
 
-        with open("data/people.json", 'w', encoding='utf-8') as f:
+        with open("data/people.json", "w", encoding="utf-8") as f:
             json.dump(self.people, f, indent=4, ensure_ascii=False)
 
-        with open("data/research.json", 'w', encoding='utf-8') as f:
+        with open("data/research.json", "w", encoding="utf-8") as f:
             json.dump(self.research, f, indent=4, ensure_ascii=False)
 
-        with open("data/general.json", 'w', encoding='utf-8') as f:
+        with open("data/general.json", "w", encoding="utf-8") as f:
             json.dump(self.general, f, indent=4, ensure_ascii=False)
 
-        log_info(f"Saved {len(self.events)} events, {len(self.people)} people, {len(self.research)} research items, {len(self.general)} general items.")
-        
-        # Auto-update Graph
+        log_info(
+            f"Saved {len(self.events)} events, {len(self.people)} people, "
+            f"{len(self.research)} research items, {len(self.general)} general items."
+        )
+
         try:
-             log_info("Updating institutional graph...")
-             build_graph.run()
-             log_info("Graph updated successfully.")
+            log_info("Updating institutional graph...")
+            build_graph.run()
+            log_info("Graph updated successfully.")
         except Exception as e:
-             log_error(f"Failed to update graph: {e}")
+            log_error(f"Failed to update graph: {e}")
+
 
 if __name__ == "__main__":
     scraper = MCMPScraper()

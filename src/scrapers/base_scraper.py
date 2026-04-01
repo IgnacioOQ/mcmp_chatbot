@@ -1,0 +1,573 @@
+import re
+import requests
+from bs4 import BeautifulSoup
+import ftfy
+from datetime import datetime
+
+from src.utils.logger import log_info, log_error
+
+
+class BaseMCMPScraper:
+    """
+    Base class containing all shared scraping logic for the MCMP website.
+
+    Subclasses override scrape_events() to implement either Selenium-based
+    dynamic loading (MCMPScraper) or static HTML-only scraping (HTMLMCMPScraper).
+    All other scraping methods, helpers, and data-cleaning utilities live here.
+    """
+
+    BASE_URL = "https://www.philosophie.lmu.de"
+    EVENT_SOURCES = [
+        f"{BASE_URL}/mcmp/en/latest-news/events-overview/index.html",
+        f"{BASE_URL}/mcmp/en/events/index.html",
+        f"{BASE_URL}/mcmp/en/index.html",
+    ]
+    PEOPLE_URLS = [f"{BASE_URL}/mcmp/en/people/index.html"]
+    RESEARCH_URL = f"{BASE_URL}/mcmp/en/research/index.html"
+
+    def __init__(self):
+        self.events = []
+        self.people = []
+        self.research = []
+        self.general = []
+        self._scraped_person_urls: set = set()  # O(1) dedup for _scrape_single_person_page
+        self.important_urls = self.load_important_urls()
+
+    # ------------------------------------------------------------------
+    # Core helpers
+    # ------------------------------------------------------------------
+
+    def _fetch_page(self, url: str) -> BeautifulSoup:
+        """Fetch a page and enforce UTF-8 to prevent mojibake."""
+        response = requests.get(url)
+        response.raise_for_status()
+        response.encoding = "utf-8"  # Force before .text — prevents mojibake
+        fixed = ftfy.fix_text(response.text)  # Repair any residual encoding issues
+        return BeautifulSoup(fixed, "html.parser")
+
+    def _clean_text(self, text):
+        """Removes common navigation noise from scraped text."""
+        if not text:
+            return ""
+
+        lines = text.split("\n")
+        cleaned_lines = []
+
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+
+            # Skip breadcrumbs
+            if "You are in the following website hierarchy" in line or "You are here:" in line:
+                continue
+            if line in ["Home", "Latest news", "Events overview", "Event", "up", "Share", "To share copy", "Link", "Share on"]:
+                continue
+            # Skip footer links
+            if line in ["Facebook", "X", "LinkedIn", "Instagram"]:
+                continue
+
+            cleaned_lines.append(line)
+
+        return "\n".join(cleaned_lines)
+
+    def load_important_urls(self):
+        """Loads important URLs from data/important_urls.txt."""
+        urls = []
+        try:
+            with open("data/important_urls.txt", "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        urls.append(line)
+            log_info(f"Loaded {len(urls)} important URLs from file.")
+        except FileNotFoundError:
+            log_error("data/important_urls.txt not found. Using defaults.")
+        return urls
+
+    def _normalize_url(self, href, source_url):
+        """Normalizes a URL to absolute form."""
+        if href.startswith("http"):
+            return href
+        elif href.startswith("/"):
+            return f"{self.BASE_URL}{href}"
+        else:
+            base_path = source_url.rsplit("/", 1)[0]
+            return f"{base_path}/{href}".replace("/./", "/")
+
+    def _is_event_link(self, href):
+        """Checks if a URL looks like an event page."""
+        if not href:
+            return False
+        lower_href = href.lower()
+        if "/event/" in href:
+            return True
+        if any(kw in lower_href for kw in ["talk-", "workshop-", "conference-", "colloquium-", "seminar-", "reading-group"]):
+            return ".html" in href
+        return False
+
+    # ------------------------------------------------------------------
+    # Event scraping
+    # ------------------------------------------------------------------
+
+    def scrape_event_details(self, event):
+        """Scrapes details for a single event with structured field extraction."""
+        try:
+            soup = self._fetch_page(event["url"])
+
+            metadata = {}
+
+            # Extract speaker from main H1 (e.g., "Talk: Simon Saunders (Oxford)")
+            h1 = soup.find("h1")
+            if h1:
+                speaker_text = h1.get_text(strip=True)
+                if ":" in speaker_text:
+                    metadata["speaker"] = speaker_text.split(":", 1)[1].strip()
+
+            # Extract labeled sections (Title, Abstract, Date)
+            for h2 in soup.find_all("h2"):
+                label = h2.get_text(strip=True).rstrip(":").lower()
+
+                if label == "title":
+                    event["talk_title"] = self._extract_section_content(h2)
+                elif label == "abstract":
+                    event["abstract"] = self._extract_section_content(h2)
+                elif label == "date":
+                    date_text = self._extract_section_content(h2)
+                    metadata.update(self._parse_date_time(date_text))
+
+            # Extract location from address tag (most reliable)
+            address = soup.find("address")
+            if address:
+                location = address.get_text(" ", strip=True)
+                metadata["location"] = " ".join(location.split())
+
+            # Fallback: Try dl/dt/dd structure for any missing metadata
+            for dl in soup.find_all("dl"):
+                for dt, dd in zip(dl.find_all("dt"), dl.find_all("dd")):
+                    key = dt.get_text(strip=True).lower().replace(":", "")
+                    val = dd.get_text(" ", strip=True)
+                    if key and val and key not in metadata:
+                        metadata[key] = val
+
+            event["metadata"] = metadata
+
+            # Build description from abstract + title
+            desc_parts = []
+            if event.get("talk_title"):
+                desc_parts.append(f"Title: {event['talk_title']}")
+            if event.get("abstract"):
+                desc_parts.append(f"Abstract: {event['abstract']}")
+            if desc_parts:
+                event["description"] = "\n\n".join(desc_parts)
+            else:
+                main_content = soup.find("div", id="r-main") or soup.find("main")
+                if main_content:
+                    event["description"] = self._clean_text(main_content.get_text(separator="\n", strip=True))
+
+        except Exception as e:
+            log_error(f"Error scraping event details for {event['url']}: {e}")
+
+    def _extract_section_content(self, header_elem):
+        """Extracts all text content following a header until the next header."""
+        content_parts = []
+        sibling = header_elem.find_next_sibling()
+
+        while sibling and sibling.name not in ["h1", "h2", "h3"]:
+            text = sibling.get_text(" ", strip=True)
+            if text:
+                content_parts.append(text)
+            sibling = sibling.find_next_sibling()
+
+        return " ".join(content_parts).strip()
+
+    def _parse_date_time(self, date_text):
+        """Parses date/time string into structured metadata."""
+        result = {}
+
+        # "4 February 2026" → "2026-02-04"
+        date_match = re.search(r"(\d{1,2})\s+(\w+)\s+(\d{4})", date_text)
+        if date_match:
+            day, month_name, year = date_match.groups()
+            result["year"] = int(year)
+            result["month"] = month_name
+
+            month_map = {
+                "january": "01", "february": "02", "march": "03", "april": "04",
+                "may": "05", "june": "06", "july": "07", "august": "08",
+                "september": "09", "october": "10", "november": "11", "december": "12",
+            }
+            month_num = month_map.get(month_name.lower(), "01")
+            result["date"] = f"{year}-{month_num}-{int(day):02d}"
+
+        # "4:00 pm" or "10:00 am - 12:00 pm"
+        time_match = re.search(r"(\d{1,2}:\d{2}\s*[ap]m)", date_text, re.IGNORECASE)
+        if time_match:
+            result["time_start"] = time_match.group(1).strip()
+
+        end_time_match = re.search(r"-\s*(\d{1,2}:\d{2}\s*[ap]m)", date_text, re.IGNORECASE)
+        if end_time_match:
+            result["time_end"] = end_time_match.group(1).strip()
+
+        return result
+
+    # ------------------------------------------------------------------
+    # People scraping
+    # ------------------------------------------------------------------
+
+    def scrape_people(self):
+        """Scrapes the people directory and individual profiles."""
+        sources = [u for u in self.important_urls if "people" in u]
+        if not sources:
+            sources = self.PEOPLE_URLS
+
+        for people_url in sources:
+            log_info(f"Starting scrape of people from {people_url}")
+            try:
+                soup = self._fetch_page(people_url)
+
+                person_links = soup.find_all("a", href=True)
+                profiles_to_visit = set()
+
+                for link in person_links:
+                    href = link["href"]
+
+                    # Drop anchor fragments — not real pages
+                    if "#" in href:
+                        continue
+
+                    if "contact-page/" in href or "/faculty/" in href or "/staff/" in href:
+                        if href.endswith("people/index.html") or href == people_url:
+                            continue
+
+                        if href.startswith("http"):
+                            full_url = href
+                        elif href.startswith("/"):
+                            full_url = f"{self.BASE_URL}{href}"
+                        else:
+                            if people_url.endswith("index.html"):
+                                base = people_url.rsplit("/", 1)[0]
+                            elif people_url.endswith("/"):
+                                base = people_url.rstrip("/")
+                            else:
+                                base = people_url
+                            full_url = f"{base}/{href}"
+
+                        profiles_to_visit.add(full_url)
+
+                log_info(f"Found {len(profiles_to_visit)} potential people profiles to scrape.")
+
+                for url in profiles_to_visit:
+                    self._scrape_single_person_page(url)
+
+            except Exception as e:
+                log_error(f"Error scraping people index {people_url}: {e}")
+
+        return self.people
+
+    def _scrape_single_person_page(self, url):
+        """Scrapes a single person's profile page."""
+        try:
+            if url in self._scraped_person_urls:
+                return
+
+            soup = self._fetch_page(url)
+
+            # Name
+            name_elem = soup.find("h1", class_="header-person__name")
+            name = name_elem.get_text(strip=True) if name_elem else "Unknown Person"
+
+            metadata = {}
+
+            # 1. Position/Role
+            job_elem = soup.find("p", class_="header-person__job")
+            if job_elem:
+                metadata["position"] = job_elem.get_text(strip=True)
+
+            # 2. Organizational Unit
+            dept_elem = soup.find("p", class_="header-person__department")
+            if dept_elem:
+                metadata["organizational_unit"] = dept_elem.get_text(strip=True)
+
+            # 3. Image URL
+            img_elem = soup.select_one("img.picture__image")
+            if img_elem and img_elem.get("src"):
+                metadata["image_url"] = img_elem["src"]
+
+            # 4. Email
+            email_elem = soup.select_one("a.header-person__contentlink.is-email")
+            if email_elem:
+                email = email_elem.get_text(strip=True).replace("Send an email", "")
+                if not email or "@" not in email:
+                    href = email_elem.get("href", "")
+                    if href.startswith("mailto:"):
+                        email = href.replace("mailto:", "")
+                if email:
+                    metadata["email"] = email.strip()
+
+            # 5. Phone
+            phone_elem = soup.select_one("a.header-person__contentlink.is-phone")
+            if phone_elem:
+                metadata["phone"] = phone_elem.get_text(strip=True)
+
+            # 6. Room / Office Address
+            detail_areas = soup.find_all("div", class_="header-person__detail_area")
+            for area in detail_areas:
+                for p in area.find_all("p"):
+                    text = p.get_text(strip=True)
+                    if "Room" in text and "Room finder" not in text:
+                        metadata["room"] = text
+                    if "Ludwigstr" in text or "Geschwister-Scholl" in text:
+                        if "office_address" not in metadata:
+                            metadata["office_address"] = text
+
+            # 7. Website
+            website_link = soup.find("a", string=lambda t: t and "Personal website" in t)
+            if website_link:
+                metadata["website"] = website_link.get("href")
+
+            # 8. Selected Publications
+            pub_header = soup.find("h2", string=lambda t: t and "Selected publications" in t)
+            if pub_header:
+                pub_list_container = pub_header.find_parent("div", class_="rte__content")
+                if pub_list_container:
+                    pub_list = pub_list_container.find(["ol", "ul"])
+                    if pub_list:
+                        metadata["selected_publications"] = [
+                            li.get_text(" ", strip=True) for li in pub_list.find_all("li")
+                        ]
+
+            # Main content for description
+            main_content = soup.find("div", id="r-main") or soup.find("main")
+            description = ""
+
+            if main_content:
+                rte_divs = main_content.find_all("div", class_="rte__content")
+                desc_text = []
+                for div in rte_divs:
+                    if div.find("h2", string=lambda t: t and "Selected publications" in t):
+                        continue
+                    text = div.get_text(separator=" ", strip=True)
+                    if text:
+                        desc_text.append(text)
+
+                description = "\n\n".join(desc_text)
+
+                if not description:
+                    description = self._clean_text(main_content.get_text(separator=" ", strip=True))
+
+                ri_header = main_content.find(
+                    lambda tag: tag.name in ["h2", "h3"] and "Research interests" in tag.get_text()
+                )
+                if ri_header:
+                    interests_text = ""
+                    curr = ri_header.find_next_sibling()
+                    while curr and curr.name not in ["h1", "h2", "h3"]:
+                        interests_text += curr.get_text(separator=" ", strip=True) + " "
+                        curr = curr.find_next_sibling()
+                    metadata["research_interests_text"] = interests_text.strip()
+
+            self.people.append({
+                "name": name,
+                "url": url,
+                "description": description[:5000],
+                "metadata": metadata,
+                "type": "person",
+                "scraped_at": datetime.now().isoformat(),
+            })
+            self._scraped_person_urls.add(url)
+
+        except Exception as e:
+            log_error(f"Error scraping person {url}: {e}")
+
+    # ------------------------------------------------------------------
+    # Research scraping
+    # ------------------------------------------------------------------
+
+    def scrape_research(self):
+        """Scrapes the research projects and structures them."""
+        log_info(f"Starting scrape of {self.RESEARCH_URL}")
+        try:
+            self.research = []
+
+            categories = {
+                "logic": {"name": "Logic and Philosophy of Language", "keywords": ["logic", "language", "semantic", "truth"], "items": []},
+                "philsc": {"name": "Philosophy of Science", "keywords": ["science", "physics", "biology", "explanation"], "items": []},
+                "decision": {"name": "Decision Theory", "keywords": ["decision", "game theory", "rationality", "choice"], "items": []},
+                "structure": {"name": "Mathematical Philosophy", "keywords": ["mathematical", "formal"], "items": []},
+            }
+
+            soup = self._fetch_page(self.RESEARCH_URL)
+
+            subpage_links = set()
+            for link in soup.find_all("a", href=True):
+                href = link["href"]
+                if "/research/" in href and href != self.RESEARCH_URL:
+                    if "/mcmp/en/research/" in href and "publications" not in href:
+                        full_url = href if href.startswith("http") else f"{self.BASE_URL}{href}"
+                        subpage_links.add(full_url)
+
+            # Ensure the ML page is included
+            subpage_links.add(f"{self.BASE_URL}/mcmp/en/research/philosophy-of-machine-learning/")
+
+            scraped_items = []
+            for url in subpage_links:
+                try:
+                    item = self._scrape_single_research_page(url)
+                    if item:
+                        scraped_items.append(item)
+                except Exception as e:
+                    log_error(f"Failed to scrape research subpage {url}: {e}")
+
+            for item in scraped_items:
+                title_lower = item["title"].lower()
+                assigned = False
+                for cat_id, cat_data in categories.items():
+                    if any(k in title_lower for k in cat_data["keywords"]):
+                        cat_data["items"].append(item)
+                        assigned = True
+                        break
+                if not assigned:
+                    categories["structure"]["items"].append(item)
+
+            final_structure = []
+            for cat_id, cat_data in categories.items():
+                final_structure.append({
+                    "id": cat_id,
+                    "name": cat_data["name"],
+                    "description": f"Research area focusing on {cat_data['name']}",
+                    "subtopics": [i["title"] for i in cat_data["items"]],
+                    "projects": cat_data["items"],
+                    "url": self.RESEARCH_URL,
+                })
+
+            self.research = final_structure
+            log_info(f"Structured research into {len(self.research)} categories.")
+            return self.research
+
+        except Exception as e:
+            log_error(f"Error scraping research: {e}")
+            return []
+
+    def _scrape_single_research_page(self, url):
+        """Helper to scrape a specific research page. Returns dict or None."""
+        try:
+            soup = self._fetch_page(url)
+
+            title_elem = soup.find("h1")
+            title = title_elem.get_text(strip=True) if title_elem else "Research Project"
+
+            main_content = soup.find("div", id="r-main") or soup.find("main")
+            if main_content:
+                text = main_content.get_text(separator=" ", strip=True)
+                return {
+                    "title": title,
+                    "description": text[:5000],
+                    "url": url,
+                    "type": "research_project",
+                    "scraped_at": datetime.now().isoformat(),
+                }
+        except Exception:
+            return None
+
+    # ------------------------------------------------------------------
+    # General / homepage scraping
+    # ------------------------------------------------------------------
+
+    def scrape_general(self):
+        """Scrapes the home page for general info (About, History)."""
+        home_url = f"{self.BASE_URL}/mcmp/en/index.html"
+        log_info(f"Starting scrape of {home_url}")
+        try:
+            soup = self._fetch_page(home_url)
+
+            main_content = soup.find("div", id="r-main") or soup.find("main")
+            if main_content:
+                for header in main_content.find_all("h2"):
+                    section_title = header.get_text(strip=True)
+                    if len(section_title) < 3:
+                        continue
+
+                    content = ""
+                    curr = header.find_next_sibling()
+                    while curr and curr.name not in ["h2", "h1"]:
+                        content += curr.get_text(separator=" ", strip=True) + "\n"
+                        curr = curr.find_next_sibling()
+
+                    # Append AFTER the while loop — not inside it
+                    if content.strip():
+                        self.general.append({
+                            "title": f"General: {section_title}",
+                            "description": content.strip(),
+                            "url": home_url,
+                            "type": "general",
+                            "scraped_at": datetime.now().isoformat(),
+                        })
+
+            return self.general
+        except Exception as e:
+            log_error(f"Error scraping general info: {e}")
+            return []
+
+    # ------------------------------------------------------------------
+    # Reading groups scraping
+    # ------------------------------------------------------------------
+
+    def scrape_reading_groups(self):
+        """Scrapes reading groups from the events page."""
+        url = f"{self.BASE_URL}/mcmp/en/events/index.html"
+        log_info(f"Starting scrape of reading groups from {url}")
+        try:
+            soup = self._fetch_page(url)
+
+            main_content = soup.find("div", id="r-main") or soup.find("main")
+            if main_content:
+                header = main_content.find(
+                    lambda tag: tag.name in ["h2", "h1"] and "Reading groups" in tag.get_text()
+                )
+
+                if header:
+                    curr = header.find_next_sibling()
+                    current_group = {}
+
+                    while curr:
+                        if curr.name in ["h1", "h2"] and "Reading groups" not in curr.get_text():
+                            break
+
+                        text = curr.get_text(separator=" ", strip=True)
+                        if text:
+                            link = curr.find("a")
+                            is_title = link and len(text) < 100
+
+                            if is_title:
+                                if current_group:
+                                    self.general.append(current_group)
+
+                                link_url = link["href"] if link else url
+                                if not link_url.startswith("http"):
+                                    link_url = f"{self.BASE_URL}{link_url}"
+
+                                if link_url == url or link_url.endswith("/events/index.html"):
+                                    slug = text.lower().replace(" ", "-").replace(":", "")[:30]
+                                    link_url = f"{link_url}#{slug}"
+
+                                current_group = {
+                                    "title": f"Reading Group: {text}",
+                                    "description": "",
+                                    "url": link_url,
+                                    "type": "reading_group",
+                                    "scraped_at": datetime.now().isoformat(),
+                                }
+                            elif current_group:
+                                current_group["description"] += "\n" + text
+
+                        curr = curr.find_next_sibling()
+
+                    if current_group:
+                        self.general.append(current_group)
+
+            log_info("Scraped reading groups into general/events.")
+            return self.general
+        except Exception as e:
+            log_error(f"Error scraping reading groups: {e}")
+            return []
