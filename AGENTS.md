@@ -19,10 +19,11 @@
 - status: active
 <!-- content -->
 1. Open the assistant and load the ai-agents-branch into their local repositories. Do this by commanding them to first of all read the AGENTS.md file.
-2. Work on the ASSISTANT, making requests, modifying code, etc.
-3. Commit Push to Git
-4. It is very useful to use specialized agents for different sectors of the code. 
-5. Enjoy!
+2. **Mandatory First Step:** Before reading code, suggesting improvements, or making any modifications, the agent MUST run `git pull origin <current-branch>` to ensure the local repository is completely up to date.
+3. Work on the ASSISTANT, making requests, modifying code, etc.
+4. Commit Push to Git. It is recommended to create a new branch for the agent's work and open a Pull Request rather than committing directly to `main`.
+5. It is very useful to use specialized agents for different sectors of the code.
+6. Enjoy!
 
 ## WORKFLOW & TOOLING
 - status: active
