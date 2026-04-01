@@ -177,16 +177,43 @@ class MCPServer:
             }
         ]
 
-    def call_tool(self, name: str, arguments: Dict[str, Any]) -> Any:
+    def call_tool(self, name: str, arguments: Dict[str, Any],
+                  status_callback=None) -> Any:
         """
         Executes a tool by name with provided arguments.
+        status_callback: optional callable(tool_name, arguments) fired before execution.
         """
         if name not in self.tools:
             raise ValueError(f"Tool {name} not found")
-            
+
+        if status_callback:
+            try:
+                status_callback(name, arguments)
+            except Exception:
+                pass  # Never let UI code break tool execution
+
         tool_func = self.tools[name]
         try:
             with log_latency(f"tool:{name}"):
                 return tool_func(**arguments)
         except Exception as e:
             return {"error": str(e)}
+
+    def get_instrumented_tools(self, status_callback) -> list:
+        """
+        Returns wrapped versions of the tool functions that fire status_callback
+        before executing. Used by the Gemini automatic_function_calling path,
+        where the SDK calls the raw Python functions directly.
+        """
+        import functools
+        instrumented = []
+        for name, fn in self.tools.items():
+            @functools.wraps(fn)
+            def _wrapper(*args, _name=name, _fn=fn, **kwargs):
+                try:
+                    status_callback(_name, kwargs)
+                except Exception:
+                    pass
+                return _fn(*args, **kwargs)
+            instrumented.append(_wrapper)
+        return instrumented

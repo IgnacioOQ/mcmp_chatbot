@@ -95,10 +95,12 @@ class ChatEngine:
 
     def generate_response(self, query: str, use_mcp_tools: bool = False,
                           model_name: str = "gemini-2.0-flash",
-                          chat_history: list = None) -> str:
+                          chat_history: list = None,
+                          status_callback=None) -> str:
         """
         Generate a response using the configured LLM provider.
         chat_history: list of dicts with 'role' ('user'/'assistant') and 'content' keys.
+        status_callback: optional callable(tool_name, arguments) fired each time a tool is invoked.
         """
         log_info(f"Generating response. Query: '{query}' | Tools: {use_mcp_tools} | Model: {model_name}")
 
@@ -110,7 +112,12 @@ class ChatEngine:
             tools = []
             if use_mcp_tools and self.mcp_server:
                 if self.provider == "gemini":
-                    tools = list(self.mcp_server.tools.values())
+                    # Use instrumented wrappers if a callback was provided so the
+                    # UI can show which tool is being called in real time.
+                    if status_callback:
+                        tools = self.mcp_server.get_instrumented_tools(status_callback)
+                    else:
+                        tools = list(self.mcp_server.tools.values())
                 elif self.provider == "openai":
                     tools = [
                         {
@@ -150,7 +157,7 @@ class ChatEngine:
                         fn   = tc.function.name
                         args = json.loads(tc.function.arguments)
                         log_info(f"Tool call: {fn}({args})")
-                        result = self.mcp_server.call_tool(fn, args)
+                        result = self.mcp_server.call_tool(fn, args, status_callback=status_callback)
                         messages.append({
                             "role": "tool",
                             "tool_call_id": tc.id,

@@ -389,13 +389,30 @@ def main():
             st.markdown(auto_prompt)
         
         with st.chat_message("assistant"):
-            with st.spinner("Looking up events..."):
+            _TOOL_ICONS = {
+                "search_people":   "🔍 Searching people",
+                "search_research": "📚 Searching research areas",
+                "get_events":      "📅 Fetching events",
+                "search_graph":    "🏛️ Querying institutional graph",
+                "grep_data":       "🔎 Running text search",
+            }
+            with st.status("Leopold is thinking...", expanded=True) as status:
+                def _callback(tool_name, args):
+                    label = _TOOL_ICONS.get(tool_name, f"⚙️ Calling {tool_name}")
+                    # Show the primary argument inline for context
+                    hint = next(iter(args.values()), "") if args else ""
+                    if hint:
+                        label += f": *{str(hint)[:60]}*"
+                    status.write(label)
+
                 response = st.session_state.engine.generate_response(
-                    auto_prompt, 
-                    use_mcp_tools=True, 
+                    auto_prompt,
+                    use_mcp_tools=True,
                     model_name="gemini-2.0-flash",
-                    chat_history=st.session_state.messages[:-1]  # history before this auto-prompt
+                    chat_history=st.session_state.messages[:-1],
+                    status_callback=_callback,
                 )
+                status.update(label="Done!", state="complete", expanded=False)
             st.markdown(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
 
@@ -406,15 +423,31 @@ def main():
             st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
+            _TOOL_ICONS = {
+                "search_people":   "🔍 Searching people",
+                "search_research": "📚 Searching research areas",
+                "get_events":      "📅 Fetching events",
+                "search_graph":    "🏛️ Querying institutional graph",
+                "grep_data":       "🔎 Running text search",
+            }
+            with st.status("Leopold is thinking...", expanded=True) as status:
+                def _callback(tool_name, args):
+                    label = _TOOL_ICONS.get(tool_name, f"⚙️ Calling {tool_name}")
+                    hint = next(iter(args.values()), "") if args else ""
+                    if hint:
+                        label += f": *{str(hint)[:60]}*"
+                    status.write(label)
+
                 response = st.session_state.engine.generate_response(
-                    prompt, 
-                    use_mcp_tools=True, 
+                    prompt,
+                    use_mcp_tools=True,
                     model_name="gemini-2.0-flash",
-                    chat_history=st.session_state.messages[:-1]  # exclude the just-appended user message
+                    chat_history=st.session_state.messages[:-1],
+                    status_callback=_callback,
                 )
-                st.markdown(response)
-                st.session_state.messages.append({"role": "assistant", "content": response})
+                status.update(label="Done!", state="complete", expanded=False)
+            st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
 
 if __name__ == "__main__":
     main()
