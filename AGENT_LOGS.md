@@ -279,3 +279,30 @@ Created a generic shell wrapper `sh2py3.sh` and symlinks for python scripts in `
 
 ### Summary
 Added `@functools.lru_cache` to `load_data` in `src/mcp/tools.py` to prevent repeated disk I/O when reading JSON files across tool calls during the same session, reducing execution latency. Also removed stale tests from `tests/test_engine.py` referencing removed code (`VectorStore`, `retrieve_with_decomposition`, `decompose_query`).
+
+---
+
+## [2026-04-01] grep_data MCP Tool + Live Tool Status Display
+
+**Agent**: Antigravity
+**Task**: Add a flexible grep/regex search tool to the MCP layer, and display active tool calls in the Streamlit UI in real time.
+
+### grep_data Tool
+Added `grep_data()` to `src/mcp/tools.py` — a flexible text search across MCMP databases (people, research, events). Unlike the specialized tools, it scans the full text of every record using a plain substring or regex pattern and returns compact `>>>match<<<`-annotated snippets showing exactly where the hit occurred.
+
+Supporting helpers added to the same file:
+- `_flatten(obj)` — recursively yields `(dotted.key.path, str_value)` pairs from any JSON object, making nested fields like `metadata.selected_publications[2]` fully searchable.
+- `_match_span(pattern, text, use_regex)` — returns the `(start, end)` of the first match; falls back to substring if an invalid regex is provided.
+- `_snippet(text, span)` — cuts an 80-character window around the match.
+
+Registered in `src/mcp/server.py` with a full JSON Schema so all providers see it correctly.
+
+### Live Tool-Call Status Display
+**Core idea**: Pass an optional `status_callback` from `app.py` → `engine.generate_response()` → `MCPServer.call_tool()`. When fired, it updates a Streamlit `st.status()` widget so users see which tool is running and with what argument in real time. For Gemini (which uses `automatic_function_calling` and calls raw Python functions directly), the tool functions themselves are wrapped via the new `MCPServer.get_instrumented_tools()` method so the callback fires before each execution.
+
+### Changes
+- `src/mcp/tools.py`: Added `grep_data()`, `_flatten()`, `_match_span()`, `_snippet()`, `_GREP_DB_MAP`.
+- `src/mcp/server.py`: Registered `grep_data`; added `status_callback` param to `call_tool()`; added `get_instrumented_tools()`.
+- `src/core/engine.py`: Added `status_callback` param to `generate_response()`; routes it to both Gemini (via `get_instrumented_tools`) and OpenAI (via `call_tool`) paths.
+- `app.py`: Replaced both `st.spinner()` blocks with `st.status()` + a `_callback` closure that writes a tool-icon line on each invocation.
+
