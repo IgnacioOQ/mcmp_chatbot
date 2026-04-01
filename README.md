@@ -1,7 +1,8 @@
 # MCMP Chatbot
 
 - status: active
-- context_dependencies: {"agents": "AGENTS.md", "conventions": "docs/MD_CONVENTIONS.md"}
+- type: explanation
+- description: Overview, setup guide, and technical architecture reference for the MCMP Chatbot application.
 
 <!-- content -->
 

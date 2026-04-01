@@ -1,4 +1,10 @@
 # AI Agent Logs
+- status: active
+- type: log
+- description: Append-only history of agent interventions, architectural changes, and feature implementations.
+- injection: informational
+
+<!-- content -->
 
 ## [2026-03-20] Data Accumulation Fix & Dataset Recovery
 

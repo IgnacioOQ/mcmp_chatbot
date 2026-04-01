@@ -1,18 +1,14 @@
 # Python User Interface Agent Skill
 - status: active
-- type: agent_skill
-- owner: dev-1
-- label: [agent]
+- type: reference
+- description: Streamlit UI reference for the MCMP Chatbot: single-page app architecture, session state management, and patterns for modifying the frontend.
+- injection: informational
+
 <!-- content -->
-- context_dependencies: {"app": "app.py", "engine": "src/core/engine.py"}
-<!-- content -->
+
 This file defines the skill/persona for manipulating the Streamlit UI (`app.py`) in the MCMP Chatbot project. Agents should refer to this when asked to modify the frontend.
 
 ## UI Architecture Overview
-- status: active
-- type: documentation
-- label: [agent]
-<!-- content -->
 The application is a single-page Streamlit app structured as follows:
 1.  **Configuration**: `st.set_page_config` sets the title and layout.
 2.  **State Management**: Uses `st.session_state` to persist:
@@ -29,17 +25,9 @@ The application is a single-page Streamlit app structured as follows:
     - Generates response with `st.spinner`.
 
 ## Modification Protocols
-- status: active
-- type: guideline
-- label: [agent, protocol]
-<!-- content -->
 When modifying `app.py`, adhere to these rules:
 
 ### 1. State Persistence
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
 Variables lost on rerun must be stored in `st.session_state`.
 ```python
 if "my_feature_enabled" not in st.session_state:
@@ -47,140 +35,33 @@ if "my_feature_enabled" not in st.session_state:
 ```
 
 ### 2. Sidebar Organization
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
 Maintain the visual hierarchy:
 - **Top**: Content relevant to the user *now* (e.g., "Events this Week").
 - **Middle**: Interactive forms (e.g., Feedback).
 - **Bottom**: System settings and configuration (e.g., "Select Model", "Enable MCP"). Use `st.markdown("---")` to separate sections.
 
 ### 3. Async/Blocking Operations
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
 - Use `st.spinner("Message...")` for any LLM call or network request.
 - Do not run heavy computations outside of user interactions or cached resource loading.
 
 ### 4. Code Style
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
 - Keep logic in `src/` modules (e.g., `src/ui/` or `src/core/`) where possible.
 - Keep `app.py` focused on layout and state wiring.
 
 ## Common Patterns
-- status: active
-- type: guideline
-- label: [agent]
-<!-- content -->
-
 ### Adding a Configuration Toggle
-- id: python_user_interface_agent_skill.common_patterns.adding_a_configuration_toggle
-- status: active
-- type: documentation
-- last_checked: 2026-02-02
-- label: [agent]
-<!-- content -->
-Place it at the bottom of the sidebar and pass it to the engine generation call.
-
-```python
-with st.sidebar:
-    # ... after other sections
-    st.markdown("---")
-    st.header("Configuration")
-    enable_feature = st.toggle("Enable Feature", value=True)
-
-# Usage
-- id: usage
-- status: active
-- type: documentation
-- last_checked: 2026-02-02
-- label: [agent]
-<!-- content -->
 if prompt:
     # ...
     response = st.session_state.engine.generate(prompt, enable_feature=enable_feature)
 ```
 
 ### Handling Chat History
-- id: usage.handling_chat_history
-- status: active
-- type: documentation
-- last_checked: 2026-02-02
-- label: [agent]
-<!-- content -->
-Always append to `st.session_state.messages` immediately after displaying.
-
-```python
-st.session_state.messages.append({"role": "user", "content": prompt})
-with st.chat_message("user"):
-    st.markdown(prompt)
-```
-
-### Custom CSS for Layout Control
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
-Use `st.markdown` with `unsafe_allow_html=True` to inject custom CSS. Target Streamlit's internal test IDs:
-
-```python
-st.markdown("""
-    <style>
-    /* Widen sidebar */
-    [data-testid="stSidebar"] {
-        min-width: 450px;
-        max-width: 500px;
-    }
-    /* Constrain main content and center it */
-    .stMainBlockContainer {
-        max-width: 900px;
-        margin: 0 auto;
-        padding-left: 3rem;
-        padding-right: 3rem;
-    }
-    /* Align chat input with main content */
-    [data-testid="stChatInput"] {
-        max-width: 900px;
-        margin: 0 auto;
-    }
-    </style>
-""", unsafe_allow_html=True)
-```
-
-### Monthly Calendar with Navigation
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
-Create an interactive monthly calendar using Python's `calendar` module and session state for navigation:
-
-```python
-import calendar
-
-# Initialize month/year in session state
-- id: initialize_monthyear_in_session_state
-- status: active
-- type: documentation
-- last_checked: 2026-02-02
-- label: [agent]
-<!-- content -->
 if "cal_year" not in st.session_state:
     st.session_state.cal_year = datetime.now().year
 if "cal_month" not in st.session_state:
     st.session_state.cal_month = datetime.now().month
 
 # Navigation buttons
-- id: navigation_buttons
-- status: active
-- type: documentation
-- last_checked: 2026-02-02
-- label: [agent]
-<!-- content -->
 col1, col2, col3 = st.columns([1, 2, 1])
 with col1:
     if st.button("◀", key="prev_month", use_container_width=True):
@@ -200,12 +81,6 @@ with col3:
         ...
 
 # Build calendar grid
-- id: build_calendar_grid
-- status: active
-- type: documentation
-- last_checked: 2026-02-02
-- label: [agent]
-<!-- content -->
 cal = calendar.Calendar(firstweekday=0)  # Monday start
 month_days = cal.monthdayscalendar(st.session_state.cal_year, st.session_state.cal_month)
 ```
@@ -213,86 +88,6 @@ month_days = cal.monthdayscalendar(st.session_state.cal_year, st.session_state.c
 **Styling the calendar**: Use an HTML/CSS grid for elegant display with gradient backgrounds and day highlighting.
 
 ### Native Streamlit Calendar Grid
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
-Build calendars using native Streamlit components for proper layout alignment and interactivity. **Do not wrap native widgets in HTML `<divs>`**, as Streamlit 1.53 enforces strict DOM boundaries and will render the widget outside of the wrapper.
-
-```python
-import calendar
-from datetime import datetime
-
-cal_year, cal_month = 2026, 3
-cal = calendar.Calendar(firstweekday=0)  # Monday start
-month_days = cal.monthdayscalendar(cal_year, cal_month)
-event_days = {15, 22} # Example
-
-# Build calendar grid natively using Streamlit columns
-for week in month_days:
-    cols = st.columns(7)
-    for i, day in enumerate(week):
-        with cols[i]:
-            if day == 0:
-                # Use a spacer or invisible button to maintain grid height
-                st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
-            else:
-                has_event = day in event_days
-                
-                # Determine button label and type
-                # Using emoji or unicode dots is the safest way to indicate events natively
-                button_label = f"{day} 🔵" if has_event else str(day)
-                
-                # Use standard types to target with CSS later
-                btn_type = "primary" if is_today else "secondary"
-                
-                if st.button(button_label, key=f"cal_{cal_year}_{cal_month}_{day}", use_container_width=True, type=btn_type):
-                    st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
-```
-
-**Key insight**: Since HTML links can't trigger Python callbacks in Streamlit, use `st.button` components and session state as the communication bridge.
-
-### Highlighting Data-Driven Days
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
-Load event data to determine which days to highlight:
-
-```python
-event_days = set()
-with open("data/raw_events.json", "r") as f:
-    raw_events = json.load(f)
-for event in raw_events:
-    date_str = event.get("metadata", {}).get("date")
-    if date_str:
-        ev_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-        if ev_date.year == cal_year and ev_date.month == cal_month:
-            event_days.add(ev_date.day)
-```
-
-Then conditionally add CSS classes or render buttons only for those days.
-
-### Native Streamlit Calendar Grid
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
-Build calendars using native Streamlit components for proper interactivity:
-
-```python
-import calendar
-
-cal = calendar.Calendar(firstweekday=0)  # Monday start
-month_days = cal.monthdayscalendar(cal_year, cal_month)
-
-# Build calendar grid using native Streamlit columns
-- id: build_calendar_grid_using_native_streamlit_columns
-- status: active
-- type: documentation
-- last_checked: 2026-02-02
-- label: [agent]
-<!-- content -->
 for week in month_days:
     cols = st.columns(7)
     for i, day in enumerate(week):
@@ -309,10 +104,6 @@ for week in month_days:
 ```
 
 ### Button Alignment & Consistent Styling
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
 To mimic glassmorphic or highly customized CSS grids *without* breaking Streamlit's native grid, apply CSS overrides targeting Streamlit's internal `data-testid` selectors.
 
 ```python
@@ -347,10 +138,6 @@ st.markdown("""
 - Use `button[data-testid="baseButton-primary"]` and `button[data-testid="baseButton-secondary"]` to differentiate days natively without needing custom classes.
 
 ### HTML Links Do NOT Work for Interactivity
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
 **Critical limitation**: HTML links (`<a href="...">`) in `st.markdown()` cannot trigger Python callbacks. They navigate to a new page or reload the app.
 
 **Attempted approaches that DON'T work:**
@@ -371,10 +158,6 @@ button {
 ```
 
 ### Zip Download of Source Files
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
 When the user wants to download a collection of files, generate a ZIP file in-memory using `io.BytesIO` and `zipfile`.
 
 ```python
@@ -399,10 +182,6 @@ st.download_button(
 **Why this works:** It provides a seamless single-file download for complex contexts without requiring server-side storage.
 
 ### Avoiding Stale Caching
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
 Avoid using `@st.cache_resource` or `@st.cache_data` on functions that load mutable system state, such as a file registry that might be updated during the session.
 
 **Anti-Pattern:**
@@ -419,10 +198,6 @@ def get_manager():
 ```
 
 ### Safe Streamlit CSS & Native Widgets
-- status: active
-- type: agent_skill
-- label: [agent]
-<!-- content -->
 **Critical limitation**: Streamlit React components (like `st.button`) render *outside* of manually injected HTML `<div>` blocks. You cannot use `st.markdown('<div class="wrapper">', unsafe_allow_html=True)` to wrap a native widget and style it via CSS.
 
 **Attempted approaches that DON'T work:**
