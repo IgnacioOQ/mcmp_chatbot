@@ -66,7 +66,7 @@ def search_people(query: str) -> List[Dict[str, Any]]:
             results.append({
                 "name": person.get("name"),
                 "role": display_role,
-                "chair": person.get("metadata", {}).get("chair", "Unknown"),
+                "chair": person.get("metadata", {}).get("organizational_unit", "Unknown"),
                 "url": person.get("url"),
                 "image_url": person.get("image_url"),
                 "email": person.get("metadata", {}).get("email"),
