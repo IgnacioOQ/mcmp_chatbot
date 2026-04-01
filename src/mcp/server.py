@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from src.mcp.tools import search_people, search_research, get_events, search_graph, grep_data
+from src.mcp.tools import search_people, search_research, get_events, search_graph, grep_data, ask_clarification
 from src.utils.logger import log_latency
 import json
 
@@ -11,6 +11,7 @@ class MCPServer:
     
     def __init__(self):
         self.tools = {
+            "ask_clarification": ask_clarification,
             "search_people": search_people,
             "search_research": search_research,
             "get_events": get_events,
@@ -23,6 +24,32 @@ class MCPServer:
         Returns the tool definitions in OpenAI/MCP-compatible format.
         """
         return [
+            {
+                "name": "ask_clarification",
+                "description": (
+                    "Ask the user a clarification question BEFORE searching any database. "
+                    "Use this when: (1) a query is ambiguous (e.g. a name matches multiple people), "
+                    "(2) the user's intent is unclear and wrong tool selection would waste a turn, "
+                    "or (3) the request could be interpreted in fundamentally different ways. "
+                    "Do NOT use this for straightforward lookups — only when genuine ambiguity exists. "
+                    "Do NOT use this for read-only or simple factual questions."
+                ),
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "question": {
+                            "type": "string",
+                            "description": (
+                                "A clear, concise disambiguation question for the user. "
+                                "Explain what additional context you need and why. "
+                                "Example: 'I found two people with the name Landes — "
+                                "Jürgen Landes (philosopher) and another. Which do you mean?'"
+                            )
+                        }
+                    },
+                    "required": ["question"]
+                }
+            },
             {
                 "name": "search_people",
                 "description": (

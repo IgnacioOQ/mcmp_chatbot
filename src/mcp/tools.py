@@ -400,3 +400,34 @@ def grep_data(
                     return results
 
     return results
+
+
+# ---------------------------------------------------------------------------
+# Tool: ask_clarification
+# ---------------------------------------------------------------------------
+def ask_clarification(question: str) -> dict:
+    """
+    Surface a clarification question to the user before executing a search.
+
+    Call this tool when the user's request is ambiguous — for example, when
+    a name could refer to multiple people, a topic spans multiple unrelated
+    research areas, or the intent of the question is unclear.
+
+    The tool is a transparent pass-through: it returns the question directly
+    so the UI can display it as a chat message, giving the user a chance to
+    refine their query before any data fetching occurs.
+
+    Args:
+        question: A clear, concise question for the user that explains what
+                  information is needed. Example:
+                  "Do you mean the logician Hannes Leitgeb, or the physicist
+                   Hans Leitgeb? Could you give me a bit more context?"
+
+    Returns:
+        dict with 'clarification_needed' (the question text) and
+        'status': 'waiting_for_user' so callers can detect this special case.
+    """
+    return {
+        "clarification_needed": question,
+        "status": "waiting_for_user",
+    }
