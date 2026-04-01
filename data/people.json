@@ -25,7 +25,7 @@
             ]
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:39.087676"
+        "scraped_at": "2026-04-01T17:44:09.235226"
     },
     {
         "name": "Dr. Timo Freiesleben",
@@ -47,7 +47,7 @@
             "research_interests_text": "I am a researcher in the philosophy of machine learning, working in close collaboration with machine learning practice. My work focuses on two main questions: 1. The impact that machine learning (potentially) has on science and its epistemic goals; and 2. The conceptual foundations of machine learning as a scientific discipline. My broader areas of interest include: Epistemology of machine learning (e.g. explainable artificial intelligence, statistical learning theory, causal inference) Philosophy of science (e.g. robustness, scientific representation, predictive Modeling) AI ethics (e.g. algortihmic recourse, algorithmic fairness, performativity)"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:32.602690"
+        "scraped_at": "2026-04-01T17:43:59.484842"
     },
     {
         "name": "Tyko Schuff, M.A.",
@@ -62,7 +62,7 @@
             "research_interests_text": "My work is on logical consequence in non-classical settings and the problem of meaning variance. I'm interested in many related subjects in the philosophy of logic, such as truth, pluralism and logical constants. Apart from that, I'm also interested in aesthetics."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:42.950008"
+        "scraped_at": "2026-04-01T17:44:05.229350"
     },
     {
         "name": "Dr. Ina Jäntgen",
@@ -79,7 +79,7 @@
             "research_interests_text": "I specialise in philosophy of science, with a focus on philosophy of the biomedical and social sciences, and in formal epistemology and decision theory. Currently, I focus on topics relevant to how science can best produce knowledge helpful for decision-makers. You can find out more about my projects on my personal website ."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:38.035819"
+        "scraped_at": "2026-04-01T17:43:57.936166"
     },
     {
         "name": "Dr. Daniele Conti",
@@ -95,7 +95,7 @@
             "research_interests_text": "My research interests lie at the interstection of philosophy of action, metaphysics and philosophy of science. They concern, in particular, theories of free will and mental causation, emergentism, the metaphysics of causation, probabilities and the laws of nature."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:40.137238"
+        "scraped_at": "2026-04-01T17:44:07.760052"
     },
     {
         "name": "Ragna Talea Oeynhausen, M.A.",
@@ -109,7 +109,7 @@
             "research_interests_text": "My research focuses on concepts of existence in analytic philosophy. In particular, I am interested in questions of meaning, quantification, and the use of proper names. My project touches on issues of metaphysics, philosophy of language and logic, and is loosely inspired by Wittgensteinian insights. Apart from early analytic philosophy (Frege, Russell and Quine), I also work on Meinong and Kripke (and their reception). More generally, I am interested in Aristotle, Kant and Wittgenstein."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:42.207254"
+        "scraped_at": "2026-04-01T17:44:02.893784"
     },
     {
         "name": "Dr. Luis Lopez",
@@ -130,7 +130,7 @@
             "research_interests_text": "I've been working on philosophical questions concerning machine learning (ML) models in scientific research, particularly focusing on the representational capacities of these models and their implications for scientific understanding. More recently, my research has expanded towards developing a rigorous, computationally implementable, and philosophically informed relational framework based on category theory. This framework aims at enabling the comparison, transfer, and integration of conceptual structures across different research contexts."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:35.639186"
+        "scraped_at": "2026-04-01T17:44:00.321437"
     },
     {
         "name": "Dr. Mario Günther",
@@ -160,7 +160,7 @@
             "research_interests_text": "Mario Günther's research centers on applying logical and mathematical tools to philosophical problems in epistemology, metaphysics, and the philosophies of science, language, law, and artificial intelligence. Currently, he is principal investigator of a research project on legal proof funded by the Junior Research Fund of LMU Munich."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:37.744936"
+        "scraped_at": "2026-04-01T17:44:05.570778"
     },
     {
         "name": "Dr. Ignacio Ojea Quintana",
@@ -187,7 +187,7 @@
             "research_interests_text": "Ignacio researches and teaches on issues of general philosophy of science and philosophy of technology, as well as formal and social epistemology, where he makes use of mathematical, computer-aided, and data-driven methods. In his doctoral thesis, he dealt with the question of how consensus and (network) dynamics of a social group can best be represented, based on the attitudes of its individuals, whether that be opinions or judgements of sympathy. Currently, he is working on social media network analysis on controversial topics, and is also interested in the emergent field of philosophy of data science, and in the ethics of autonomous decision making."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:43.245570"
+        "scraped_at": "2026-04-01T17:44:08.102213"
     },
     {
         "name": "Matteo De Benedetto",
@@ -201,7 +201,7 @@
             "research_interests_text": "My research interests lie mainly in analytic philosophy, logic, and cognitive science."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:39.533479"
+        "scraped_at": "2026-04-01T17:43:59.814852"
     },
     {
         "name": "Dr. Levin Hornischer",
@@ -219,7 +219,7 @@
             "research_interests_text": "The main part of my research is on the foundations of artificial intelligence (AI). Modern neural networks and machine learning algorithms have become both impressively and worryingly powerful, but we're still lacking a general theory for them. Developing such a theory is a fascinating open problem at the intersection of computer science, math, philosophy, cognitive science, and other subjects. For classical computer programs, this largely has been solved: we understand their possibilities, limitations, complexity, semantics, logic, verification, safety, etc. My approach to this problem is to investigate if analogous aspects of understanding can be developed for the sub-symbolic computation of modern AI. I find it fruitful to view this kind of computation as dynamical systems; and in my PhD thesis, I developed a domain-theoretic semantics for them. My research interests outside this topic also include, e.g., the philosophy of language (hyperintensionality, synonymy, vagueness) and philosophical logic (multivalued logics, relevance logic, counterfactuals, non-monotonic logics, logical constants). I enjoy using the tools of dynamical systems theory, domain theory, category theory, duality theory, universal algebra, constructive mathematics, modal logic, and formal epistemology—and especially learning new ones."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:41.915288"
+        "scraped_at": "2026-04-01T17:44:10.602198"
     },
     {
         "name": "PD Dr. habil. Jürgen Landes",
@@ -247,7 +247,7 @@
             "research_interests_text": "I'm interested in uncertain reasoning broadly construed, including but not limited to: inductive logic (pure and objective Bayesian), epistemology, general philosophy of science, causal inference (in medicine and elsewhere), knowledge representation and foundations of AI."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:42.653266"
+        "scraped_at": "2026-04-01T17:43:58.792318"
     },
     {
         "name": "Andreas Frenzel",
@@ -262,7 +262,7 @@
             "room": "Room 225"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:36.702189"
+        "scraped_at": "2026-04-01T17:44:04.886318"
     },
     {
         "name": "Anne Deng, M.A.",
@@ -277,7 +277,7 @@
             "research_interests_text": "I am interested in General Philosophy of Science, Philosophy of Physics, and Philosophy of Mathematics. My PhD project examines Structural Realism in physics and mathematics from a Quinean perspective."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:37.596612"
+        "scraped_at": "2026-04-01T17:43:59.315370"
     },
     {
         "name": "Rodrigo Mena González",
@@ -292,7 +292,7 @@
             "research_interests_text": "My research interests are focused on the relationship between syntactic and semantic approaches to the notion of logical consequence, and how these may be related to the translatability of deductive bases and the underdetermination of logical consequences. Am also interested in algebraic approaches to modal and non-classical logics. As a lawyer, I also work on deontic logic."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:38.186120"
+        "scraped_at": "2026-04-01T17:44:06.862720"
     },
     {
         "name": "Dr. Bianca Scheeff",
@@ -307,7 +307,7 @@
             "office_address": "Geschwister-Scholl-Platz 1"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:33.219484"
+        "scraped_at": "2026-04-01T17:44:01.525492"
     },
     {
         "name": "Dr. Edi Pavlović",
@@ -322,7 +322,7 @@
             "research_interests_text": "Edi's interest lies in logic, and especially in all things proof-theoretic, though he will ocassionally find himself intrigued by the philosphical consequences of his proofs. This has led him to be interested in non-classical theories of quantification, and of late especially free logic, as well as a myriad of modalities whose intended interpretations have philosophical heft, like \"do,\" \"ought,\" \"believe,\" and \"know.\""
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:32.446296"
+        "scraped_at": "2026-04-01T17:44:11.998175"
     },
     {
         "name": "Dr. Alexander Blum",
@@ -348,7 +348,7 @@
             "research_interests_text": "I'm interested in exploring the foundations of modern physics through its history. My main interest is in quantum field theory, but I have also worked extensively on the renaissance of general relativity, the origins of quantum mechanics, and the history of magnetohydrodynamics. My aim is to better understand how we arrived at the multifarious concepts, theoretical structures, and calculational practices that we use to order the world and to what extent we can view them as contributing to a unified picture."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:42.802386"
+        "scraped_at": "2026-04-01T17:44:04.096853"
     },
     {
         "name": "PD Dr. Martin Fischer",
@@ -376,7 +376,7 @@
             "research_interests_text": "One of my main research interests is truth from the perspective of philosophy of language as well as logic, especially axiomatic theories of truth. I am also interested in modalities. In the area of philosophical logic, I carry out research on questions on logical pluralism. In the philosophy of mathematics, epistemic questions are especially relevant. Besides questions of implicit commitment, I am interested in idealizations taking place in formal treatments and the possibility of avoiding those."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:40.873801"
+        "scraped_at": "2026-04-01T17:44:09.048785"
     },
     {
         "name": "Dr. Laurie Letertre",
@@ -397,7 +397,7 @@
             "research_interests_text": "First of all, I am interested in the metaphysical questions related to the interpretations of quantum mechanics and theoretical generalisations thereof, such as the process matrix formalism in which indefinite causal orders can be defined. I study the potential metaphysical implications of indefinite causal orders, as well as their connection with nonlocality. I am also interested in the epistemic questions surrounding operational formalisms for physical theories, and the way these formalisms can be used as an epistemic tool to understand theory change and knowledge acquisition in physics. My present focus is on the status of space and time in quantum physics, from quantum mechanics to quantum gravity."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:41.763551"
+        "scraped_at": "2026-04-01T17:44:07.586922"
     },
     {
         "name": "Nicola Bonatti, MPhil",
@@ -417,7 +417,7 @@
             "research_interests_text": "My primary research interests lie in logic and the philosophy of mathematics. In my PhD thesis, I explore historical, philosophical, and mathematical aspects of extremal axioms, i.e., principles that impose either minimality or maximality conditions on the admissible models of an axiomatic theory. This research is closely connected to the literature on structuralism in the philosophy of mathematics, including the axiomatic method, implicit definitions, and categoricity. Instead, as part of the DFG project, I'm working on a Kripke-style semantics for a conservative extension of Intuitionistic Free Logic with Hilbert's epsilon-operator. This line of research is primarily motivated by concerns about choice principles and arbitrariness in non-classical settings."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:33.683810"
+        "scraped_at": "2026-04-01T17:44:02.719145"
     },
     {
         "name": "Dr. Dr. André W. Carus",
@@ -431,7 +431,7 @@
             "research_interests_text": "My academic training was originally in history; I was very dissatisfied with that discipline, little suspecting that it could get so much worse in years to come. I was then attracted by economics, and also got very interested in cognitive science. Eventually, when I found myself living in Hyde Park (Chicago), I gave in to the inevitable and enrolled in the philosophy graduate program there, where I encountered (among other teachers) Leonard Linsky, Bill Tait, David Malament, and Howard Stein. Also (among other students) Steve Awodey and Erich Reck. These people dragged my attention off in other directions at first, especially Howard, whose interest in his erstwhile teacher Rudolf Carnap much inspired me. But I am now finally getting around, belatedly, to applying what I learned from all those philosophers of science and mathematics at the University of Chicago to social science — which I'm still convinced we have no idea how to do properly. Though there are individual social scientists, usually quite lonely ones, doing great work in isolated corners, none of the relevant disciplines rewards the kind of study that could actually lead to a cumulative and consistent social science with empirical integrity and sociopolitical relevance. I would like to help articulate what its goals and program might be, if the deeply ingrained incentive distortions could someday be overcome."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:41.609185"
+        "scraped_at": "2026-04-01T17:44:10.426802"
     },
     {
         "name": "Beinan Li, M.A.",
@@ -446,7 +446,7 @@
             "research_interests_text": "My PhD project will explore formalization as a method to study philosophy. I am interested in metaphilosophy, philosophy of language, and the history of 20th-century analytic philosophy."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:41.463145"
+        "scraped_at": "2026-04-01T17:44:10.249789"
     },
     {
         "name": "Lilian von Bressensdorf",
@@ -458,7 +458,7 @@
             "email": "L.Bressensdorf@campus.lmu.de"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:43.975992"
+        "scraped_at": "2026-04-01T17:44:10.957751"
     },
     {
         "name": "Zhouwanyue (Nata) Yang, M.A.",
@@ -472,7 +472,7 @@
             "room": "Room 225"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:39.684358"
+        "scraped_at": "2026-04-01T17:44:08.862506"
     },
     {
         "name": "Dr. Ron Aboodi",
@@ -487,7 +487,7 @@
             "website": "https://sites.google.com/mail.huji.ac.il/ronaboodi/home"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:37.000858"
+        "scraped_at": "2026-04-01T17:44:01.354862"
     },
     {
         "name": "Dr. Conrad Friedrich",
@@ -502,7 +502,7 @@
             "website": "https://conradfriedrich.github.io/"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:41.317016"
+        "scraped_at": "2026-04-01T17:44:00.495034"
     },
     {
         "name": "Dr. Silvia Milano",
@@ -517,7 +517,7 @@
             "website": "https://www.silvia-milano.com/"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:36.096952"
+        "scraped_at": "2026-04-01T17:44:11.125125"
     },
     {
         "name": "Dr. Naftali Weinberger",
@@ -546,7 +546,7 @@
             "research_interests_text": "Naftali uses recently developed causal modeling methods to address foundational questions concerning causal inference and explanation. He has written about the role of causation in a wide range of sciences including: population genetics, psychometrics, neuroscience, and economics. He currently has an ongoing project regarding causation in complex dynamical systems as well as a separate project on causally modeling discrimination. See this podcast episode for more information on causation and complexity. An overview of his approach to discrimination can be found here ."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:33.835544"
+        "scraped_at": "2026-04-01T17:44:06.040452"
     },
     {
         "name": "Dr. Gabriel Târziu",
@@ -570,7 +570,7 @@
             "research_interests_text": "Gabriel specializes in epistemology, the philosophy of science, and the philosophy of mathematics and he has a wide interest in topics related to (scientific) understanding and explanation, the problem of the applicability of mathematics to the physical world, and the ontological debate in the philosophy of mathematics. Currently, he works on an MSCA-funded project on the epistemological particularities of understanding in climate science. His aim in this project is to develop an account of climate scientific understanding that takes climate model hierarchies as central for achieving understanding in climate science."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:34.887157"
+        "scraped_at": "2026-04-01T17:44:06.368458"
     },
     {
         "name": "Dr. Lennart Ackermans",
@@ -591,7 +591,7 @@
             "research_interests_text": "My research interests are on the intersection between philosophy of science and formal ethics. In particular, I am interested in causal concepts that are used and measured in the social sciences, which raise questions relating to causal methodology, the metaphysics of causation and ethics. I am currently working on the concept of discrimination, which I argue should be defined causally. There are many open challenges about the correct way to define discrimination (causally or otherwise) and the right (causal) methods to measure discrimination. I am also interested in Bayesian epistemology."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:35.337214"
+        "scraped_at": "2026-04-01T17:44:06.537706"
     },
     {
         "name": "Wouter Cohen",
@@ -607,7 +607,7 @@
             "research_interests_text": "My research interests are relatively diffuse. I am currently working on (i) the development and historical roots of Russell's theory of existence, (ii) Carnapian approaches to neo-logicism and inferentialism, (iii) an empiricist framework for modality with a new semantics for first-order modal logic. I am also actively interested in the philosophical significance of James Baldwin's work and writing a paper on Baldwin and forgiveness."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:36.552850"
+        "scraped_at": "2026-04-01T17:43:59.142020"
     },
     {
         "name": "Dr. Bianca Scheeff",
@@ -622,7 +622,7 @@
             "office_address": "Geschwister-Scholl-Platz 1"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:34.285139"
+        "scraped_at": "2026-04-01T17:44:11.297222"
     },
     {
         "name": "Dr. Borut Trpin",
@@ -634,7 +634,7 @@
             "website": "https://boruttrpin.weebly.com/"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:40.577206"
+        "scraped_at": "2026-04-01T17:43:59.648050"
     },
     {
         "name": "Rafael Fuchs",
@@ -647,7 +647,7 @@
             "office_address": "Geschwister-Scholl-Platz 1"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:33.061203"
+        "scraped_at": "2026-04-01T17:44:02.189347"
     },
     {
         "name": "Ayse Sena Bozdag, M.A.",
@@ -681,7 +681,7 @@
             "research_interests_text": "My research focuses on various aspects of logic. During my M.A., I specialised in proof-theoretic approaches for defining non-classical logics. In particular, I worked on the hyperintensional logics N4 and HYPE. These logics capture inferences in particularly refined contexts, and are useful e.g. to model a fine-grained notion of content. In the meanwhile, I started working on Strict-Tolerant logics, substructural logics that aim at avoiding semantic paradoxes while maintaining classical validities. The mere fact that such logics can be defined has repercussions for our conception of logic itself, and stresses its reliance on some properties of the consequence relation. I am now investigating both topics at a first-order level. This requires a 'free' approach to quantification, i.e. one that does not presuppose a denotation for all terms in every context. Later, I got interested in non-deterministic semantics applied to modal logics. This approach generalises truth-tables to output sets of values, and seems powerful enough to provide a common framework for normal and non-normal modal logics. This offers a different approach to intensionality than world-based semantics as well as a way to characterise phenomena of indeterminacy in logic. The latter is part of a larger project of mine aimed at capturing various aspects of indeterminacy and constitutes the main topic of my PhD research. Building on Carnap's explicit definition of theoretical terms in science, I am working on a general way to denote contexts with the use of Epsilon Calculus. These structures seem to share some underlying properties of non-deterministic semantics, as well as offering new ways to define hyperintensional contexts in classical-based logics."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:38.640037"
+        "scraped_at": "2026-04-01T17:44:10.078644"
     },
     {
         "name": "Luca Castaldo",
@@ -697,7 +697,7 @@
             "research_interests_text": "My research primarily focuses on formal theories of truth and semantic notions, the interplay between classical and non-classical logics, and paradoxes. I also work on Explainable AI within Human-Computer Interaction and Nonmonotonic Reasoning."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:37.447548"
+        "scraped_at": "2026-04-01T17:44:11.633269"
     },
     {
         "name": "Prof. Dr. Christian List",
@@ -724,7 +724,7 @@
             ]
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:39.991188"
+        "scraped_at": "2026-04-01T17:43:58.972949"
     },
     {
         "name": "Felix Rohls, M.A.",
@@ -739,7 +739,7 @@
             "research_interests_text": "The focus of my research lies on the philosophy of language, specifically on natural language semantics and metasemantics. For my PhD, I am working on the theory of names, focusing on the predicativist view that names are predicates (title: Names and Predicates. A Critique of Predicativism). Beyond that, my philosophical interests include various fields, in particular metaphysics, aesthetics/philosophy of art, and the reconstruction and evaluation of theories from continental philosophy with analytic methods."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:35.191224"
+        "scraped_at": "2026-04-01T17:44:09.409044"
     },
     {
         "name": "Allie Richards",
@@ -750,7 +750,7 @@
             "organizational_unit": "Chair of Logic and Philosophy of Language, MCMP"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:37.149709"
+        "scraped_at": "2026-04-01T17:44:12.156417"
     },
     {
         "name": "Marina Moreno",
@@ -771,7 +771,7 @@
             "research_interests_text": "Generally, Marina Moreno's core interests are in formal practical philosophy, including decision theory, rationality theory, game theory and social choice theory. Her doctoral project investigates the concept of well-being and its relationship to rational reasons for action. In particular, she is investigating how an individual can be understood as an intrapersonal collective, both synchronically, as a collective of conflicting internal wishes, and diachronically, as a collective of different person-stages over time. To this end, she uses various tools from traditionally interpersonal fields such as social choice theory or population ethics, in order to understand the intrapersonal domain. Marina Moreno is also interested in the philosophy of suffering, metaethics (especially subjectivism and pluralism), political philosophy and social epistemology."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:44.123819"
+        "scraped_at": "2026-04-01T17:43:59.991243"
     },
     {
         "name": "Killian Francis McGrath, M.Phil, M.Mus.",
@@ -799,7 +799,7 @@
             "research_interests_text": "My main interests are epistemology of AI, philosophy of science, and philosophy of mathematics, as well as the intersection of these topics. For my PhD project, I focus on the problems surrounding the epistemological analysis of machine learning, particularly the interpretation of inductive bias in ML. In my MSc thesis, I researched the role of mathematical intuition in AI-assisted mathematical proofs."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:39.384714"
+        "scraped_at": "2026-04-01T17:44:00.666672"
     },
     {
         "name": "Prof. Dr. Ulrike Hahn",
@@ -823,7 +823,7 @@
             "research_interests_text": "Ulrike Hahn's research interests are categorization, similarity, language and language acquisition, and, first and foremost, questions of human rationality. Her research examines human judgment, decision-making, and the rationality of everyday argument. She is presently particularly interested in the role of perceived source reliability on our beliefs, including our beliefs as parts of larger communicative social networks."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:32.905672"
+        "scraped_at": "2026-04-01T17:44:03.913565"
     },
     {
         "name": "Diego García Rincón",
@@ -835,7 +835,7 @@
             "email": "D.Garcia@campus.lmu.de"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:32.750143"
+        "scraped_at": "2026-04-01T17:44:09.737073"
     },
     {
         "name": "Hannah Pillin, M.Sc., M.A.",
@@ -851,7 +851,7 @@
             "research_interests_text": "Besides epistemology, I am also interested in (doxastic) logic, philosophy of logic, specifically in questions about normativity of logic and rationality, social epistemology (judgment aggregation, social choice), philosophy of language, and philosophy of science. In philosophy of science, I am especially interested in the epistemology of complex system sciences, such as climate sciences, as well as the role values play in science. Related to this interest, in 2022, I have pursued a 5-month Blue Book traineeship at the European Commission, Directorate General CLIMA, where I worked on climate change, climate modeling and climate policy."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:36.852668"
+        "scraped_at": "2026-04-01T17:44:01.010622"
     },
     {
         "name": "Johannes Bommes, M.Sc.",
@@ -864,7 +864,7 @@
             "office_address": "Ludwigstraße 31"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:42.354340"
+        "scraped_at": "2026-04-01T17:44:07.925242"
     },
     {
         "name": "Luis F. Bartolo Alegre, M.A.",
@@ -880,7 +880,7 @@
             "website": "https://lfba.seplo.org"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:35.791183"
+        "scraped_at": "2026-04-01T17:44:03.063850"
     },
     {
         "name": "Dr. Simon Graf",
@@ -909,7 +909,7 @@
             "research_interests_text": "My current research focus lies in epistemology, especially the intersection between collective and social epistemology. I am also interested in various related epistemological questions in philosophy of science, philosophy of mind, and decision theory."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:38.791967"
+        "scraped_at": "2026-04-01T17:44:11.467634"
     },
     {
         "name": "PhD Daniele Bruno Garancini",
@@ -931,7 +931,7 @@
             "research_interests_text": "Daniele has an interest in epistemology and philosophy of science. In particular, he has done work on the epistemology of logic and scientific progress in the history of philosophy. Moreover, Daniele recently developed an interest in science policy."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:34.440398"
+        "scraped_at": "2026-04-01T17:44:00.149786"
     },
     {
         "name": "Dr. John Dougherty",
@@ -960,7 +960,7 @@
             "research_interests_text": "John's research is concerned with topics in philosophy of science and philosophy of mathematics. One of his projects addresses conceptual issues in high-energy particle theory. This project is particularly focused on philosophical questions concerning symmetry and representation, and it argues that understanding these questions requires philosophers to revise their notion of \"structure\". More recently, John's research has addressed issues arising in contemporary versions of empiricism in the philosophy of science, with a focus on how they have been influenced by developments in formal semantics and by the work of Wilfrid Sellars."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:33.984028"
+        "scraped_at": "2026-04-01T17:44:01.188583"
     },
     {
         "name": "Ursula Danninger, M.A.",
@@ -975,7 +975,7 @@
             "room": "Room 226"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:32.150629"
+        "scraped_at": "2026-04-01T17:44:02.020261"
     },
     {
         "name": "Dr. Daniel A. Di Liscia",
@@ -1000,7 +1000,7 @@
             "research_interests_text": "Daniel A. Di Liscia's research interest is the history of philosophy and science from late medieval to early modern times. His focus lies on two branches of research: the history of Renaissance cosmology, especially in connection with Nicolaus Copernicus and Johannes Kepler, and the tradition of the \"calculators\". The background for both subjects is the same: the late Aristotelian tradition in logic, epistemology and, above all, natural philosophy. Late medieval history of logic and philosophy of language: theory of \" consequentiae \"; syllogistic and concept of deduction in medieval logic and mathematics. Late medieval physics: quantification of motion and qualities within the Aristotelian framework, nature and motion, continuum and infinite; latitude of forms and \"configurations doctrine\" (Jacob of Naples, Nicole Oresme, Biagio Pelacani da Parma). Humanistic criticism of calculators (Juan Luis Vives). The quantification of Aristotelian metaphysics and the perfection of species (Nicholas of Amsterdam, John of Wesel, Jacques Legrand). Early modern cosmology and history of science: Gravity in Copernicus and Kepler; Kepler on pneumatics; mathematics and metrology in Kepler; the late Aristotelian Tradition and the new cosmology; Renaissance epistemology (the \"middle sciences\", regressus demonstrativus and the kind of scientific proofs). Joachim Jungius and late Aristotelianism. Logic-mathematical approaches in traditional philosophical and scientific works (Richard Swineshead, Jean Buridan, Nicole Oresme, Albert of Saxony; Galileo Galilei)."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:36.403764"
+        "scraped_at": "2026-04-01T17:44:08.522730"
     },
     {
         "name": "Cordelia Berz, M.Sc., M.A.",
@@ -1015,7 +1015,7 @@
             "room": "Room 225"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:40.285695"
+        "scraped_at": "2026-04-01T17:44:09.567807"
     },
     {
         "name": "Leon Assaad",
@@ -1029,7 +1029,7 @@
             "research_interests_text": "I am interested in socio-epistemic processes such as the spread of beliefs, communication and collective decision-making. My PhD project analyzes how worrisome social phenomena at the collective level (e.g. belief polarization or echo chambers) can emerge through deliberation between (boundedly) rational agents. To this end, I often work with agent-based simulations, using tools from Bayesian epistemology, game theory and social choice theory."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:35.485099"
+        "scraped_at": "2026-04-01T17:44:05.387728"
     },
     {
         "name": "David Hofmann",
@@ -1044,7 +1044,7 @@
             "research_interests_text": "My primary research focuses on the philosophy of mathematics, particularly Predicativism, and Potentialism in arithmetic and set theory. My dissertation explores their interplay and connection to various schools of constructivism. Additionally, I have strong interests in the metaphysics of Gottfried Leibniz and the philosophical contributions of Kurt Gödel, with a focus on their relevance to the foundational issues in mathematics."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:43.677887"
+        "scraped_at": "2026-04-01T17:44:02.357245"
     },
     {
         "name": "Dr. David Colaco",
@@ -1073,7 +1073,7 @@
             "research_interests_text": "David works at the intersection of history and philosophy of science, philosophy of cognitive science, and philosophy of neuroscience. He is currently working on the DFG project Three Methodological Problems in Memory Science (Project Number 528370787). This project addresses the philosophical dimensions of current controversies in memory science, which links the psychology of memory to its physical basis. Memory science is in an exciting state of flux, resulting from a series of provocative studies and setbacks in the dominant paradigm. The primary objective of this project is to resolve three related problems that contribute to this state of flux. First, what phenomena can be demonstrated? This is the demonstration problem . Second, where can the physical basis of memory be located? This is the localization problem . Third, by what set of criteria can memory be distinguished from non-memory? This is the demarcation problem . Together, these heretofore unresolved problems suggest that memory might depart from intuitive, scientific, and philosophical notions. With this, these problems challenge widely accepted commitments and paradigmatic success stories in cognitive science and neuroscience, as scientific study of the mind and brain long has been directed by insights about memory. At their cores, these problems are manifestations of topics in philosophy of science. They each concern a dimension of how the targets of scientific investigation are determined. For this reason, the proposed project adopts the stance that traction on resolving these problems and therefore settling these controversies can be made by philosophically analyzing memory science and its current state of flux. However, this project will do more than only settle existing controversies in memory science. These outcomes will also supply new insights into classic problems in philosophy of science. Further, these insights will have a firm basis in the realities of the scientific practice, its history, and its future. These insights will serve as a basis for informing naturalistic philosophical accounts that appeal to memory, including in epistemology, personal identity, and ethics. David is also interested in scientific reasoning. He focuses on cases in which these forms of reasoning might be flawed, and he explores the epistemic and ethical ramifications of potentially flawed reasoning. In his research, he integrates cognitive science research on biases, philosophical models of scientific reasoning, and analyses of cases from the history of science."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:39.840018"
+        "scraped_at": "2026-04-01T17:44:02.549176"
     },
     {
         "name": "Dr. Michael Cuffaro",
@@ -1086,7 +1086,7 @@
             "website": "http://www.michaelcuffaro.com/"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:41.164280"
+        "scraped_at": "2026-04-01T17:44:04.329508"
     },
     {
         "name": "Dr. Jonas Raab",
@@ -1102,7 +1102,7 @@
             "research_interests_text": "Jonas has interests in most areas of theoretical philosophy, with special interest in methodological questions. He has published on Aristotelian logic, Quine's account of explication, Easy Ontology, and co-written a companion chapter on metaphysics. For more information, see his website: https://www.jonasraab.org ."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:38.337935"
+        "scraped_at": "2026-04-01T17:44:04.499553"
     },
     {
         "name": "Dr. Idit Chikurel",
@@ -1123,7 +1123,7 @@
             "research_interests_text": "Idit's research interests are in the philosophy and history of science, especially of mathematics, as well as in the history of philosophy. She is focused on epistemological and metaphysical questions, namely on the use of mathematical knowledge in the construction of philosophical arguments. Currently she is interested in conceptions of ampliative analysis and the role of mathematics in the formation of these conceptions, as well as in their connection to theories of grounding and of consequences."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:43.390199"
+        "scraped_at": "2026-04-01T17:44:00.840982"
     },
     {
         "name": "apl. Prof. Dr. Alexander Reutlinger",
@@ -1149,7 +1149,7 @@
             ]
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:35.040589"
+        "scraped_at": "2026-04-01T17:44:07.409636"
     },
     {
         "name": "Elena Rabinoff",
@@ -1161,7 +1161,7 @@
             "office_address": "Geschwister-Scholl-Platz 1"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:40.432097"
+        "scraped_at": "2026-04-01T17:44:03.744532"
     },
     {
         "name": "Junyan Feng, M.A.",
@@ -1176,7 +1176,7 @@
             "room": "Room 134"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:40.727236"
+        "scraped_at": "2026-04-01T17:44:05.056932"
     },
     {
         "name": "Dr. Sébastien Rivat",
@@ -1204,7 +1204,7 @@
             "research_interests_text": "Sébastien's main research focus is on the history and philosophy of physics. He explores how recent developments at the frontiers of physics, especially in the quantum realm, affect our understanding of why science works so well. He has looked primarily at the framework of effective theories up until now, moving more recently towards history to trace their origins and gain further conceptual insights. Along the way, he has been led to develop new projects in the foundations of physics (e.g., the status of gauge symmetries, the concept of open system, the epistemology of discretization methods). His other research interests include metaphysics and early modern philosophy."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:42.062178"
+        "scraped_at": "2026-04-01T17:44:04.673157"
     },
     {
         "name": "Arthur Saraiva",
@@ -1218,7 +1218,7 @@
             "office_address": "Geschwister-Scholl-Platz 1"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:43.532844"
+        "scraped_at": "2026-04-01T17:44:05.792354"
     },
     {
         "name": "Dr. Vanessa Carr",
@@ -1239,7 +1239,7 @@
             "research_interests_text": "Her research generally concerns the nature of intentional action, and the distinctive form of control that we have when we act intentionally. Her PhD, and later work building on this research, focused on the role of causation in an account of intentional agency, addressing a wide-range of action-kinds, including the creation and change of abstract artworks. She is now also working on other aspects of intentional agency, such as the relationship between our means and our ends, the knowledge of what we are doing and how to do it, and the rationality of our beliefs about what we intend to do. Other agency-related topics that Vanessa is interested in include practical reason and rationality, willpower, the sense of agency, mental action, collective action, and social practices. More broadly, Vanessa is interested in moral psychology, philosophy of mind, and social philosophy."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:34.135752"
+        "scraped_at": "2026-04-01T17:44:03.409538"
     },
     {
         "name": "apl. Prof. Dr. Martin Rechenauer",
@@ -1262,7 +1262,7 @@
             "research_interests_text": "My research interests concern mainly foundational issues in practical philosophy: theories of justice, contractualist justification procedures, all branches of the theory of rational choice (decision theory, game theory and social choice theory) in general and in their application to questions of practical philosophy. Other central research interests address conceptions of collective intentionality. Besides, I am very interested in philosophy of probability, questions of formal epistemology, political philosophy, philosophy of economics. Historically, I focus on the tradition of social contract theory. I am assistant editor of the Theory and Decision Library Series A at Springer publishers, have organized a DAAD-funded cooperation of the Munich Chair of Philosophy and Political Theory with Prof. Raimo Tuomela and his research group at Helsinki, and worked as co-organizer for the 6th Decision Games and Logic workshop at MCMP in summer 2012."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:33.373752"
+        "scraped_at": "2026-04-01T17:44:01.850450"
     },
     {
         "name": "Wu Dawei, M.A.",
@@ -1277,7 +1277,7 @@
             "room": "Room 223"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:36.242061"
+        "scraped_at": "2026-04-01T17:43:58.103156"
     },
     {
         "name": "Dr. Tom Sterkenburg",
@@ -1306,7 +1306,7 @@
             "research_interests_text": "Tom's research is in the philosophy of induction and the epistemological foundations of machine learning. He is in particular interested in applying the mathematical theory of machine learning to philosophical questions around machine learning and artificial intelligence."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:32.003116"
+        "scraped_at": "2026-04-01T17:44:01.683012"
     },
     {
         "name": "Hosea von Hauff, M.A.",
@@ -1319,7 +1319,7 @@
             "office_address": "Ludwigstraße 31"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:43.095095"
+        "scraped_at": "2026-04-01T17:44:08.694940"
     },
     {
         "name": "Dr. Dominik Ehrenfels",
@@ -1336,7 +1336,7 @@
             "research_interests_text": "My interests lie primarily in the philosophy of science and the philosophy of physics. For the DFG project on effective theories, my plan is to focus on issues of emergence and the autonomy of higher-level theories. My DPhil Thesis is concerned with the role of symmetries in the interpretation of theories, and specifically with the way reformulation can help us eliminate symmetry-variant structure. Related to this, I am particularly interested in Julian Barbour's relationalism and shape dynamics. Besides that, I have secondary interests in the philosophy of logic (esp. logical conventionalism) and metaphysics (esp. material plenitude)."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:42.504223"
+        "scraped_at": "2026-04-01T17:44:07.199131"
     },
     {
         "name": "Dr. Edoardo Baccini",
@@ -1353,7 +1353,7 @@
             "research_interests_text": "Edoardo's research is concerned with the dynamics of knowledge acquisition, belief formation and opinion diffusion in social contexts. At the intersection of social epistemology and formal epistemology, Edoardo makes use of a variety of formal methods (dynamic logics, probability theory and agent-based modeling) to study information dynamics in social groups and in social networks. His current research focuses on: the development of formal frameworks for assessing the adequacy of agent communication (belief merge, preference aggregation) from the standpoint of formal learning theory; the application of Bayesian Networks and agent-based modeling to study the emergence of order effects in single-agent belief dynamics and of social anchoring effects in epistemic collectives; the application of logical tools to model social network phenomena. He is also interested in the philosophical debates around peer review and open science."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:32.296683"
+        "scraped_at": "2026-04-01T17:44:07.038891"
     },
     {
         "name": "Prof. Dr. Stephan Hartmann",
@@ -1382,7 +1382,7 @@
             ]
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:35.946904"
+        "scraped_at": "2026-04-01T17:44:11.816275"
     },
     {
         "name": "Dr. Martin King",
@@ -1409,7 +1409,7 @@
             "research_interests_text": "Martin's research interests are in philosophy of science, the philosophy of physics, and the philosophy of artificial intelligence. In publications, he has contributed to debates on scientific explanation, confirmation, and modelling as they pertain to physics, and in particular, particle physics. He is currently working on the epistemological issues surrounding the use of artificial intelligence (in particular deep learning), the change in scientific methodology, and the transformation and treatment of huge amounts of data in searches for new physics."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:33.530223"
+        "scraped_at": "2026-04-01T17:43:58.271342"
     },
     {
         "name": "Marta Esteves",
@@ -1424,7 +1424,7 @@
             "research_interests_text": "I am mainly interested in Philosophy of Mathematics and in the application of mathematical methods and results to the solution of philosophical problems. In particular, I am interested in the topic of mathematical structuralism, which my dissertation is about. Here I argue for non-eliminative structuralism, as well as providing an adequate mathematical formulation of structures according to this perspective. More generally, I am also interested in the philosophy of set theory, and formal epistemology (in particular in the application of topological semantics to epistemic logic)."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:34.592846"
+        "scraped_at": "2026-04-01T17:43:58.617280"
     },
     {
         "name": "Dr. Norbert Gratzl",
@@ -1447,7 +1447,7 @@
             "research_interests_text": "Norbert is interested in all things philosophical with a strong formal bias."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:34.740384"
+        "scraped_at": "2026-04-01T17:44:09.909340"
     },
     {
         "name": "Dr. Alessandra Marra",
@@ -1472,7 +1472,7 @@
             "research_interests_text": "Alessandra's research interests concern normative reasoning. She approaches the issue from various angles: philosophical logic (logics for obligations, intentions, and plans), metaethics (subjective vs objective oughts, prima facie vs all-things-considered oughts), semantics (deontic modals, indicative conditionals, and the inference rules governing their interaction), and the intersection between philosophy of logic and epistemology (the normative role that logical principles play for the reasoning of bounded agents like ourselves)."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:37.298470"
+        "scraped_at": "2026-04-01T17:43:58.455135"
     },
     {
         "name": "Dr. Sophie Kikkert",
@@ -1494,7 +1494,7 @@
             "research_interests_text": "Sophie's research centres on topics in practical rationality, social philosophy, metaphysics, and epistemology. Her work addresses what it takes to have and exercise abilities, how we learn about our own abilities and options, and what role ability beliefs and attention play in practical reasoning. In addition, she has written about the relation between abilities, disability, and mental health."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:41.019769"
+        "scraped_at": "2026-04-01T17:44:06.191336"
     },
     {
         "name": "Dr. Toby C. P. Solomon",
@@ -1515,7 +1515,7 @@
             "research_interests_text": "Toby's Alexander von Humboldt Foundation project is entitled \"What can I do?: Modelling Option-Uncertainty in Decision Theory\". As the title suggests, the aim of this project is to develop formal models to understand how rational decision-makers should respond to uncertainty about what their options are (or, in other words, what they can do). He also continues to think about the theme of his PhD research, namely the relationship between traditional problems of free will and decision theory. He defends a view he calls Libertarian Decision Theory: roughly, that rational decision-makers must presuppose that their choices are uncaused and unconstrained by the past and the laws of nature (though they almost certainly should not believe that). More broadly he is interested in carefully characterizing the problems, and their potential solutions, that arise when decision-makers reflect on the causes of their own choices. Some other things he has been thinking about recently include the difficulties that Causal Decision Theory has with dynamic/diachronic decision situations, deflationary truth based solutions to the semantic paradoxes, and self-referential paradoxes in decision theory."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:43.830378"
+        "scraped_at": "2026-04-01T17:44:03.577639"
     },
     {
         "name": "Prof. Dr. Godehard Link, Dipl.Math.",
@@ -1541,7 +1541,7 @@
             "research_interests_text": "Logic, philosophical and linguistic semantics, philosophy of mathematics and science, Russell studies."
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:38.939755"
+        "scraped_at": "2026-04-01T17:44:08.299590"
     },
     {
         "name": "Daniel Misselbeck-Wessel, PhD",
@@ -1562,7 +1562,7 @@
             ]
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:37.890649"
+        "scraped_at": "2026-04-01T17:44:03.239512"
     },
     {
         "name": "Simone Salzano, M.A.",
@@ -1576,7 +1576,7 @@
             "office_address": "Geschwister-Scholl-Platz 1"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:38.484819"
+        "scraped_at": "2026-04-01T17:44:06.703011"
     },
     {
         "name": "Dr. Christian Damböck",
@@ -1590,6 +1590,6 @@
             "office_address": "Geschwister-Scholl-Pl. 1"
         },
         "type": "person",
-        "scraped_at": "2026-04-01T11:37:39.235453"
+        "scraped_at": "2026-04-01T17:44:10.792931"
     }
 ]
