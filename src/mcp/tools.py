@@ -1,3 +1,4 @@
+import functools
 import json
 import os
 import unicodedata
@@ -21,6 +22,7 @@ def _normalize(text: str) -> str:
     """Lowercase and strip diacritics so 'gonzalez' matches 'González'."""
     return unicodedata.normalize("NFD", text.lower()).encode("ascii", "ignore").decode("ascii")
 
+@functools.lru_cache(maxsize=32)
 def load_data(filename: str) -> List[Dict[str, Any]]:
     path = os.path.join(DATA_DIR, filename)
     if not os.path.exists(path):
