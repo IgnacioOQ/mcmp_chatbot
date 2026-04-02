@@ -74,6 +74,20 @@ def inject_global_mobile_css() -> None:
             font-weight: 700 !important;
         }
 
+        /* Event day buttons — blue tint, circle stays right of number via nowrap */
+        [data-testid="stSidebar"] [data-testid="column"] button[data-testid="baseButton-tertiary"] {
+            color: #60a5fa !important;
+            border: 1px solid rgba(96, 165, 250, 0.35) !important;
+            background: rgba(96, 165, 250, 0.06) !important;
+        }
+
+        /* Prevent day number + circle from wrapping to a second line */
+        [data-testid="stSidebar"] [data-testid="column"] button p,
+        [data-testid="stSidebar"] [data-testid="column"] button span {
+            white-space: nowrap !important;
+            overflow: hidden !important;
+        }
+
         /* Day header row — desktop */
         .day-header-row {
             display: flex;

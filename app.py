@@ -200,7 +200,12 @@ def main():
                         button_label = f"{day}●" if has_event else str(day)
                         
                         # Use primary button type to naturally highlight "today"
-                        btn_type = "primary" if is_today else "secondary"
+                        if is_today:
+                            btn_type = "primary"
+                        elif has_event:
+                            btn_type = "tertiary"
+                        else:
+                            btn_type = "secondary"
                         
                         if st.button(
                             button_label, 
