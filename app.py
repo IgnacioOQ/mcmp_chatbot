@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timedelta
 from src.core.engine import ChatEngine
 from src.utils.logger import log_info, log_error
+from src.ui.styles import inject_global_mobile_css
 
 @st.cache_data
 def load_raw_events():
@@ -85,29 +86,7 @@ def main():
         layout="wide"
     )
 
-    # Custom CSS to widen sidebar and adjust chat container
-    st.markdown("""
-        <style>
-        [data-testid="stSidebar"] {
-            min-width: 450px;
-            max-width: 500px;
-        }
-        .stMainBlockContainer {
-            max-width: 900px;
-            margin: 0 auto;
-            padding-left: 3rem;
-            padding-right: 3rem;
-        }
-        [data-testid="stChatInput"] {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        /* Justify chat message text */
-        [data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p {
-            text-align: justify;
-        }
-        </style>
-    """, unsafe_allow_html=True)
+    inject_global_mobile_css()
 
     st.title("Leopold - The MCMP Chatbot")
     st.markdown("This is a very basic bot to retrieve information about the Munich Center for Mathematical Philosophy (MCP) and its events. It can answer questions about upcoming talks, speakers, and other related information. Do not expect proper intelligence! The goal is to have a centralized registry. \n\n It is done using Web scraping + MCP on the databases ([README](https://github.com/IgnacioOQ/mcmp_chatbot/blob/main/README.md)). It is still very much a demo and it will lack knowledge, but it should be able to provide accurate and up to date information. \n\nPlease use the feedback form on the left to leave comments, it will help improve it.")
@@ -192,56 +171,15 @@ def main():
         # Streamlit 1.53 strictly enforces DOM closure, so we cannot wrap columns with raw 'div' tags.
         # Instead, we identify buttons purely by their standard Streamlit UI type property.
         
-        # Scoped, safe CSS to tighten the grid and style the container
-        st.markdown("""
-        <style>
-            /* Tighten column spacing for the calendar grid */
-            [data-testid="stSidebar"] [data-testid="column"] {
-                padding: 0 2px !important;
-            }
-            
-            /* Make calendar buttons perfectly square and uniform */
-            [data-testid="stSidebar"] [data-testid="column"] button {
-                height: 40px !important;
-                padding: 0px !important;
-                border-radius: 8px !important;
-                background: rgba(255, 255, 255, 0.03) !important;
-                border: 1px solid rgba(255, 255, 255, 0.05) !important;
-            }
-
-            /* Style Specific Types (e.g., Primary = Today) */
-            [data-testid="stSidebar"] [data-testid="column"] button[data-testid="baseButton-primary"] {
-                border: 1px solid rgba(74, 222, 128, 0.4) !important;
-                color: #4ade80 !important; 
-                font-weight: 700 !important;
-            }
-            
-            /* Subtle text styling for the native headers */
-            .day-header-row {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 8px;
-                padding: 0 10px;
-            }
-            .day-header-item {
-                color: #94a3b8;
-                font-weight: 600;
-                font-size: 12px;
-                width: 14%;
-                text-align: center;
-            }
-        </style>
-        """, unsafe_allow_html=True)
-        
         st.markdown("""
         <div class="day-header-row">
-            <span class="day-header-item">Mo</span>
-            <span class="day-header-item">Tu</span>
-            <span class="day-header-item">We</span>
-            <span class="day-header-item">Th</span>
-            <span class="day-header-item">Fr</span>
-            <span class="day-header-item">Sa</span>
-            <span class="day-header-item">Su</span>
+            <span class="day-header-item">M</span>
+            <span class="day-header-item">T</span>
+            <span class="day-header-item">W</span>
+            <span class="day-header-item">T</span>
+            <span class="day-header-item">F</span>
+            <span class="day-header-item">S</span>
+            <span class="day-header-item">S</span>
         </div>
         """, unsafe_allow_html=True)
         
@@ -259,7 +197,7 @@ def main():
                         
                         # Determine button label and type
                         # Using emoji or unicode dots is the safest way to indicate events in native Streamlit
-                        button_label = f"{day} 🔵" if has_event else str(day)
+                        button_label = f"{day}·" if has_event else str(day)
                         
                         # Use primary button type to naturally highlight "today"
                         btn_type = "primary" if is_today else "secondary"
