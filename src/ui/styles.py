@@ -74,11 +74,6 @@ def inject_global_mobile_css() -> None:
             font-weight: 700 !important;
         }
 
-        /* Event day buttons — bold blue number */
-        [data-testid="stSidebar"] [data-testid="column"] button[data-testid="baseButton-tertiary"] {
-            color: #60a5fa !important;
-            font-weight: 700 !important;
-        }
 
         /* Day header row — desktop */
         .day-header-row {

@@ -194,27 +194,23 @@ def main():
                     else:
                         is_today = (day == today.day and cal_month == today.month and cal_year == today.year)
                         has_event = day in event_days
-                        
-                        # Determine button label and type
-                        # Using emoji or unicode dots is the safest way to indicate events in native Streamlit
-                        button_label = str(day)
-                        
-                        # Use primary button type to naturally highlight "today"
-                        if is_today:
-                            btn_type = "primary"
-                        elif has_event:
-                            btn_type = "tertiary"
-                        else:
-                            btn_type = "secondary"
-                        
+                        btn_type = "primary" if is_today else "secondary"
+
                         if st.button(
-                            button_label, 
-                            key=f"cal_{cal_year}_{cal_month}_{day}", 
+                            str(day),
+                            key=f"cal_{cal_year}_{cal_month}_{day}",
                             use_container_width=True,
                             type=btn_type
                         ):
                             st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
                             st.session_state.calendar_query_formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
+
+                        if has_event:
+                            st.markdown(
+                                "<div style='text-align:center;margin-top:-10px;margin-bottom:2px;"
+                                "color:#60a5fa;font-size:7px;line-height:1'>●</div>",
+                                unsafe_allow_html=True
+                            )
         
         st.markdown("---")
         
