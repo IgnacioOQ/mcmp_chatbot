@@ -208,7 +208,7 @@ def main():
                         if has_event:
                             st.markdown(
                                 "<div style='text-align:center;margin-top:-10px;margin-bottom:2px;"
-                                "color:#60a5fa;font-size:7px;line-height:1'>●</div>",
+                                "color:#60a5fa;font-size:11px;line-height:1'>●</div>",
                                 unsafe_allow_html=True
                             )
         
