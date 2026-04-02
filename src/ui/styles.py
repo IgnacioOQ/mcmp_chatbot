@@ -74,10 +74,13 @@ def inject_global_mobile_css() -> None:
             font-weight: 700 !important;
         }
 
-        /* Event day buttons — blue tint, circle stays right of number via nowrap */
+        /* Event day buttons — blue tint, circle stays right of number via nowrap.
+           box-shadow used instead of border because Streamlit's tertiary button
+           default styles set border:none !important and win the cascade. */
         [data-testid="stSidebar"] [data-testid="column"] button[data-testid="baseButton-tertiary"] {
             color: #60a5fa !important;
-            border: 1px solid rgba(96, 165, 250, 0.35) !important;
+            border: none !important;
+            box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.5) !important;
             background: rgba(96, 165, 250, 0.06) !important;
         }
 
