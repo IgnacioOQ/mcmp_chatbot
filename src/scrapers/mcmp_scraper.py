@@ -763,8 +763,21 @@ class MCMPScraper:
                 json.dump(log_entries, f, indent=4, ensure_ascii=False)
 
             log_info(f"Logged {total_changes} changes to {log_file}")
+            self._print_update_summary(changes_summary)
         else:
             log_info("No changes detected in datasets.")
+            print("\n--- Update Summary ---")
+            print("No changes detected.")
+            print("----------------------\n")
+
+    def _print_update_summary(self, changes_summary):
+        print("\n--- Update Summary ---")
+        for category, diff in changes_summary.items():
+            added = len(diff.get("added", []))
+            removed = len(diff.get("removed", []))
+            updated = len(diff.get("updated", []))
+            print(f"  {category}: +{added} added, -{removed} removed, ~{updated} updated")
+        print("----------------------\n")
 
     def _accumulate(self, new_data, file_path, key):
         """Merge new_data into existing file: update matching entries, add new ones, never remove."""
