@@ -69,6 +69,7 @@ class ChatEngine:
             "- User asks about an **event, talk, or schedule** → `get_events(...)` with date range or keyword.",
             "- User asks about a **research area or field** (not a specific person) → `search_research(topic='<field>')`.",
             "- User asks about **organizational structure** (who leads what, supervisor, chair affiliation) → `search_graph(query='<name or unit>')`.",
+            "- User asks about a **degree program, MA, Master, Bachelor, PhD, how to apply, application requirements, deadlines, or study programs** → `search_academic_offerings(offering_type='<master|bachelor|phd|learning_materials>')`. Use this FIRST for any question about studying at or applying to the MCMP.",
             "",
             "**FALLBACK CASCADE RULE — MANDATORY:**",
             "If a tool returns 0 results or an empty list, you MUST NOT give up and say 'I found nothing'.",
@@ -215,7 +216,7 @@ class ChatEngine:
                             tools=tools,
                             automatic_function_calling=types.AutomaticFunctionCallingConfig(
                                 disable=False,
-                                maximum_remote_calls=5,
+                                maximum_remote_calls=10,
                             ),
                         ),
                         history=gemini_history,
