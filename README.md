@@ -13,6 +13,7 @@ The application is built with **Streamlit** for the frontend, uses **JSON data f
 ## Features
 
 - **Activity QA**: Ask about upcoming talks, reading groups, and events.
+- **Academic Offerings QA**: Ask about degree programs (Bachelor, Master, PhD), application requirements, deadlines, and coordinators.
 - **Automated Scraping**: Keeps data fresh by scraping the MCMP website.
 - **Rich Metadata Extraction**: Automatically extracts detailed profile information including emails, office locations, hierarchical roles, and publication lists.
 - **Structured Data Tools (MCP)**: Implements an in-process Model Context Protocol (MCP) server that exposes `people.json`, `research.json`, and `raw_events.json` as structured tools. This allows the LLM to perform precise queries (e.g., "List all events next week", "Who researches Logic?").
@@ -104,16 +105,17 @@ Streamlit limits raw HTML `<a href="...">` links from natively triggering backen
 The core logic (`src/core/engine.py`) connects to the **Gemini API** (or others) to generate responses. It offers the model a set of MCP tools; the model decides whether and how to call them based on the user's query.
 
 ### 3. Data Storage
-- **JSON Data Files**: Scraped content is stored as structured JSON in `data/people.json`, `data/research.json`, and `data/raw_events.json`. These are the source of truth queried by the MCP tools.
+- **JSON Data Files**: Scraped content is stored as structured JSON in `data/people.json`, `data/research.json`, `data/raw_events.json`, and `data/academic_offerings.json`. These are the source of truth queried by the MCP tools.
 - **Institutional Graph**: Organizational relationships are stored in `data/graph/mcmp_graph.md` and `data/graph/mcmp_jgraph.json`, parsed by `src/core/graph_utils.py` for context injection.
 - **Cloud Feedback**: User feedback is pushed to **Google Sheets** via the Google Drive API, acting as a cloud database for ongoing user data collection.
 
 ### 4. Data Model & Relationships
-The system connects four key data types to answer complex questions:
+The system connects five key data types to answer complex questions:
 1.  **People** (`data/people.json`): Comprehensive profiles including bios, contact details (email, phone, office), organizational roles, and selected publications.
 2.  **Research** (`data/research.json`): Hierarchical structure of research areas (e.g., Logic, Philosophy of Science) and their subtopics, with automated linking to people.
 3.  **Events** (`data/raw_events.json`): Upcoming talks and workshops.
-4.  **Institutional Graph** (`data/graph/mcmp_graph.md`): A knowledge graph that links **People** to **Organizational Units** (Chairs) and defines hierarchy (e.g., who leads a chair, who supervises whom).
+4.  **Academic Offerings** (`data/academic_offerings.json`): Structured program info for Bachelor, Master, and PhD pathways — including ECTS, deadlines, coordinators, required documents, and contact emails. Scraped from the MCMP "For Students" section at most once per 30 days.
+5.  **Institutional Graph** (`data/graph/mcmp_graph.md`): A knowledge graph that links **People** to **Organizational Units** (Chairs) and defines hierarchy (e.g., who leads a chair, who supervises whom).
 
 **How they interact:**
 - When a user asks "Who works at the Chair of Philosophy of Science?", the **Graph** identifies the Chair entity and its `affiliated_with` edges.
@@ -122,7 +124,7 @@ The system connects four key data types to answer complex questions:
 
 ### 5. MCP Integration (Structured Data)
 To handle specific queries that require structured data access (e.g., "Which events are happening between date X and Y?"), the system implements a lightweight **MCP Server** (`src/mcp/`).
-- **Tools**: Exposes Python functions (`search_people`, `search_research`, `get_events`, `search_graph`) as tools to the LLM.
+- **Tools**: Exposes Python functions (`search_people`, `search_research`, `get_events`, `search_graph`, `search_academic_offerings`) as tools to the LLM.
 - **Execution**: The engine offers these tools to the LLM. If the LLM determines it needs data, it calls the tool, and the result is fed back for the final answer.
 - **Toggle**: This feature can be enabled/disabled via the Streamlit sidebar to manage latency and costs.
 *(See `docs/MCP_AGENT.md` for full implementation details)*

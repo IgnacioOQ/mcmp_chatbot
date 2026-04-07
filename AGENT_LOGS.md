@@ -278,9 +278,9 @@ Improved Python CLIs in `manager` and `language` to be POSIX-friendly and suppor
 ### Summary
 Created a generic shell wrapper `sh2py3.sh` and symlinks for python scripts in `bin/` directory.
 
-## [2026-04-07] Academic Offerings Scraper — Implemented, NOT RESOLVED ⚠️
+## [2026-04-07] Academic Offerings Scraper — Resolved ✅
 
-**Status**: UNRESOLVED — feature is fully implemented and working locally but non-functional in production.
+**Status**: RESOLVED — feature is fully implemented and working in production.
 **Agent**: Claude (Sonnet 4.6)
 **Task**: Add scraping and MCP tool coverage for the MCMP "For Students" section (degree programs, application requirements, PhD pathways, learning materials).
 
@@ -365,21 +365,12 @@ This log line was added but the `path=` value has not been captured yet because 
 
 ---
 
-### Resolution Steps for Next Session
+### Resolution
 
-1. **Get the server path**: Restart the app (`systemctl restart --user streamlit-app`), ask "talk to me about the MA program", then run:
-   ```bash
-   journalctl --user -u streamlit-app -n 30 | grep "search_academic_offerings"
-   ```
-   Read the `path=` field from the log output.
-
-2. **Deploy the file**: Either:
-   - Copy from local: `scp data/academic_offerings.json user@mcmp:<path_from_log>`
-   - Or generate on server: `cd <project_dir> && python scripts/update_dataset.py --scrape-offerings`
-
-3. **Verify**: Ask "talk to me about the MA program" — the tool should return 1 result and the chatbot should render the full program block with link.
-
-4. **Cleanup**: Remove the debug log lines from `search_academic_offerings` in `src/mcp/tools.py` (the two lines starting with `from src.utils.logger import log_info as _log` and `_log(f"[search_academic_offerings]..."`).
+- **Root cause confirmed**: `data/academic_offerings.json` was gitignored (the entire `data/` directory is excluded) so it was never deployed to the server (`/home/ignacio/mcmp_chatbot/data/academic_offerings.json`). The debug log confirmed `path_exists=False` on every tool call.
+- **Fix**: Added `!data/academic_offerings.json` to `.gitignore` (alongside the existing `!data/scraping_logs.json` exception) and committed the file to the repository. The server pulls it via `git pull` like all other code changes.
+- **Verified**: Chatbot now returns the full MA program block with link when asked "talk to me about the MA program".
+- **Cleanup pending**: Remove the two temporary debug log lines from `search_academic_offerings` in `src/mcp/tools.py`.
 
 ---
 
