@@ -27,6 +27,8 @@ def _normalize(text: str) -> str:
 def load_data(filename: str) -> List[Dict[str, Any]]:
     path = os.path.join(DATA_DIR, filename)
     if not os.path.exists(path):
+        # Do NOT cache a missing file — clear so next call retries the disk
+        load_data.cache_clear()
         return []
     with open(path, 'r', encoding='utf-8') as f:
         return json.load(f)

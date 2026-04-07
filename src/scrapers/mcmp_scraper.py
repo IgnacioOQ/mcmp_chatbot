@@ -735,6 +735,14 @@ class MCMPScraper:
             "learning": "learning_materials",
         }
 
+        # --- Canonical titles for each offering type ---
+        TITLE_MAP = {
+            "bachelor": "Bachelor Program in Philosophy",
+            "master": "Master Program in Logic and Philosophy of Science",
+            "phd": "PhD Program",
+            "learning_materials": "Learning Materials",
+        }
+
         def _detect_offering_type(header_text: str) -> str:
             lower = header_text.lower()
             for kw, ot in SECTION_MAP.items():
@@ -821,7 +829,7 @@ class MCMPScraper:
                     entry_url = self.FOR_STUDENTS_URL
 
                 self.academic_offerings.append({
-                    "title": section_title,
+                    "title": TITLE_MAP.get(offering_type, section_title),
                     "offering_type": offering_type,
                     "url": entry_url,
                     "description": description,
