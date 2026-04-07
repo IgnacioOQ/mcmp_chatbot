@@ -1,0 +1,85 @@
+[
+    {
+        "title": "Bachelor Program in Philosophy",
+        "offering_type": "bachelor",
+        "url": "https://www.philosophie.lmu.de/en/study/degree-programs/bachelor-in-philosophy-philosophy-major/",
+        "description": "Many courses taught at the MCMP contribute to the Bachelor in Philosophy at the Faculty of Philosophy, Philosophy of Science and Religious Studies at LMU Munich. The Bachelor in Philosophy as well as other Bachelor degree programs at LMU are classified as undergraduate degree programs. To be admitted to a Bachelor program, you will need to be proficient in German and in possession of a university entrance qualification. In addition, admission to many Bachelor programs is dependent on further conditions, e.g. pre-registration, academic advising and orientation, or aptitude tests. For general information about degree studies, please visit the page for prospective students .",
+        "type": "academic_offering",
+        "metadata": {
+            "ects": 180,
+            "duration": "6 semesters",
+            "language": "German (with select seminars in English)",
+            "application_deadline": "July 15",
+            "start": "Winter semester only",
+            "note": "Mandatory minor subject (60 ECTS). Full-time, in-person study required.",
+            "admission_requirements": [
+                "General university entrance qualification (Abitur/Hochschulreife)",
+                "International applicants apply through the International Office"
+            ]
+        },
+        "scraped_at": "2026-04-07T14:56:55.736823"
+    },
+    {
+        "title": "Master Program in Logic and Philosophy of Science",
+        "offering_type": "master",
+        "url": "https://www.philosophie.lmu.de/en/study/degree-programs/master-in-logic-and-philosophy-of-science/",
+        "description": "Our Master (MA) program in Logic and Philosophy of Science was founded in October 2012. It is an international MA program of the Faculty of Philosophy, Philosophy of Science and Religious Studies at LMU Munich.\n\nLMU has a long-standing tradition in both philosophy of science and logic reaching back to the time of Wolfgang Stegmüller and Kurt Schütte. In recent years, this tradition has been revived by establishing two new chairs in logic and philosophy of language (held by Hannes Leitgeb ) and in philosophy of science (held by Stephan Hartmann ), and by founding the MCMP. Hannes Leitgeb was awarded an Alexander von Humboldt Professorship by the Alexander von Humboldt Foundation in 2010. In 2012, a second Alexander von Humboldt Professorship was awarded to Stephan Hartmann. In 2021, Christian List joined the center as co-director. He holds the chair of philosophy and decision theory.\n\nOur MA program is not just open to philosophy and logic undergraduates - we also aim to attract undergraduates from relevant scientific disciplines, such as mathematics, physics, biology, chemistry, neuroscience, computer science, engineering, economics, linguistics, psychology, cognitive science, the social sciences, and related disciplines.\n\nNorbert Gratzl and Alexander Reutlinger are the program coordinators of the Master in Logic and Philosophy of Science, and are happy to answer questions about the program.",
+        "type": "academic_offering",
+        "metadata": {
+            "ects": 120,
+            "duration": "2 years / 4 semesters",
+            "language": "English",
+            "cost": "Free (approx. €150/semester fee for student services and transport)",
+            "founded": 2012,
+            "application_deadline": "June 10",
+            "application_opens": "November 1",
+            "contact_email": "letters.mcmp.masters@lrz.uni-muenchen.de",
+            "coordinators": [
+                "Norbert Gratzl",
+                "Alexander Reutlinger"
+            ],
+            "required_documents": [
+                "Cover letter (1–2 pages)",
+                "CV",
+                "Official transcript",
+                "Writing sample (max 15 pages)",
+                "English proficiency certificate (C1)",
+                "Two letters of recommendation"
+            ],
+            "admission_requirements": [
+                "Previous degree equivalent to at least 150 ECTS",
+                "Average grade of 2.0 or better",
+                "English proficiency: C1 level",
+                "German language: A1 level by end of Year 1"
+            ]
+        },
+        "scraped_at": "2026-04-07T14:56:56.037209"
+    },
+    {
+        "title": "PhD Program",
+        "offering_type": "phd",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/for-students/",
+        "description": "The doctorate (Dr. phil.) serves to demonstrate the ability of the doctoral student to perform original and in-depth academic research and is based on a written dissertation (doctoral thesis), conducted independently, and, finally, a defense of the dissertation. The core element of the doctorate is the doctoral thesis or dissertation. The topic of the dissertation is agreed upon with the candidate's academic supervisor. The student then produces the dissertation as a piece of independent research, which serves to demonstrate the new academic knowledge gained during the doctoral project.\n\nAt the MCMP, such a dissertation prepared in the form of an individual project, supervised by one of our authorized examiners. More information can be found in the tabs below.",
+        "type": "academic_offering",
+        "metadata": {},
+        "scraped_at": "2026-04-07T14:56:56.037516"
+    },
+    {
+        "title": "Learning Materials",
+        "offering_type": "learning_materials",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/for-students/",
+        "description": "Just as in any other area in which logical or mathematical methods are being used, it is necessary to understand and practise these methods before they can be applied successfully. One way of achieving this is of course to take courses at the MCMP. Additionally, here is some background material on logic and philosophy that will be of use for self-study:",
+        "type": "academic_offering",
+        "metadata": {},
+        "scraped_at": "2026-04-07T14:56:56.038493"
+    },
+    {
+        "title": "",
+        "offering_type": "general",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/for-students/",
+        "description": "Basic Teach Yourself Logic: A Guide Eine Einführung in die klassische Aussagen- und Prädikatenlogik (PDF, 1,106 KB) (lecture notes on introductory logic in German, 277 pages) An Introduction to Mathematical Logic (PDF, 549 KB) (for mathematicians, 147 pages) Logic in Philosophy of Mathematics (PDF, 174 KB) (article, 27 pages) Logic in Philosophy of Science (PDF, 162 KB) (article, 14 pages) Basic Set Theory (PDF, 166 KB) (lecture notes, 6 pages) Basic Set Theory II (PDF, 170 KB) (lecture notes, 5 pages) Introduction to Model Theory (PDF, 309 KB) (lecture notes, 4 pages) Notes on Formal Methods (PDF, 360 KB) (55 pages) Notes on Modal Logic (14 pages) Introduction to Formal Epistemology (lecture notes, 52 pages) Advanced A Philosophers' Guide to Forcing (PDF, 402 KB) (by Toby Meadows) Advanced Logic (PDF, 650 KB) (lecture notes by Toby Meadows, 145 pages) Introduction to Categorical Logic (lecture notes by Steve Awodey and Andrej Bauer, 57 pages) Bayesian epistemology I: Probabilism and its Dutch Book argument (PDF, 84 KB) (by Richard Pettigrew, 2 pages) Bayesian epistemology II: Arguments for Probabilism (PDF, 119 KB) (by Richard Pettigrew, 5 pages) Bayesian epistemology III: Arguments for Conditionalization (PDF, 93 KB) (by Richard Pettigrew, 4 pages) Introduction to Neighborhood Semantics (lecture notes by Eric Pacuit, 38 pages) Set theory - basics and advanced overview (PDF, 521 KB) (by Toby Meadows, 91 pages) The Compactness and Löwenheim-Skolem Theorems (PDF, 220 KB) (by Benedict Eastaugh, 6 pages) Truth and Paradox (PDF, 323 KB) (by Toby Meadows, 45 pages) An Introduction to Toposes (PDF, 420 KB) (lecture notes for mathematicians by Richard Pettigrew, 63 pages)",
+        "type": "academic_offering",
+        "metadata": {},
+        "scraped_at": "2026-04-07T14:56:56.038884"
+    }
+]
