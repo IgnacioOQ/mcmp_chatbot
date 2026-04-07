@@ -208,7 +208,7 @@ class MCPServer:
                         },
                         "database": {
                             "type": "string",
-                            "enum": ["all", "people", "research", "events"],
+                            "enum": ["all", "people", "research", "events", "academic_offerings"],
                             "description": "Which database to search. Default is 'all'."
                         },
                         "fields": {

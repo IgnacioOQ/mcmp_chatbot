@@ -282,9 +282,10 @@ def search_graph(query: str) -> List[Dict[str, Any]]:
 # ── Grep helpers ─────────────────────────────────────────────────────────────
 
 _GREP_DB_MAP: Dict[str, Tuple[str, Any]] = {
-    "people":   ("people.json",     lambda e: e.get("name",  e.get("url", "?"))),
-    "research": ("research.json",   lambda e: e.get("name",  "?")),
-    "events":   ("raw_events.json", lambda e: e.get("title", "?")),
+    "people":             ("people.json",              lambda e: e.get("name",  e.get("url", "?"))),
+    "research":           ("research.json",            lambda e: e.get("name",  "?")),
+    "events":             ("raw_events.json",          lambda e: e.get("title", "?")),
+    "academic_offerings": ("academic_offerings.json",  lambda e: e.get("title", "?")),
 }
 
 _SNIPPET_RADIUS = 80  # characters to show either side of the match
@@ -440,7 +441,7 @@ def search_academic_offerings(
                 continue
 
         metadata = offering.get("metadata", {})
-        results.append({
+        entry = {
             "program": offering.get("title"),
             "offering_type": offering.get("offering_type"),
             "url": offering.get("url"),
@@ -458,7 +459,9 @@ def search_academic_offerings(
             "admission_requirements": metadata.get("admission_requirements"),
             "open_to": metadata.get("open_to"),
             "external_resources": metadata.get("external_resources"),
-        })
+        }
+        # Strip None values — Gemini's function calling may discard results containing None
+        results.append({k: v for k, v in entry.items() if v is not None})
 
     return results[:10]
 
