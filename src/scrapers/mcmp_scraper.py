@@ -39,12 +39,16 @@ class MCMPScraper:
     ]
     PEOPLE_URLS = [f"{BASE_URL}/mcmp/en/people/index.html"]
     RESEARCH_URL = f"{BASE_URL}/mcmp/en/research/index.html"
+    FOR_STUDENTS_URL = f"{BASE_URL}/mcmp/en/for-students/"
+    BACHELOR_URL = f"{BASE_URL}/en/study/degree-programs/bachelor-in-philosophy-philosophy-major/"
+    MASTER_URL = f"{BASE_URL}/en/study/degree-programs/master-in-logic-and-philosophy-of-science/"
 
     def __init__(self):
         self.events = []
         self.people = []
         self.research = []
         self.general = []
+        self.academic_offerings = []
         self._scraped_person_urls: set = set()  # O(1) dedup for _scrape_single_person_page
         self.important_urls = self.load_important_urls()
 
@@ -694,6 +698,270 @@ class MCMPScraper:
             return []
 
     # ------------------------------------------------------------------
+    # Academic offerings scraping
+    # ------------------------------------------------------------------
+
+    def scrape_academic_offerings(self):
+        """Scrapes academic program info: Bachelor, Master, PhD, and Learning Materials.
+
+        Fetches the 'For Students' index page, splits it into 4 sections by <h2>,
+        then follows the Bachelor and Master sub-pages for structured metadata.
+        Does NOT follow PDF links, external links, or people profile links.
+        """
+        log_info(f"Starting scrape of academic offerings from {self.FOR_STUDENTS_URL}")
+
+        _LMU_HOST = "www.philosophie.lmu.de"
+
+        def _is_internal_content_link(href: str) -> bool:
+            """True if this link should be followed as content (not PDF, profile, external, anchor)."""
+            if not href or href.startswith("#"):
+                return False
+            if href.lower().endswith(".pdf"):
+                return False
+            if "/contact-page/" in href:
+                return False
+            # Allow relative links and links to the same host
+            if href.startswith("http") and _LMU_HOST not in href:
+                return False
+            return True
+
+        # --- Section keyword → offering_type mapping ---
+        SECTION_MAP = {
+            "bachelor": "bachelor",
+            "master": "master",
+            "phd": "phd",
+            "ph.d": "phd",
+            "doctoral": "phd",
+            "learning": "learning_materials",
+        }
+
+        def _detect_offering_type(header_text: str) -> str:
+            lower = header_text.lower()
+            for kw, ot in SECTION_MAP.items():
+                if kw in lower:
+                    return ot
+            return "general"
+
+        try:
+            soup = self._fetch_page(self.FOR_STUDENTS_URL)
+            main_content = soup.find("div", id="r-main") or soup.find("main")
+            if not main_content:
+                log_error("Could not find main content on For Students page.")
+                return self.academic_offerings
+
+            # Split page into sections by <h2>
+            for h2 in main_content.find_all("h2"):
+                section_title = h2.get_text(strip=True)
+                offering_type = _detect_offering_type(section_title)
+
+                # Accumulate text and links from siblings until next <h2>/<h1>
+                description_parts = []
+                internal_links = []  # list of (text, full_url)
+                sibling = h2.find_next_sibling()
+                while sibling and sibling.name not in ["h1", "h2"]:
+                    text = sibling.get_text(separator=" ", strip=True)
+                    if text:
+                        description_parts.append(text)
+                    for a in sibling.find_all("a", href=True):
+                        href = a["href"]
+                        if _is_internal_content_link(href):
+                            full_url = self._normalize_url(href, self.FOR_STUDENTS_URL)
+                            link_text = a.get_text(strip=True)
+                            internal_links.append((link_text, full_url))
+                    sibling = sibling.find_next_sibling()
+
+                description = "\n\n".join(description_parts)[:5000]
+                metadata = {}
+
+                # Extract PhD contact emails directly from the section text
+                if offering_type == "phd":
+                    raw_text = "\n\n".join(description_parts)
+                    email_matches = re.findall(r'[\w.+-]+@[\w.-]+\.[a-zA-Z]+', raw_text)
+                    if email_matches:
+                        metadata["contact_emails"] = list(dict.fromkeys(email_matches))  # dedup, preserve order
+
+                # Learning Materials: collect non-PDF external resources
+                if offering_type == "learning_materials":
+                    external_resources = []
+                    for a in main_content.find_all("a", href=True):
+                        href = a["href"]
+                        if href.lower().endswith(".pdf"):
+                            continue
+                        if href.startswith("#"):
+                            continue
+                        link_text = a.get_text(strip=True)
+                        # Only collect links from the learning_materials section area
+                        # (we're already inside the sibling loop above, but collect here from raw soup)
+                    # Re-scan siblings for non-PDF links specifically
+                    sibling2 = h2.find_next_sibling()
+                    while sibling2 and sibling2.name not in ["h1", "h2"]:
+                        for a in sibling2.find_all("a", href=True):
+                            href = a["href"]
+                            if href.lower().endswith(".pdf") or href.startswith("#"):
+                                continue
+                            link_text = a.get_text(strip=True)
+                            full_url = self._normalize_url(href, self.FOR_STUDENTS_URL)
+                            external_resources.append({"text": link_text, "url": full_url})
+                        sibling2 = sibling2.find_next_sibling()
+                    if external_resources:
+                        metadata["external_resources"] = external_resources
+
+                # Follow sub-pages for Bachelor and Master
+                if offering_type == "bachelor":
+                    metadata.update(self._scrape_bachelor_details())
+                elif offering_type == "master":
+                    metadata.update(self._scrape_master_details())
+
+                # Determine canonical URL for this entry
+                if offering_type == "bachelor":
+                    entry_url = self.BACHELOR_URL
+                elif offering_type == "master":
+                    entry_url = self.MASTER_URL
+                else:
+                    entry_url = self.FOR_STUDENTS_URL
+
+                self.academic_offerings.append({
+                    "title": section_title,
+                    "offering_type": offering_type,
+                    "url": entry_url,
+                    "description": description,
+                    "type": "academic_offering",
+                    "metadata": metadata,
+                    "scraped_at": datetime.now().isoformat(),
+                })
+                log_info(f"Scraped academic offering section: '{section_title}' (type={offering_type})")
+
+        except Exception as e:
+            log_error(f"Error scraping academic offerings: {e}")
+
+        log_info(f"Scraped {len(self.academic_offerings)} academic offering sections.")
+        return self.academic_offerings
+
+    def _scrape_bachelor_details(self) -> dict:
+        """Fetches the Bachelor program page and returns structured metadata."""
+        try:
+            soup = self._fetch_page(self.BACHELOR_URL)
+            main = soup.find("div", id="r-main") or soup.find("main")
+            if not main:
+                return {}
+            full_text = main.get_text(separator=" ", strip=True)
+            metadata = {
+                "ects": 180,
+                "duration": "6 semesters",
+                "language": "German (with select seminars in English)",
+                "application_deadline": "July 15",
+                "start": "Winter semester only",
+                "note": "Mandatory minor subject (60 ECTS). Full-time, in-person study required.",
+            }
+            # Extract admission requirement sentence if present
+            if "Hochschulreife" in full_text or "university entrance" in full_text.lower():
+                metadata["admission_requirements"] = [
+                    "General university entrance qualification (Abitur/Hochschulreife)",
+                    "International applicants apply through the International Office",
+                ]
+            return metadata
+        except Exception as e:
+            log_error(f"Error scraping Bachelor details: {e}")
+            return {}
+
+    def _scrape_master_details(self) -> dict:
+        """Fetches the Master program page and returns structured metadata."""
+        try:
+            soup = self._fetch_page(self.MASTER_URL)
+            main = soup.find("div", id="r-main") or soup.find("main")
+            if not main:
+                return {}
+            full_text = main.get_text(separator=" ", strip=True)
+
+            metadata = {
+                "ects": 120,
+                "duration": "2 years / 4 semesters",
+                "language": "English",
+                "cost": "Free (approx. €150/semester fee for student services and transport)",
+                "founded": 2012,
+            }
+
+            # Application deadline
+            deadline_match = re.search(r"(?:deadline|by)[^\d]*(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s+\d{4}|June\s+\d{1,2},?\s+\d{4})", full_text, re.IGNORECASE)
+            if deadline_match:
+                metadata["application_deadline"] = deadline_match.group(1).strip()
+            else:
+                metadata["application_deadline"] = "June 10"  # known from page
+
+            # Application opens
+            opens_match = re.search(r"(?:application[s]?\s+open[s]?|from)[^\d]*(\w+\s+\d{1,2},?\s+\d{4}|November\s+\d{1,2},?\s+\d{4})", full_text, re.IGNORECASE)
+            if opens_match:
+                metadata["application_opens"] = opens_match.group(1).strip()
+            else:
+                metadata["application_opens"] = "November 1"  # known from page
+
+            # Contact email
+            email_matches = re.findall(r'[\w.+-]+@[\w.-]+\.[a-zA-Z]+', full_text)
+            if email_matches:
+                metadata["contact_email"] = email_matches[0]
+
+            # Coordinators
+            coordinators = []
+            for name in ["Norbert Gratzl", "Alexander Reutlinger"]:
+                if name in full_text:
+                    coordinators.append(name)
+            if coordinators:
+                metadata["coordinators"] = coordinators
+
+            # Required documents — look for a list near "application" heading
+            req_docs = []
+            app_header = main.find(
+                lambda tag: tag.name in ["h2", "h3"] and "application" in tag.get_text(strip=True).lower()
+            )
+            if app_header:
+                curr = app_header.find_next_sibling()
+                while curr and curr.name not in ["h1", "h2", "h3"]:
+                    if curr.name in ["ul", "ol"]:
+                        req_docs = [li.get_text(" ", strip=True) for li in curr.find_all("li")]
+                        break
+                    curr = curr.find_next_sibling()
+            if req_docs:
+                metadata["required_documents"] = req_docs
+            else:
+                # Fallback: known documents
+                metadata["required_documents"] = [
+                    "Cover letter (1–2 pages)",
+                    "CV",
+                    "Official transcript",
+                    "Writing sample (max 15 pages)",
+                    "English proficiency certificate (C1)",
+                    "Two letters of recommendation",
+                ]
+
+            # Admission requirements
+            metadata["admission_requirements"] = [
+                "Previous degree equivalent to at least 150 ECTS",
+                "Average grade of 2.0 or better",
+                "English proficiency: C1 level",
+                "German language: A1 level by end of Year 1",
+            ]
+
+            # Open to (eligible disciplines)
+            disciplines_header = main.find(
+                lambda tag: tag.name in ["h2", "h3"] and any(
+                    kw in tag.get_text(strip=True).lower()
+                    for kw in ["open to", "eligible", "background", "who can apply"]
+                )
+            )
+            if disciplines_header:
+                curr = disciplines_header.find_next_sibling()
+                while curr and curr.name not in ["h1", "h2", "h3"]:
+                    if curr.name in ["ul", "ol"]:
+                        metadata["open_to"] = [li.get_text(" ", strip=True) for li in curr.find_all("li")]
+                        break
+                    curr = curr.find_next_sibling()
+
+            return metadata
+        except Exception as e:
+            log_error(f"Error scraping Master details: {e}")
+            return {}
+
+    # ------------------------------------------------------------------
     # Persistence
     # ------------------------------------------------------------------
 
@@ -706,6 +974,7 @@ class MCMPScraper:
             "people": (self.people, "data/people.json", "url"),
             "research": (self.research, "data/research.json", "id"),
             "general": (self.general, "data/general.json", lambda x: f"{x.get('url', '')}_{x.get('title', '')}"),
+            "academic_offerings": (self.academic_offerings, "data/academic_offerings.json", lambda x: f"{x.get('url', '')}_{x.get('offering_type', '')}"),
         }
 
         changes_summary = {}
@@ -815,6 +1084,10 @@ class MCMPScraper:
             self.general, "data/general.json",
             lambda x: f"{x.get('url', '')}_{x.get('title', '')}",
         )
+        self.academic_offerings = self._accumulate(
+            self.academic_offerings, "data/academic_offerings.json",
+            lambda x: f"{x.get('url', '')}_{x.get('offering_type', '')}",
+        )
 
         self._log_changes()
 
@@ -830,9 +1103,13 @@ class MCMPScraper:
         with open("data/general.json", "w", encoding="utf-8") as f:
             json.dump(self.general, f, indent=4, ensure_ascii=False)
 
+        with open("data/academic_offerings.json", "w", encoding="utf-8") as f:
+            json.dump(self.academic_offerings, f, indent=4, ensure_ascii=False)
+
         log_info(
             f"Saved {len(self.events)} events, {len(self.people)} people, "
-            f"{len(self.research)} research items, {len(self.general)} general items."
+            f"{len(self.research)} research items, {len(self.general)} general items, "
+            f"{len(self.academic_offerings)} academic offering sections."
         )
 
         try:

@@ -402,6 +402,62 @@ def grep_data(
     return results
 
 
+def search_academic_offerings(
+    query: Optional[str] = None,
+    offering_type: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Search academic program info at the MCMP: Master, Bachelor, PhD pathways, and Learning Materials.
+    Use for questions about degree programs, application requirements, deadlines, coordinators,
+    required documents, contact emails, and study resources.
+
+    Args:
+        query: Keyword to search (e.g. "application deadline", "ECTS", "requirements", "PhD").
+        offering_type: Optional filter — "master", "bachelor", "phd", "learning_materials".
+    """
+    offerings = load_data("academic_offerings.json")
+    results = []
+
+    query_lower = _normalize(query) if query else ""
+    offering_type_lower = offering_type.lower() if offering_type else ""
+
+    for offering in offerings:
+        if offering_type_lower and offering_type_lower not in offering.get("offering_type", "").lower():
+            continue
+
+        if query_lower:
+            searchable = _normalize(
+                offering.get("title", "") + " "
+                + offering.get("description", "") + " "
+                + json.dumps(offering.get("metadata", {}))
+            )
+            if query_lower not in searchable:
+                continue
+
+        metadata = offering.get("metadata", {})
+        results.append({
+            "program": offering.get("title"),
+            "offering_type": offering.get("offering_type"),
+            "url": offering.get("url"),
+            "description": offering.get("description", "")[:1000],
+            "ects": metadata.get("ects"),
+            "duration": metadata.get("duration"),
+            "language": metadata.get("language"),
+            "cost": metadata.get("cost"),
+            "application_deadline": metadata.get("application_deadline"),
+            "application_opens": metadata.get("application_opens"),
+            "coordinators": metadata.get("coordinators"),
+            "contact_email": metadata.get("contact_email"),
+            "contact_emails": metadata.get("contact_emails"),
+            "required_documents": metadata.get("required_documents"),
+            "admission_requirements": metadata.get("admission_requirements"),
+            "open_to": metadata.get("open_to"),
+            "external_resources": metadata.get("external_resources"),
+        })
+
+    return results[:10]
+
+
 # ---------------------------------------------------------------------------
 # Tool: ask_clarification
 # ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from src.mcp.tools import search_people, search_research, get_events, search_graph, grep_data, ask_clarification
+from src.mcp.tools import search_people, search_research, get_events, search_graph, grep_data, ask_clarification, search_academic_offerings
 from src.utils.logger import log_latency
 import json
 
@@ -17,6 +17,7 @@ class MCPServer:
             "get_events": get_events,
             "search_graph": search_graph,
             "grep_data": grep_data,
+            "search_academic_offerings": search_academic_offerings,
         }
         
     def list_tools(self) -> List[Dict[str, Any]]:
@@ -152,6 +153,34 @@ class MCPServer:
                         "type_filter": {
                             "type": "string",
                             "description": "Filter by event type. Examples: 'Talk', 'Workshop', 'Reading Group'."
+                        }
+                    }
+                }
+            },
+            {
+                "name": "search_academic_offerings",
+                "description": (
+                    "Search academic program information at the MCMP: degree programs, application requirements, "
+                    "deadlines, coordinators, required documents, and learning materials. "
+                    "Use for any question about the Master in Logic and Philosophy of Science, "
+                    "the Bachelor in Philosophy, PhD application pathways, or study resources. "
+                    "Examples: 'How do I apply for the Master program?', 'What are the PhD application contacts?', "
+                    "'What is the application deadline?', 'What documents are needed to apply?'"
+                ),
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": (
+                                "Keyword or phrase to search across program descriptions and metadata. "
+                                "Examples: 'application deadline', 'ECTS', 'required documents', 'logic', 'PhD'."
+                            )
+                        },
+                        "offering_type": {
+                            "type": "string",
+                            "enum": ["master", "bachelor", "phd", "learning_materials"],
+                            "description": "Optional filter by program type."
                         }
                     }
                 }
