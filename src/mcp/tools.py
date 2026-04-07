@@ -1,4 +1,3 @@
-import functools
 import json
 import os
 import re
@@ -23,15 +22,19 @@ def _normalize(text: str) -> str:
     """Lowercase and strip diacritics so 'gonzalez' matches 'González'."""
     return unicodedata.normalize("NFD", text.lower()).encode("ascii", "ignore").decode("ascii")
 
-@functools.lru_cache(maxsize=32)
+# Manual cache: only stores files that were successfully loaded.
+# lru_cache was replaced because it caches missing-file [] results, causing
+# tools to return empty permanently if a dataset didn't exist at first call.
+_data_cache: Dict[str, List[Dict[str, Any]]] = {}
+
 def load_data(filename: str) -> List[Dict[str, Any]]:
-    path = os.path.join(DATA_DIR, filename)
-    if not os.path.exists(path):
-        # Do NOT cache a missing file — clear so next call retries the disk
-        load_data.cache_clear()
-        return []
-    with open(path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+    if filename not in _data_cache:
+        path = os.path.join(DATA_DIR, filename)
+        if not os.path.exists(path):
+            return []  # not cached — next call will retry the disk
+        with open(path, "r", encoding="utf-8") as f:
+            _data_cache[filename] = json.load(f)
+    return _data_cache[filename]
 
 def search_people(query: str) -> List[Dict[str, Any]]:
     """
