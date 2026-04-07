@@ -278,6 +278,122 @@ Improved Python CLIs in `manager` and `language` to be POSIX-friendly and suppor
 ### Summary
 Created a generic shell wrapper `sh2py3.sh` and symlinks for python scripts in `bin/` directory.
 
+## [2026-04-07] Academic Offerings Scraper — Implemented, NOT RESOLVED ⚠️
+
+**Status**: UNRESOLVED — feature is fully implemented and working locally but non-functional in production.
+**Agent**: Claude (Sonnet 4.6)
+**Task**: Add scraping and MCP tool coverage for the MCMP "For Students" section (degree programs, application requirements, PhD pathways, learning materials).
+
+---
+
+### What Was Built
+
+**New scraper method** (`src/scrapers/mcmp_scraper.py`):
+- `scrape_academic_offerings()` — scrapes `mcmp/en/for-students/`, splits by `<h2>` into 4 sections (`bachelor`, `master`, `phd`, `learning_materials`), follows Bachelor and Master sub-pages for structured metadata (ECTS, deadlines, coordinators, required documents, contact emails).
+- `_scrape_bachelor_details()` and `_scrape_master_details()` helpers.
+- Class-level constants: `FOR_STUDENTS_URL`, `BACHELOR_URL`, `MASTER_URL`.
+- `self.academic_offerings = []` added to `__init__`.
+- `save_to_json()` and `_log_changes()` extended to handle `data/academic_offerings.json`.
+
+**Time-gated scraping** (`scripts/update_dataset.py`):
+- Academic offerings are throttled to at most once per 30 days (programs change infrequently).
+- `--scrape-offerings` flag forces a re-scrape regardless.
+- `should_scrape_academic_offerings()` checks `scraping_logs.json` for the last run timestamp.
+
+**New MCP tool** (`src/mcp/tools.py`, `src/mcp/server.py`):
+- `search_academic_offerings(query, offering_type)` — filters by type and keyword, returns structured program info (deadline, coordinators, contact, required docs, ECTS, duration, language).
+- Registered in `MCPServer` and `list_tools()` with full JSON schema.
+- Added `academic_offerings` to `_GREP_DB_MAP` so `grep_data` also searches it as a fallback.
+
+**Load cache fix** (`src/mcp/tools.py`):
+- Replaced `@functools.lru_cache` with a manual `_data_cache` dict. The old `lru_cache` permanently cached `[]` for any file that didn't exist at first call — meaning if a new dataset file was added after app startup, the tool would return empty forever until the process was restarted. The new dict only stores successful loads; missing files are never cached and retry on every call.
+
+**Tool selection guide updated** (`src/core/engine.py`):
+- Added explicit rule: "User asks about a degree program, MA, Master, Bachelor, PhD, how to apply → `search_academic_offerings(offering_type='...')`".
+- Bumped `maximum_remote_calls` from 5 to 10.
+
+**Personality updated** (`prompts/personality.md`):
+- Added mandatory block format for academic offerings (mirrors the existing people/events formats), ensuring the LLM always includes a `Link:` bullet with the program URL.
+
+---
+
+### The Problem (Unresolved)
+
+The chatbot consistently fails to answer questions about the MA program:
+
+```
+User: talk to me about the MA program
+
+⚙️ Calling search_academic_offerings: master
+⚙️ Calling search_academic_offerings: MA
+⚙️ Calling search_academic_offerings: application
+⚙️ Calling search_academic_offerings: master's program
+🔎 Running text search: master
+
+I am sorry, I cannot find any information about a Master's program at the MCMP.
+```
+
+The tool is called correctly by Gemini (4 times with different keyword extractions), but returns `[]` every time. The `grep_data` fallback finds only incidental mentions of "master" in `people.json` bios, not the actual program entry.
+
+**Root cause confirmed via debug logging** (`journalctl --user -u streamlit-app`):
+
+```
+[search_academic_offerings] query=None offering_type='master' offerings_loaded=0
+[search_academic_offerings] query='MA' offering_type=None offerings_loaded=0
+[search_academic_offerings] query='application' offering_type='master' offerings_loaded=0
+```
+
+`offerings_loaded=0` on every call — `load_data("academic_offerings.json")` returns `[]` because **`data/academic_offerings.json` does not exist on the production server** (host `mcmp`, running via systemd service `streamlit-app`).
+
+The file was generated locally (macOS, `/Users/ignacio/Documents/VS Code/GitHub Repositories/mcmp_chatbot/data/academic_offerings.json`, 5 entries, 8 KB) but was never transferred to the server or generated there.
+
+**What we do NOT yet know**: the exact filesystem path where the server expects the file. A second diagnostic log line was added:
+
+```python
+_log(f"... path_exists={_os.path.exists(_expected_path)} path={_expected_path}")
+```
+
+This log line was added but the `path=` value has not been captured yet because the app was not restarted after this log was added (or the log output was not collected). This log is still present in `tools.py` and will emit on next restart + query.
+
+**What was ruled out during debugging**:
+- The tool function itself works correctly — verified by direct `python3 -c` invocation, returning 1 result for `offering_type='master'`.
+- The instrumented wrapper (used by Gemini's automatic function calling) also works correctly — verified via `MCPServer.get_instrumented_tools()` test.
+- File permissions are fine (`-rw-r--r--`).
+- `DATA_DIR` is computed correctly from `__file__` (absolute path, not CWD-dependent).
+- The `_data_cache` replacement correctly handles missing files without caching the empty result.
+- The issue is purely that the file is absent from the server's filesystem.
+
+---
+
+### Resolution Steps for Next Session
+
+1. **Get the server path**: Restart the app (`systemctl restart --user streamlit-app`), ask "talk to me about the MA program", then run:
+   ```bash
+   journalctl --user -u streamlit-app -n 30 | grep "search_academic_offerings"
+   ```
+   Read the `path=` field from the log output.
+
+2. **Deploy the file**: Either:
+   - Copy from local: `scp data/academic_offerings.json user@mcmp:<path_from_log>`
+   - Or generate on server: `cd <project_dir> && python scripts/update_dataset.py --scrape-offerings`
+
+3. **Verify**: Ask "talk to me about the MA program" — the tool should return 1 result and the chatbot should render the full program block with link.
+
+4. **Cleanup**: Remove the debug log lines from `search_academic_offerings` in `src/mcp/tools.py` (the two lines starting with `from src.utils.logger import log_info as _log` and `_log(f"[search_academic_offerings]..."`).
+
+---
+
+### All Code Changes Made (All on Local, Deployed to Server via Git Except the JSON Data File)
+- `src/scrapers/mcmp_scraper.py`: Added constants, `self.academic_offerings`, `scrape_academic_offerings()`, `_scrape_bachelor_details()`, `_scrape_master_details()`, extended `save_to_json()` and `_log_changes()`.
+- `scripts/update_dataset.py`: Added `argparse`, `should_scrape_academic_offerings()`, `--scrape-offerings` flag.
+- `src/mcp/tools.py`: Added `search_academic_offerings()`, added `academic_offerings` to `_GREP_DB_MAP`, replaced `lru_cache` with `_data_cache` dict, added **temporary debug log** (still present — remove after resolution).
+- `src/mcp/server.py`: Imported and registered `search_academic_offerings` in tools dict and `list_tools()`.
+- `src/core/engine.py`: Updated tool selection guide, bumped `maximum_remote_calls` to 10.
+- `prompts/personality.md`: Added academic offering block format.
+- `data/academic_offerings.json`: **Created locally only. 5 entries: bachelor, master, phd, learning_materials, learning_materials list. NOT on server.**
+
+---
+
 ## [2026-04-01] Caching in MCP Tools
 
 **Agent**: Jules
