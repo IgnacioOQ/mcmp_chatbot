@@ -424,6 +424,9 @@ def search_academic_offerings(
     offerings = load_data("academic_offerings.json")
     results = []
 
+    from src.utils.logger import log_info as _log
+    _log(f"[search_academic_offerings] query={query!r} offering_type={offering_type!r} offerings_loaded={len(offerings)}")
+
     query_lower = _normalize(query) if query else ""
     offering_type_lower = offering_type.lower() if offering_type else ""
 
