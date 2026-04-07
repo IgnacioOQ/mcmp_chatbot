@@ -425,7 +425,9 @@ def search_academic_offerings(
     results = []
 
     from src.utils.logger import log_info as _log
-    _log(f"[search_academic_offerings] query={query!r} offering_type={offering_type!r} offerings_loaded={len(offerings)}")
+    import os as _os
+    _expected_path = _os.path.join(DATA_DIR, "academic_offerings.json")
+    _log(f"[search_academic_offerings] query={query!r} offering_type={offering_type!r} offerings_loaded={len(offerings)} path_exists={_os.path.exists(_expected_path)} path={_expected_path}")
 
     query_lower = _normalize(query) if query else ""
     offering_type_lower = offering_type.lower() if offering_type else ""
