@@ -276,6 +276,7 @@ def main():
                             "speaker": speaker,
                             "date": event_date,
                             "time": meta.get("time_start", "Time TBA"),
+                            "location": meta.get("location"),
                             "url": event.get("url", "#")
                         })
                 except ValueError:
@@ -290,7 +291,8 @@ def main():
                     date_fmt = ev["date"].strftime("%A, %d")
                     st.markdown(f"**{ev['speaker']}**")
                     st.markdown(f"[{ev['title']}]({ev['url']})")
-                    st.caption(f"📅 {date_fmt} at {ev['time']}")
+                    location_str = f" · 📍 {ev['location']}" if ev.get("location") else ""
+                    st.caption(f"📅 {date_fmt} at {ev['time']}{location_str}")
                     st.markdown("---")
             
         except Exception as e:
