@@ -372,6 +372,24 @@ class MCMPScraper:
             try:
                 soup = self._fetch_page(people_url)
 
+                # The LMU CMS may place the people index at one path (e.g. /mcmp/en/people/)
+                # while all individual contact pages live under a different base (e.g.
+                # /en/directory-of-persons/). A <base href="..."> tag in the HTML tells browsers
+                # the correct base for resolving relative links — we must honour it too,
+                # otherwise relative hrefs like "contact-page/name-id.html" get resolved against
+                # the wrong directory and produce 404 URLs.
+                base_tag = soup.find("base", href=True)
+                if base_tag:
+                    raw_base = base_tag["href"].rstrip("/")
+                    effective_base = raw_base if raw_base.startswith("http") else f"{self.BASE_URL}{raw_base}"
+                else:
+                    if people_url.endswith("index.html"):
+                        effective_base = people_url.rsplit("/", 1)[0]
+                    elif people_url.endswith("/"):
+                        effective_base = people_url.rstrip("/")
+                    else:
+                        effective_base = people_url
+
                 profiles_to_visit = set()
                 for link in soup.find_all("a", href=True):
                     href = link["href"]
@@ -389,13 +407,7 @@ class MCMPScraper:
                         elif href.startswith("/"):
                             full_url = f"{self.BASE_URL}{href}"
                         else:
-                            if people_url.endswith("index.html"):
-                                base = people_url.rsplit("/", 1)[0]
-                            elif people_url.endswith("/"):
-                                base = people_url.rstrip("/")
-                            else:
-                                base = people_url
-                            full_url = f"{base}/{href}"
+                            full_url = f"{effective_base}/{href}"
 
                         profiles_to_visit.add(full_url)
 
