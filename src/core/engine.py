@@ -103,7 +103,7 @@ class ChatEngine:
     # ── Public API ───────────────────────────────────────────────────────────
 
     def generate_response(self, query: str, use_mcp_tools: bool = False,
-                          model_name: str = "gemini-2.5-flash",
+                          model_name: str = "gemini-2.0-flash-lite",
                           chat_history: list = None,
                           status_callback=None) -> str:
         """
