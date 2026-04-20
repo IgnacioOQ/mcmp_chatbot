@@ -6,7 +6,6 @@ from src.core.personality import load_personality
 from src.mcp.server import MCPServer
 from src.utils.logger import log_info, log_error, log_latency
 import openai
-from anthropic import Anthropic
 from datetime import datetime
 
 load_dotenv()
