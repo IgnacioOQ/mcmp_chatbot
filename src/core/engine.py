@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from dotenv import load_dotenv
 from src.core.personality import load_personality
 from src.mcp.server import MCPServer
@@ -223,7 +224,21 @@ class ChatEngine:
                     )
 
                 with log_latency("llm_api_call"):
-                    response = chat.send_message(query)
+                    delays = [5, 10]
+                    for attempt, delay in enumerate([None] + delays):
+                        if delay:
+                            log_info(f"429 received, retrying in {delay}s (attempt {attempt + 1})...")
+                            time.sleep(delay)
+                        try:
+                            response = chat.send_message(query)
+                            break
+                        except Exception as e:
+                            if "429" in str(e) and attempt < len(delays):
+                                last_exc = e
+                                continue
+                            raise
+                    else:
+                        raise last_exc
                 return response.text
 
         except Exception as e:
