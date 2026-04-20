@@ -278,7 +278,7 @@ Improved Python CLIs in `manager` and `language` to be POSIX-friendly and suppor
 ### Summary
 Created a generic shell wrapper `sh2py3.sh` and symlinks for python scripts in `bin/` directory.
 
-## [2026-04-20] Transient 429 Handling + Latency Observation
+## [2026-04-20] 429 Errors — Resolved ✅
 
 **Agent**: Claude (Sonnet 4.6)
 **Task**: Investigate and mitigate `429 RESOURCE_EXHAUSTED` errors from the Gemini API.
@@ -288,6 +288,15 @@ The 429s are **not** quota exhaustion — confirmed via the AI Studio dashboard 
 
 ### Fix
 Added exponential backoff retry to the Gemini `chat.send_message()` call in `src/core/engine.py`. On a 429, the engine waits 5s and retries, then 10s and retries, before surfacing the error to the user. Any other exception type is re-raised immediately.
+
+### Root Cause (Full)
+Two compounding issues:
+1. The `GEMINI_API_KEY` in `.streamlit/secrets.toml` had expired (returned `400 API_KEY_INVALID`). A new key was generated and applied to both `.env` and `secrets.toml`.
+2. `gemini-2.0-flash` was experiencing a model-level service degradation returning persistent 429s on `generateContent` — confirmed by `gemini-2.0-flash-lite` and `gemini-2.5-flash` succeeding on the same key/project. `gemini-2.5-flash` also supports tool/function calling and was switched in as the default model.
+
+### Resolution
+- Default model changed from `gemini-2.0-flash` → `gemini-2.5-flash` in `app.py` (both call sites) and `src/core/engine.py` (default parameter).
+- New API key applied to `.env` and `.streamlit/secrets.toml`.
 
 ### Open Issue — High GenerateContent Latency
 Cloud Console shows `GenerativeService.GenerateContent` with a **p99 latency of ~19.5 seconds**. The median is 1.754s, so the tail is extreme. Likely caused by multi-step tool-calling chains (up to `maximum_remote_calls=10`) where each tool round-trip adds a full LLM call. Worth profiling to determine whether reducing the remote call ceiling or batching tool results would help.

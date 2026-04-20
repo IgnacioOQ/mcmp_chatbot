@@ -103,7 +103,7 @@ class ChatEngine:
     # ── Public API ───────────────────────────────────────────────────────────
 
     def generate_response(self, query: str, use_mcp_tools: bool = False,
-                          model_name: str = "gemini-2.0-flash",
+                          model_name: str = "gemini-2.5-flash",
                           chat_history: list = None,
                           status_callback=None) -> str:
         """
@@ -223,7 +223,7 @@ class ChatEngine:
                     )
 
                 with log_latency("llm_api_call"):
-                    delays = [5, 10]
+                    delays = [15, 30]
                     for attempt, delay in enumerate([None] + delays):
                         if delay:
                             log_info(f"429 received, retrying in {delay}s (attempt {attempt + 1})...")
