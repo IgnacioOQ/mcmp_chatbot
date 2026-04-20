@@ -278,6 +278,27 @@ Improved Python CLIs in `manager` and `language` to be POSIX-friendly and suppor
 ### Summary
 Created a generic shell wrapper `sh2py3.sh` and symlinks for python scripts in `bin/` directory.
 
+## [2026-04-20] Transient 429 Handling + Latency Observation
+
+**Agent**: Claude (Sonnet 4.6)
+**Task**: Investigate and mitigate `429 RESOURCE_EXHAUSTED` errors from the Gemini API.
+
+### Root Cause
+The 429s are **not** quota exhaustion — confirmed via the AI Studio dashboard (RPM: 10/2000, TPM: 38.65K/4M, RPD: 122/Unlimited). They are transient server-side throttling from Google's infrastructure, unrelated to the project's usage levels.
+
+### Fix
+Added exponential backoff retry to the Gemini `chat.send_message()` call in `src/core/engine.py`. On a 429, the engine waits 5s and retries, then 10s and retries, before surfacing the error to the user. Any other exception type is re-raised immediately.
+
+### Open Issue — High GenerateContent Latency
+Cloud Console shows `GenerativeService.GenerateContent` with a **p99 latency of ~19.5 seconds**. The median is 1.754s, so the tail is extreme. Likely caused by multi-step tool-calling chains (up to `maximum_remote_calls=10`) where each tool round-trip adds a full LLM call. Worth profiling to determine whether reducing the remote call ceiling or batching tool results would help.
+
+### Changes
+- `src/core/engine.py`: Added `import time`; wrapped `chat.send_message(query)` with a retry loop (attempts: 3, delays: 5s / 10s on 429).
+- `src/core/engine.py`: Removed unused `from anthropic import Anthropic` import.
+- `requirements.txt`: Removed `anthropic` dependency.
+
+---
+
 ## [2026-04-07] Academic Offerings Scraper — Resolved ✅
 
 **Status**: RESOLVED — feature is fully implemented and working in production.
