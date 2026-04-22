@@ -67,6 +67,7 @@ class ChatEngine:
             "**TOOL SELECTION GUIDE** — pick the right tool for the query type:",
             "- User asks about a **person** (name, role, contact, publications, research) → `search_people(query='<name or keyword>')`, then optionally `search_graph(query='<name>')` for organizational context.",
             "- User asks about an **event, talk, or schedule** → `get_events(...)` with date range or keyword.",
+            "- User asks about events on a **specific date, day, or date range** → ALWAYS call `get_events(start_date='YYYY-MM-DD', end_date='YYYY-MM-DD')` — never answer from memory.",
             "- User asks about a **research area or field** (not a specific person) → `search_research(topic='<field>')`.",
             "- User asks about **organizational structure** (who leads what, supervisor, chair affiliation) → `search_graph(query='<name or unit>')`.",
             "- User asks about a **degree program, MA, Master, Bachelor, PhD, how to apply, application requirements, deadlines, or study programs** → `search_academic_offerings(offering_type='<master|bachelor|phd|learning_materials>')`. Use this FIRST for any question about studying at or applying to the MCMP.",
@@ -214,6 +215,9 @@ class ChatEngine:
                         config=types.GenerateContentConfig(
                             system_instruction=system_instruction,
                             tools=tools,
+                            tool_config=types.ToolConfig(
+                                function_calling_config=types.FunctionCallingConfig(mode="ANY")
+                            ) if tools else None,
                             automatic_function_calling=types.AutomaticFunctionCallingConfig(
                                 disable=False,
                                 maximum_remote_calls=10,
