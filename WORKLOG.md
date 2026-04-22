@@ -6,6 +6,15 @@
 
 <!-- content -->
 
+## 2026-04-22 — Gemini tool-calling reliability investigation and fix
+- **Task:** Diagnose why the chatbot was skipping MCP tool calls for date-based event queries after switching from `gemini-2.0-flash` to `gemini-2.0-flash-lite`.
+- **Outcome:** Added an explicit system prompt rule in `_build_tools_description_str()` (`engine.py`) mandating `get_events` for any specific date or date-range query. Also trialled `tool_config` with `mode="ANY"` (Gemini `FunctionCallingConfig`) to force tool use, but reverted it after it caused an infinite tool-calling loop — the model called tools on every turn including after receiving results, exhausting `maximum_remote_calls=10` per request. Final working state: `gemini-2.0-flash-lite` with `mode="AUTO"` (default) and stronger system prompt instructions.
+- **Key decisions:** `mode="ANY"` is incompatible with Automatic Function Calling (AFC) — it prevents the model from ever generating a final text response. `gemini-2.0-flash` was tested but hits 429 rate limits under free-tier usage. `gemini-2.0-flash-lite` + prompt engineering is the current pragmatic compromise.
+- **KB changes:** `content/reference/MCP_TOOLS_REF.md` updated — added subsection 5.D documenting the `mode="ANY"` infinite loop pitfall and the correct `mode="AUTO"` approach.
+- **Follow-up:** Tool-calling reliability with `gemini-2.0-flash-lite` remains imperfect for date queries. If rate limits are resolved (paid tier or quota increase), switching to `gemini-2.0-flash` would be the cleanest fix.
+
+---
+
 ## [2026-03-20] Data Accumulation Fix & Dataset Recovery
 
 **Agent**: Claude (Sonnet 4.6)
