@@ -349,7 +349,7 @@ def main():
                 response = st.session_state.engine.generate_response(
                     auto_prompt,
                     use_mcp_tools=True,
-                    model_name="gemini-2.0-flash-lite",
+                    model_name="gemini-2.0-flash",
                     chat_history=st.session_state.messages[:-1],
                     status_callback=_callback,
                 )
@@ -382,7 +382,7 @@ def main():
                 response = st.session_state.engine.generate_response(
                     prompt,
                     use_mcp_tools=True,
-                    model_name="gemini-2.0-flash-lite",
+                    model_name="gemini-2.0-flash",
                     chat_history=st.session_state.messages[:-1],
                     status_callback=_callback,
                 )

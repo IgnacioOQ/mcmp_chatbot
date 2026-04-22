@@ -104,7 +104,7 @@ class ChatEngine:
     # ── Public API ───────────────────────────────────────────────────────────
 
     def generate_response(self, query: str, use_mcp_tools: bool = False,
-                          model_name: str = "gemini-2.0-flash-lite",
+                          model_name: str = "gemini-2.0-flash",
                           chat_history: list = None,
                           status_callback=None) -> str:
         """
@@ -215,9 +215,6 @@ class ChatEngine:
                         config=types.GenerateContentConfig(
                             system_instruction=system_instruction,
                             tools=tools,
-                            tool_config=types.ToolConfig(
-                                function_calling_config=types.FunctionCallingConfig(mode="ANY")
-                            ) if tools else None,
                             automatic_function_calling=types.AutomaticFunctionCallingConfig(
                                 disable=False,
                                 maximum_remote_calls=10,
