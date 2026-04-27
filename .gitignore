@@ -14,3 +14,7 @@ scripts/test_*.py
 scripts/verify_*.py
 .DS_Store
 .streamlit/secrets.toml
+
+# Claude Code settings
+.claude/settings.json
+.claude/settings.local.json
