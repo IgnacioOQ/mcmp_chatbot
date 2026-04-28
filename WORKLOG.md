@@ -6,6 +6,15 @@
 
 <!-- content -->
 
+## 2026-04-28 — Switch to gemini-2.5-flash to resolve persistent 429 errors
+- **Task:** Diagnose and fix persistent `429 RESOURCE_EXHAUSTED` errors from the Gemini API that were not resolved by the existing 15s/30s retry logic.
+- **Outcome:** Confirmed quotas and retry logic were not the issue — the throttling was sustained beyond the 45s retry window. Switched model from `gemini-2.0-flash-lite` to `gemini-2.5-flash` in `app.py` (two call sites) and the default in `src/core/engine.py`. Error resolved immediately.
+- **Key decisions:** `gemini-2.5-flash` is significantly more expensive (uses thinking tokens by default) but was the only available upgrade path since `flash-lite` was already the cheapest tier. This also partially addresses the follow-up from 2026-04-22 — a more capable model is now in use, though cost should be monitored.
+- **KB changes:** None — `content/how-to/GEMINI_ERROR_HANDLING_SKILL.md` already covered this scenario accurately.
+- **Follow-up:** Monitor token costs with `gemini-2.5-flash`. If costs are too high, consider switching back to `gemini-2.0-flash` once throttling clears, or upgrading quota on the AI Studio project.
+
+---
+
 ## 2026-04-22 — Gemini tool-calling reliability investigation and fix
 - **Task:** Diagnose why the chatbot was skipping MCP tool calls for date-based event queries after switching from `gemini-2.0-flash` to `gemini-2.0-flash-lite`.
 - **Outcome:** Added an explicit system prompt rule in `_build_tools_description_str()` (`engine.py`) mandating `get_events` for any specific date or date-range query. Also trialled `tool_config` with `mode="ANY"` (Gemini `FunctionCallingConfig`) to force tool use, but reverted it after it caused an infinite tool-calling loop — the model called tools on every turn including after receiving results, exhausting `maximum_remote_calls=10` per request. Final working state: `gemini-2.0-flash-lite` with `mode="AUTO"` (default) and stronger system prompt instructions.
