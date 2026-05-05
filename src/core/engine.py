@@ -10,6 +10,9 @@ from datetime import datetime
 
 load_dotenv()
 
+DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite"
+
+
 class ChatEngine:
     """
     Core chatbot engine. Uses MCP structured tools to answer queries.
@@ -104,7 +107,7 @@ class ChatEngine:
     # ── Public API ───────────────────────────────────────────────────────────
 
     def generate_response(self, query: str, use_mcp_tools: bool = False,
-                          model_name: str = "gemini-2.5-flash",
+                          model_name: str = DEFAULT_GEMINI_MODEL,
                           chat_history: list = None,
                           status_callback=None) -> str:
         """
@@ -215,6 +218,8 @@ class ChatEngine:
                         config=types.GenerateContentConfig(
                             system_instruction=system_instruction,
                             tools=tools,
+                            temperature=0,
+                            thinking_config=types.ThinkingConfig(thinking_budget=0),
                             automatic_function_calling=types.AutomaticFunctionCallingConfig(
                                 disable=False,
                                 maximum_remote_calls=10,
@@ -224,16 +229,21 @@ class ChatEngine:
                     )
 
                 with log_latency("llm_api_call"):
-                    delays = [15, 30]
+                    # Retry transient Google-side errors:
+                    #   429 RESOURCE_EXHAUSTED — quota throttling
+                    #   503 UNAVAILABLE       — high-demand spike on the model
+                    # Per content/how-to/GEMINI_ERROR_HANDLING_SKILL.md.
+                    delays = [5, 15, 30]
+                    transient_codes = ("429", "503")
                     for attempt, delay in enumerate([None] + delays):
                         if delay:
-                            log_info(f"429 received, retrying in {delay}s (attempt {attempt + 1})...")
+                            log_info(f"Transient error received, retrying in {delay}s (attempt {attempt + 1})...")
                             time.sleep(delay)
                         try:
                             response = chat.send_message(query)
                             break
                         except Exception as e:
-                            if "429" in str(e) and attempt < len(delays):
+                            if any(code in str(e) for code in transient_codes) and attempt < len(delays):
                                 last_exc = e
                                 continue
                             raise

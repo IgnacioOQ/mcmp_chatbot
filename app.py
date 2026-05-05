@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import json
 from datetime import datetime, timedelta
-from src.core.engine import ChatEngine
+from src.core.engine import ChatEngine, DEFAULT_GEMINI_MODEL
 from src.utils.logger import log_info, log_error
 from src.ui.styles import inject_global_mobile_css
 
@@ -349,7 +349,7 @@ def main():
                 response = st.session_state.engine.generate_response(
                     auto_prompt,
                     use_mcp_tools=True,
-                    model_name="gemini-2.5-flash",
+                    model_name=DEFAULT_GEMINI_MODEL,
                     chat_history=st.session_state.messages[:-1],
                     status_callback=_callback,
                 )
@@ -382,7 +382,7 @@ def main():
                 response = st.session_state.engine.generate_response(
                     prompt,
                     use_mcp_tools=True,
-                    model_name="gemini-2.5-flash",
+                    model_name=DEFAULT_GEMINI_MODEL,
                     chat_history=st.session_state.messages[:-1],
                     status_callback=_callback,
                 )
