@@ -6,6 +6,20 @@
 
 <!-- content -->
 
+## 2026-05-05 — Firebase migration plan: MD_CONVENTIONS audit and multi-session hardening
+- **Task:** Audit `docs/FIREBASE_MIGRATION_PLAN.md` for MD_CONVENTIONS compliance and add multi-session support (memory, WORKLOG, and KB knowledge capture).
+- **Outcome:** Plan updated with: (1) Executing Agent Protocol in preamble — 6-step guide for any agent picking up the plan across sessions; (2) `owner: agent` and `last_checked` added to all 9 phase-level nodes; (3) Phase 8.3 corrected — `TODO_WORKFLOW.md` already existed; (4) Phase 8.2 extended with memory file update instruction; (5) Phase 8 renamed to include "Knowledge Capture"; (6) Tasks 8.4 (KB doc update post-implementation) and 8.5 (KB performance feedback) added per MD_CONVENTIONS BP #11. `TODO_WORKFLOW.md` updated: `todo.firebase_phase_1` replaced with a leaner `todo.firebase_migration` entry pointing to the plan as authoritative source.
+- **Key decisions:** Replaced the Phase 1-only `todo.firebase_phase_1` task with a single `todo.firebase_migration` entry — detailed per-phase steps live in the plan itself, not in the TODO entry. Knowledge capture tasks (8.4–8.5) are marked mandatory in the executing agent protocol, not optional.
+- **KB changes:** None.
+- **Follow-up:** Begin Phase 1 of `docs/FIREBASE_MIGRATION_PLAN.md` in next session. Entry point: `todo.firebase_migration` in `TODO_WORKFLOW.md`.
+
+## 2026-05-05 — Firebase migration plan authored
+- **Task:** Research and write a detailed, phased migration plan to move the MCMP Chatbot from Streamlit to Firebase.
+- **Outcome:** `docs/FIREBASE_MIGRATION_PLAN.md` created — 8 execution phases, ~50 tasks, all key architecture decisions locked. No implementation started.
+- **Key decisions:** Next.js 14 SSR on Firebase App Hosting (following Chatbot Template canonical pattern); FastAPI on Cloud Run (IAM-only, OIDC proxy from App Hosting); Firestore for all scraped data; Cloud Run Job + Cloud Scheduler (weekly) for the scraper; Google Sheets for feedback (unchanged); new isolated GCP project `mcmp-firebase` at org root; production branch `firebase-branch`; ChromaDB dropped from Firebase build; public chat with Google-auth-gated `/admin` panel.
+- **KB changes:** None — existing KB documents (`DEPLOY_FIREBASE_WORKFLOW.md`, `INFRASTRUCTURE_CHATBOT_TEMPLATE_REF.md`, `FIREBASE_DEFINITIONS_REF.md`) provided all necessary guidance.
+- **Follow-up:** Begin Phase 1 (repo scaffold) in next session. See `docs/FIREBASE_MIGRATION_PLAN.md` for full task tree.
+
 ## 2026-04-28 — Switch to gemini-2.5-flash to resolve persistent 429 errors
 - **Task:** Diagnose and fix persistent `429 RESOURCE_EXHAUSTED` errors from the Gemini API that were not resolved by the existing 15s/30s retry logic.
 - **Outcome:** Confirmed quotas and retry logic were not the issue — the throttling was sustained beyond the 45s retry window. Switched model from `gemini-2.0-flash-lite` to `gemini-2.5-flash` in `app.py` (two call sites) and the default in `src/core/engine.py`. Error resolved immediately.
