@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from src.mcp.tools import search_people, search_research, get_events, search_graph, grep_data, ask_clarification, search_academic_offerings
 from src.utils.logger import log_latency
 import json
@@ -19,6 +19,25 @@ class MCPServer:
             "grep_data": grep_data,
             "search_academic_offerings": search_academic_offerings,
         }
+        # Per-request dedupe cache: (tool_name, frozen_args) -> result.
+        # The engine clears this at the start of each generate_response call
+        # so the cache lives only for the duration of one user query.
+        self._call_cache: Dict[Tuple[str, Any], Any] = {}
+
+    def reset_call_cache(self) -> None:
+        """Clear the per-request tool-result cache. Call before each user query."""
+        self._call_cache.clear()
+
+    @staticmethod
+    def _freeze_args(args: Dict[str, Any]) -> Tuple:
+        """Make tool arguments hashable for cache keying. Lists/dicts → tuples."""
+        def _f(v):
+            if isinstance(v, dict):
+                return tuple(sorted((k, _f(x)) for k, x in v.items()))
+            if isinstance(v, list):
+                return tuple(_f(x) for x in v)
+            return v
+        return tuple(sorted((k, _f(v)) for k, v in (args or {}).items()))
         
     def list_tools(self) -> List[Dict[str, Any]]:
         """
@@ -248,10 +267,20 @@ class MCPServer:
             except Exception:
                 pass  # Never let UI code break tool execution
 
+        # Per-request dedupe: identical (name, args) within a single user query
+        # returns the cached result instead of re-invoking the tool. Some
+        # frontier models speculatively repeat tool calls, which doubles
+        # latency for no benefit.
+        cache_key = (name, self._freeze_args(arguments))
+        if cache_key in self._call_cache:
+            return self._call_cache[cache_key]
+
         tool_func = self.tools[name]
         try:
             with log_latency(f"tool:{name}"):
-                return tool_func(**arguments)
+                result = tool_func(**arguments)
+            self._call_cache[cache_key] = result
+            return result
         except Exception as e:
             return {"error": str(e)}
 
@@ -270,6 +299,12 @@ class MCPServer:
                     status_callback(_name, kwargs)
                 except Exception:
                     pass
-                return _fn(*args, **kwargs)
+                # Per-request dedupe — see call_tool() for rationale.
+                cache_key = (_name, self._freeze_args(kwargs))
+                if cache_key in self._call_cache:
+                    return self._call_cache[cache_key]
+                result = _fn(*args, **kwargs)
+                self._call_cache[cache_key] = result
+                return result
             instrumented.append(_wrapper)
         return instrumented

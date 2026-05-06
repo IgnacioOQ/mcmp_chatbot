@@ -10,7 +10,7 @@ from datetime import datetime
 
 load_dotenv()
 
-DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite"
+DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
 
 
 class ChatEngine:
@@ -117,6 +117,11 @@ class ChatEngine:
         """
         log_info(f"Generating response. Query: '{query}' | Tools: {use_mcp_tools} | Model: {model_name}")
 
+        # Per-request dedupe lives in MCPServer; clear it so the cache is
+        # scoped to a single user query.
+        if self.mcp_server is not None:
+            self.mcp_server.reset_call_cache()
+
         with log_latency("build_system_instruction"):
             system_instruction = self._build_system_instruction()
 
@@ -221,8 +226,12 @@ class ChatEngine:
                             temperature=0,
                             thinking_config=types.ThinkingConfig(thinking_budget=0),
                             automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                                # 3 is enough for: tool call → answer, plus one
+                                # speculative retry. Tighter than the previous
+                                # 10 to cap token spend and discourage runaway
+                                # tool chains.
                                 disable=False,
-                                maximum_remote_calls=10,
+                                maximum_remote_calls=3,
                             ),
                         ),
                         history=gemini_history,
@@ -254,6 +263,100 @@ class ChatEngine:
         except Exception as e:
             log_error(f"Error generating response: {e}")
             return f"Error: {e}"
+
+    def generate_response_stream(self, query: str, use_mcp_tools: bool = False,
+                                 model_name: str = DEFAULT_GEMINI_MODEL,
+                                 chat_history: list = None,
+                                 status_callback=None):
+        """
+        Streaming variant of generate_response — yields text chunks as the
+        model produces them. Only the Gemini provider is supported; the SDK
+        runs tool calls non-streaming behind the scenes during AFC and then
+        streams the final answer, which is exactly what we want for snappy UI.
+
+        Yields strings; the caller is responsible for joining them. On a
+        transient 429/503 the call to establish the stream is retried; once
+        iteration starts, errors propagate.
+        """
+        if self.provider != "gemini":
+            # Fallback: non-streaming providers yield the full text in one chunk.
+            yield self.generate_response(query, use_mcp_tools, model_name, chat_history, status_callback)
+            return
+
+        log_info(f"Generating streamed response. Query: '{query}' | Tools: {use_mcp_tools} | Model: {model_name}")
+
+        if self.mcp_server is not None:
+            self.mcp_server.reset_call_cache()
+
+        from google.genai import types
+
+        system_instruction = self._build_system_instruction()
+
+        tools = []
+        if use_mcp_tools and self.mcp_server:
+            if status_callback:
+                tools = self.mcp_server.get_instrumented_tools(status_callback)
+            else:
+                tools = list(self.mcp_server.tools.values())
+
+        gemini_history = []
+        if chat_history:
+            for msg in chat_history:
+                role = msg.get("role")
+                content = msg.get("content", "")
+                if role == "user":
+                    gemini_history.append(types.Content(role="user", parts=[types.Part.from_text(text=content)]))
+                elif role == "assistant":
+                    gemini_history.append(types.Content(role="model", parts=[types.Part.from_text(text=content)]))
+
+        chat = self._gemini_client.chats.create(
+            model=model_name,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                tools=tools,
+                temperature=0,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                    disable=False,
+                    maximum_remote_calls=3,
+                ),
+            ),
+            history=gemini_history,
+        )
+
+        # Retry only the connection-establishing call. Once chunks start flowing,
+        # propagate any error since partial output cannot be cleanly retried.
+        delays = [5, 15, 30]
+        transient_codes = ("429", "503")
+        stream = None
+        last_exc = None
+        for attempt, delay in enumerate([None] + delays):
+            if delay:
+                log_info(f"Transient error received, retrying in {delay}s (attempt {attempt + 1})...")
+                time.sleep(delay)
+            try:
+                stream = chat.send_message_stream(query)
+                break
+            except Exception as e:
+                if any(code in str(e) for code in transient_codes) and attempt < len(delays):
+                    last_exc = e
+                    continue
+                log_error(f"Error generating streamed response: {e}")
+                yield f"Error: {e}"
+                return
+
+        if stream is None:
+            yield f"Error: {last_exc}"
+            return
+
+        try:
+            for chunk in stream:
+                text = getattr(chunk, "text", None)
+                if text:
+                    yield text
+        except Exception as e:
+            log_error(f"Error mid-stream: {e}")
+            yield f"\n\n[stream interrupted: {e}]"
 
 
 if __name__ == "__main__":

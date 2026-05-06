@@ -314,81 +314,102 @@ def main():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Handle calendar day click via session state (from button clicks)
+    _TOOL_ICONS = {
+        "search_people":            "🔍 Searching people",
+        "search_research":          "📚 Searching research areas",
+        "get_events":               "📅 Fetching events",
+        "search_graph":             "🏛️ Querying institutional graph",
+        "grep_data":                "🔎 Running text search",
+        "search_academic_offerings": "🎓 Searching academic offerings",
+        "ask_clarification":        "❓ Asking for clarification",
+    }
+
+    def render_assistant_response(prompt_text: str, use_tools: bool = True) -> None:
+        """Render the assistant's reply with a tool-call status box and a streamed answer."""
+        with st.chat_message("assistant"):
+            status = st.status("Leopold is thinking...", expanded=True)
+
+            def _callback(tool_name, args):
+                label = _TOOL_ICONS.get(tool_name, f"⚙️ Calling {tool_name}")
+                hint = next(iter(args.values()), "") if args else ""
+                if hint:
+                    label += f": *{str(hint)[:60]}*"
+                status.write(label)
+
+            stream = st.session_state.engine.generate_response_stream(
+                prompt_text,
+                use_mcp_tools=use_tools,
+                model_name=DEFAULT_GEMINI_MODEL,
+                chat_history=st.session_state.messages[:-1],
+                status_callback=_callback,
+            )
+
+            def _chunks():
+                # Close the status box as soon as the first answer chunk arrives —
+                # tool calls (and any AFC retries) have completed by then.
+                first = True
+                for piece in stream:
+                    if first:
+                        status.update(label="Done!", state="complete", expanded=False)
+                        first = False
+                    yield piece
+                if first:
+                    # No chunks at all — make sure the status doesn't stay spinning.
+                    status.update(label="Done!", state="complete", expanded=False)
+
+            full = st.write_stream(_chunks())
+            st.session_state.messages.append({"role": "assistant", "content": full})
+
+    def render_calendar_response(iso_date: str, formatted: str) -> None:
+        """
+        Calendar-click fast path. The date is already resolved client-side, so
+        we call get_events directly and skip the LLM's tool-decision round-trip:
+        - empty result → a static answer, no LLM call at all.
+        - non-empty   → hand the events to the LLM as pre-resolved context
+                        (use_tools=False) and let it stream formatted output.
+        """
+        import json
+        from src.mcp.tools import get_events
+        events = get_events(start_date=iso_date, end_date=iso_date)
+
+        if not events:
+            with st.chat_message("assistant"):
+                msg = f"There are no events scheduled for {formatted}."
+                st.markdown(msg)
+                st.session_state.messages.append({"role": "assistant", "content": msg})
+            return
+
+        synth_prompt = (
+            f"The user is asking about events for {formatted}. "
+            f"The MCMP database has been queried already and returned the following events "
+            f"(do not call any tools — the data below is complete and authoritative):\n\n"
+            f"```json\n{json.dumps(events, ensure_ascii=False, indent=2)}\n```\n\n"
+            f"Render each event using the Event block format from your instructions, "
+            f"separating consecutive events with a horizontal rule (`---`)."
+        )
+        render_assistant_response(synth_prompt, use_tools=False)
+
+    # Handle calendar day click via session state (from button clicks).
+    # Fast path: we already know the date, so we fetch events directly and
+    # bypass the LLM's tool-decision round-trip.
     if "calendar_query_date" in st.session_state:
+        iso_date = st.session_state.calendar_query_date
         query_formatted = st.session_state.calendar_query_formatted
-        # Clear the trigger to prevent re-execution
         del st.session_state.calendar_query_date
         del st.session_state.calendar_query_formatted
-        
-        # Generate the prompt silently
-        auto_prompt = f"What talks or events are scheduled for {query_formatted}? Please provide details about each event, including an abstract or description."
-        
-        # Add to chat history and generate response
-        st.session_state.messages.append({"role": "user", "content": auto_prompt})
-        with st.chat_message("user"):
-            st.markdown(auto_prompt)
-        
-        with st.chat_message("assistant"):
-            _TOOL_ICONS = {
-                "search_people":   "🔍 Searching people",
-                "search_research": "📚 Searching research areas",
-                "get_events":      "📅 Fetching events",
-                "search_graph":    "🏛️ Querying institutional graph",
-                "grep_data":       "🔎 Running text search",
-            }
-            with st.status("Leopold is thinking...", expanded=True) as status:
-                def _callback(tool_name, args):
-                    label = _TOOL_ICONS.get(tool_name, f"⚙️ Calling {tool_name}")
-                    # Show the primary argument inline for context
-                    hint = next(iter(args.values()), "") if args else ""
-                    if hint:
-                        label += f": *{str(hint)[:60]}*"
-                    status.write(label)
 
-                response = st.session_state.engine.generate_response(
-                    auto_prompt,
-                    use_mcp_tools=True,
-                    model_name=DEFAULT_GEMINI_MODEL,
-                    chat_history=st.session_state.messages[:-1],
-                    status_callback=_callback,
-                )
-                status.update(label="Done!", state="complete", expanded=False)
-            st.markdown(response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
+        user_visible = f"What talks or events are scheduled for {query_formatted}?"
+        st.session_state.messages.append({"role": "user", "content": user_visible})
+        with st.chat_message("user"):
+            st.markdown(user_visible)
+        render_calendar_response(iso_date, query_formatted)
 
     # User input
     if prompt := st.chat_input("What is the next talk about?"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
-
-        with st.chat_message("assistant"):
-            _TOOL_ICONS = {
-                "search_people":   "🔍 Searching people",
-                "search_research": "📚 Searching research areas",
-                "get_events":      "📅 Fetching events",
-                "search_graph":    "🏛️ Querying institutional graph",
-                "grep_data":       "🔎 Running text search",
-            }
-            with st.status("Leopold is thinking...", expanded=True) as status:
-                def _callback(tool_name, args):
-                    label = _TOOL_ICONS.get(tool_name, f"⚙️ Calling {tool_name}")
-                    hint = next(iter(args.values()), "") if args else ""
-                    if hint:
-                        label += f": *{str(hint)[:60]}*"
-                    status.write(label)
-
-                response = st.session_state.engine.generate_response(
-                    prompt,
-                    use_mcp_tools=True,
-                    model_name=DEFAULT_GEMINI_MODEL,
-                    chat_history=st.session_state.messages[:-1],
-                    status_callback=_callback,
-                )
-                status.update(label="Done!", state="complete", expanded=False)
-            st.markdown(response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
+        render_assistant_response(prompt)
 
 if __name__ == "__main__":
     main()
