@@ -114,12 +114,13 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
     """
     Get upcoming events.
 
-    Returns a list of events. Each result has both a `title` (the event-listing
-    header, e.g. "Talk: Philipp Haueis (Bielefeld)") and a `talk_title` (the
-    actual title of the talk, e.g. "The productive polysemy of scientific
-    language"). When `talk_title` is non-empty, prefer it when reporting the
-    talk to the user; fall back to `title` for events without a single talk
-    title (conferences, workshops).
+    Each result's `title` is the canonical title to show the user — the actual
+    talk title (e.g. "The productive polysemy of scientific language") for
+    individual talks, or the listing header (e.g. "Workshop Epsilon Calculus")
+    for conferences and workshops. The speaker's name and affiliation are in
+    the `speaker` field, so the title never needs to include the speaker.
+    `weekday` is the full English weekday name for `date` (e.g. "Wednesday")
+    — use it directly rather than computing the day of the week from `date`.
 
     Args:
         date_range: Optional. "upcoming" (default), "today", "this_week".
@@ -155,52 +156,65 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
     query_lower = query.lower() if query else None
 
     for event in events:
-        title = event.get("title", "")
+        listing_header = event.get("title", "")
+        talk_title = event.get("talk_title", "")
+        # Prefer the actual talk title when present; fall back to the listing
+        # header (which has the form "Talk: <Speaker> (<Affiliation>)") for
+        # events without a single talk title (conferences, workshops).
+        display_title = talk_title or listing_header
         meta = event.get("metadata", {})
         date_str = meta.get("date")
         abstract = event.get("abstract", "")
         description = event.get("description", "")
-        
-        # Filter by content query
-        if query_lower:
-            text_content = (title + " " + abstract + " " + description).lower()
-            if query_lower not in text_content:
-                continue
-        
-        # Filter by type
-        if type_filter and type_filter.lower() not in title.lower():
-            continue
-            
-        # Filter by date
+
+        # Parse the event date once — used for filtering and for the weekday
+        # field surfaced to the LLM. Stays None if the date is missing or
+        # malformed.
+        evt_date = None
         if date_str:
             try:
-                # Handle YYYY-MM-DD
                 evt_date = datetime.strptime(date_str, "%Y-%m-%d")
-                
-                # Logic: Explicit dates take precedence over date_range presets
-                if start_dt or end_dt:
-                    if start_dt and evt_date < start_dt:
-                        continue
-                    if end_dt and evt_date > end_dt:
-                        continue
-                else:
-                    # Fallback to date_range presets
-                    if date_range == "today" and evt_date.date() != today.date():
-                        continue
-                    if (date_range == "upcoming" or date_range is None) and evt_date < today:
-                        continue
-                    if date_range == "this_week":
-                        delta = (evt_date - today).days
-                        if delta < 0 or delta > 7:
-                            continue
-                        
             except ValueError:
-                pass # skip date check if format unknown
-        
+                evt_date = None
+
+        # Filter by content query — search both the listing header and the
+        # talk title so queries like "Haueis" still match talks where the
+        # speaker name is only in the listing header.
+        if query_lower:
+            text_content = (listing_header + " " + talk_title + " " + abstract + " " + description).lower()
+            if query_lower not in text_content:
+                continue
+
+        # Filter by type — type words ("Talk", "Workshop") only ever appear
+        # in the listing header, so match against that.
+        if type_filter and type_filter.lower() not in listing_header.lower():
+            continue
+
+        # Filter by date
+        if evt_date is not None:
+            # Logic: Explicit dates take precedence over date_range presets
+            if start_dt or end_dt:
+                if start_dt and evt_date < start_dt:
+                    continue
+                if end_dt and evt_date > end_dt:
+                    continue
+            else:
+                # Fallback to date_range presets
+                if date_range == "today" and evt_date.date() != today.date():
+                    continue
+                if (date_range == "upcoming" or date_range is None) and evt_date < today:
+                    continue
+                if date_range == "this_week":
+                    delta = (evt_date - today).days
+                    if delta < 0 or delta > 7:
+                        continue
+
+        weekday = evt_date.strftime("%A") if evt_date is not None else ""
+
         results.append({
-            "title": title,
-            "talk_title": event.get("talk_title", ""),
+            "title": display_title,
             "date": date_str,
+            "weekday": weekday,
             "time": f"{meta.get('time_start')} - {meta.get('time_end')}",
             "location": meta.get("location", ""),
             "speaker": meta.get("speaker"),
