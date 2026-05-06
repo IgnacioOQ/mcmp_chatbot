@@ -113,7 +113,14 @@ def search_research(topic: Optional[str] = None) -> List[Dict[str, Any]]:
 def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None, query: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Get upcoming events.
-    
+
+    Returns a list of events. Each result has both a `title` (the event-listing
+    header, e.g. "Talk: Philipp Haueis (Bielefeld)") and a `talk_title` (the
+    actual title of the talk, e.g. "The productive polysemy of scientific
+    language"). When `talk_title` is non-empty, prefer it when reporting the
+    talk to the user; fall back to `title` for events without a single talk
+    title (conferences, workshops).
+
     Args:
         date_range: Optional. "upcoming" (default), "today", "this_week".
         type_filter: Optional type filter (e.g., "talk", "workshop").
@@ -192,6 +199,7 @@ def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = No
         
         results.append({
             "title": title,
+            "talk_title": event.get("talk_title", ""),
             "date": date_str,
             "time": f"{meta.get('time_start')} - {meta.get('time_end')}",
             "location": meta.get("location", ""),
