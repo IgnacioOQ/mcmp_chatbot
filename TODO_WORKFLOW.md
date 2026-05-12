@@ -74,38 +74,6 @@ Cross-session task backlog. Tasks are added here when work started in a session 
 
 ---
 
-## Regenerate missing data/graph/ artifacts
-- status: todo
-- type: task
-- id: todo.regenerate_graph
-- description: Rebuild the institutional graph artifacts (mcmp_graph.md, mcmp_jgraph.json) so the search_graph MCP tool stops returning empty for chair-leadership and supervisor queries.
-- owner: agent
-- estimate: 15m
-- blocked_by: []
-- last_checked: 2026-05-05
-<!-- content -->
-
-**Context:** The 2026-05-05 housekeeping run surfaced that `data/graph/mcmp_graph.md` does not exist locally, even though `src/core/graph_utils.py:9` and `src/utils/build_graph.py:237-244` both reference it and the README documents it as authoritative. `GraphUtils._load_graph()` silently no-ops when the file is missing (line 18-19), so `search_graph` runs against an empty graph. This produces a real correctness regression: the stress test case `graph_org_question` ("Who leads the Chair of Logic and Philosophy of Language?") returns Godehard Link (Professor Emeritus, keyword-matched on `unit` field via the search_people fallback) instead of Hannes Leitgeb. `data/` is fully gitignored, so the graph was never tracked — it must be regenerated from the scrape pipeline.
-
-**Preconditions:**
-- `GEMINI_API_KEY` set (the scrape pipeline does not need it, but a follow-up stress test does).
-- Network access to the MCMP website.
-
-**Steps:**
-1. Confirm `data/graph/` does not exist: `ls data/graph/ 2>&1`. Confirm the JSON data files in `data/` are present and recent so the graph builder has inputs.
-2. Run the scraper / graph builder: `python scripts/update_dataset.py`. Per README this both refreshes data and rebuilds the graph at `data/graph/mcmp_graph.md` and `data/graph/mcmp_jgraph.json`.
-3. If the script does not produce graph files, run the graph builder directly: `python -m src.utils.build_graph` (verify the entrypoint by reading `src/utils/build_graph.py` first).
-4. Re-run only the affected stress case: `python -m tests.stress_test_gemini` and inspect the `graph_org_question` result. Expectation: `search_graph` now returns Hannes Leitgeb as the chair leader.
-
-**Verification:**
-- `ls data/graph/mcmp_graph.md data/graph/mcmp_jgraph.json` — both files exist.
-- Stress test case `graph_org_question` returns "Hannes Leitgeb" (or equivalent, via `search_graph` rather than the search_people keyword fallback).
-- `search_graph(query="Hannes Leitgeb")` from a python REPL returns non-empty edges/affiliations.
-
-**On completion:** Delete this entire task block from TODO_WORKFLOW.md (from the `---` above the `##` header to the `---` below the last line). Update the next housekeeping run's `## Latest Report` "Notable events" to record the fix.
-
----
-
 ## Migrate feedback from Google Sheets to Firestore (deferred)
 - status: todo
 - type: task

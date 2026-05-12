@@ -15,6 +15,20 @@ The target architecture is: **Next.js 14 SSR on Firebase App Hosting** (public f
 
 The migration preserves every Streamlit UI feature: the interactive month calendar (grid, event-day dots, click-to-query), the Events This Week sidebar list, the chat with live MCP tool-call status icons, and the feedback form. An `/admin` panel is added, gated behind Google sign-in with email allowlist.
 
+**Operating account (locked 2026-05-12):**
+The entire Firebase deploy runs under the Google Workspace account `eikasia@eikasia.com` — NOT `ignacioojea@gmail.com`. The new `mcmp-firebase` GCP project lives at the **eikasia.com org root**, billing is on the eikasia organization, and all `gcloud` / `firebase` CLI commands in this plan must be executed while authenticated as `eikasia@eikasia.com`. Before starting any Phase 2+ task:
+```bash
+gcloud auth login eikasia@eikasia.com
+gcloud config set account eikasia@eikasia.com
+gcloud auth application-default login   # also as eikasia
+firebase login --reauth                 # also as eikasia
+```
+Verify with `gcloud config get-value account` (must return `eikasia@eikasia.com`) before running provisioning commands. Pre-flight values to capture once authenticated:
+- `gcloud organizations list` → record `<EIKASIA_ORG_ID>` (12-digit number) used in Phase 2.1.
+- `gcloud billing accounts list` → record `<EIKASIA_BILLING_ACCOUNT_ID>` used in Phase 2.1.
+
+The existing `mcmp-chatbot` GCP project (owned by `ignacioojea@gmail.com`) and its Streamlit Cloud deployment remain entirely untouched.
+
 **Context loads for executing agents:**
 > `mcp__kb_mcp__knowledge_base_read(path="content/reference/INFRASTRUCTURE_CHATBOT_TEMPLATE_REF.md")` — IAM bindings, SA names, Cloud Run spec, service URLs pattern.
 > `mcp__kb_mcp__knowledge_base_read(path="content/how-to/INFRASTRUCTURE_CHATBOT_TEMPLATE_SKILL.md")` — deploy, log-reading, and cost-management runbooks.
@@ -72,7 +86,7 @@ Existing `scripts/update_dataset.py` adapted to write to Firestore instead of lo
 - type: task
 - id: mcmp_firebase_migration.phase_0.task_05
 <!-- content -->
-Chat is fully public (no sign-in required). `/admin` page requires Google sign-in via Firebase Auth. Email allowlist enforced in the Next.js server component. Admin actions: trigger manual scrape, link to Google Sheets feedback view.
+Chat is fully public (no sign-in required). `/admin` page requires Google sign-in via Firebase Auth. Email allowlist enforced in the Next.js server component — the sole allowed email is `eikasia@eikasia.com`. Admin actions: trigger manual scrape, link to Google Sheets feedback view.
 
 ### 0.6 Feedback: Keep Google Sheets
 - status: done
@@ -86,7 +100,7 @@ Google Sheets integration kept. FastAPI `/feedback` endpoint handles the `gsprea
 - type: task
 - id: mcmp_firebase_migration.phase_0.task_07
 <!-- content -->
-New isolated GCP project `mcmp-firebase` at org root (required by Firebase App Hosting — the CLI picker does not surface projects nested in GCP folders). Existing `mcmp-chatbot` project and Streamlit Cloud deployment are untouched.
+New isolated GCP project `mcmp-firebase` at the **eikasia.com org root** (required by Firebase App Hosting — the CLI picker does not surface projects nested in GCP folders). Existing `mcmp-chatbot` project (owned by `ignacioojea@gmail.com`) and its Streamlit Cloud deployment are untouched. Precedent for the eikasia org: the `chatbot-template-eikasia` project and `eikasia-llc/adk_playground` GitHub org used by the chatbot_template reference implementation.
 
 ### 0.8 Repository Layout and Production Branch
 - status: done
@@ -215,7 +229,7 @@ env:
     availability:
       - RUNTIME
   - variable: ALLOWED_ADMIN_EMAILS
-    value: "ignacioojea@gmail.com"
+    value: "eikasia@eikasia.com"
     availability:
       - RUNTIME
 ```
@@ -249,19 +263,27 @@ Keep `firebase/firebase.json` committed (no secrets in it).
 <!-- content -->
 Create the `mcmp-firebase` GCP project, enable all required APIs, provision IAM service accounts, store secrets in Secret Manager, configure the log sink, initialize Firebase, create the App Hosting backend, and create the Firestore database. These are all one-time console/CLI operations.
 
-**Before starting:** run `nvm use 20 && firebase login --reauth` on any workstation executing Firebase CLI commands. Node < 20 and stale auth tokens are the two most common failure modes.
+**Before starting:**
+1. Confirm CLI identity is `eikasia@eikasia.com`: `gcloud config get-value account` must echo `eikasia@eikasia.com`. If not, follow the auth steps in the plan preamble (Operating account section).
+2. Capture pre-flight values once authenticated as eikasia:
+   - `gcloud organizations list` → copy the eikasia org ID into `<EIKASIA_ORG_ID>` below.
+   - `gcloud billing accounts list` → copy the eikasia billing account ID into `<EIKASIA_BILLING_ACCOUNT_ID>` below.
+3. Run `nvm use 20 && firebase login --reauth` (as `eikasia@eikasia.com`) on any workstation executing Firebase CLI commands. Node < 20 and stale auth tokens are the two most common failure modes.
 
 ### 2.1 Create GCP project mcmp-firebase at org root
 - status: todo
 - type: task
 - id: mcmp_firebase_migration.phase_2.task_01
 <!-- content -->
-Create the project at **org root** (not inside any folder). Firebase App Hosting's project picker does not surface folder-nested projects.
+Create the project at the **eikasia.com org root** (not inside any folder). Firebase App Hosting's project picker does not surface folder-nested projects. The `--organization` flag pins the project to the eikasia org rather than the executing user's default org.
 ```bash
-gcloud projects create mcmp-firebase --name="MCMP Firebase"
-gcloud billing projects link mcmp-firebase --billing-account=<BILLING_ACCOUNT_ID>
+gcloud projects create mcmp-firebase \
+  --name="MCMP Firebase" \
+  --organization=<EIKASIA_ORG_ID>
+gcloud billing projects link mcmp-firebase \
+  --billing-account=<EIKASIA_BILLING_ACCOUNT_ID>
 ```
-Confirm placement: `gcloud projects describe mcmp-firebase` — `parent.type` must be `organization`, not `folder`.
+Confirm placement: `gcloud projects describe mcmp-firebase` — `parent.type` must be `organization` and `parent.id` must equal `<EIKASIA_ORG_ID>` (not `folder`, not the default org for any other account).
 
 ### 2.2 Enable required APIs
 - status: todo
@@ -356,17 +378,27 @@ done
 - blocked_by: [mcmp_firebase_migration.phase_2.task_02]
 <!-- content -->
 Values are provided out-of-band. Never stored in the repository.
+
+**Gemini API key — pick one option before running:**
+- **(a) Eikasia-owned key (recommended):** Sign in to Google AI Studio as `eikasia@eikasia.com`, create a new API key linked to the `mcmp-firebase` project. Gemini usage bills to eikasia. Clean ownership.
+- **(b) Reuse existing key:** Re-use the key already used by the Streamlit deployment (currently linked to the old `mcmp-chatbot` project on `ignacioojea@gmail.com`). Faster, but Gemini charges land on the old account.
+
 ```bash
-# Gemini API key (get from Google AI Studio, or re-use the key from mcmp-chatbot)
+# Gemini API key (option a or b above)
 echo -n "AIza..." | gcloud secrets create GEMINI_API_KEY \
   --data-file=- --project=mcmp-firebase
 
-# Google Sheets service account JSON (the full JSON blob from the SA key in mcmp-chatbot)
+# Google Sheets service account JSON
 gcloud secrets create SHEETS_SA_JSON \
   --data-file=/path/to/sheets-sa-key.json \
   --project=mcmp-firebase
 ```
-The `SHEETS_SA_JSON` secret holds the complete JSON content of the GCP service account key that has Sheets API access. This replaces the `.streamlit/secrets.toml` `[gcp_service_account]` block.
+
+**Sheets SA — pick one option before running:**
+- **(a) New eikasia-owned SA (recommended):** Create a new service account on `mcmp-firebase`, share the existing feedback Sheet (`1N9YOiOQKgjEbA_P0868FQjVjkykhnPrrOnqPxztYSyY`) with the new SA's email (Editor role), download its JSON key, store it as `SHEETS_SA_JSON`. Clean ownership.
+- **(b) Reuse existing SA:** Use the existing `mcmp-admin@mcmp-chatbot.iam.gserviceaccount.com` SA JSON. Cross-links the eikasia deploy back to the ignacio-owned SA.
+
+The `SHEETS_SA_JSON` secret holds the complete JSON content of whichever SA you picked. This replaces the `.streamlit/secrets.toml` `[gcp_service_account]` block.
 
 ### 2.7 Log sink: WARNING+ exclusion
 - status: todo
@@ -401,12 +433,18 @@ gcloud compute networks subnets update default \
 <!-- content -->
 ```bash
 nvm use 20
-firebase login --reauth
-firebase projects:list   # confirm mcmp-firebase appears
+firebase login --reauth         # must be eikasia@eikasia.com
+firebase projects:list          # confirm mcmp-firebase appears under eikasia
 
 cd firebase/frontend
 firebase init apphosting
 ```
+
+**GitHub repo decision (before running `init apphosting`):**
+- The mcmp_chatbot repo currently lives under `IgnacioOQ/mcmp_chatbot` (a personal GitHub account separate from `eikasia-llc`).
+- App Hosting authorizes via the Firebase GitHub app installed on the org/account hosting the repo. Two options:
+  - **(a) Keep repo at `IgnacioOQ/mcmp_chatbot`** — install the Firebase GitHub app on `IgnacioOQ` and grant it access to this repo. Simpler short-term, asymmetric ownership long-term (code on a personal account, infra on eikasia).
+  - **(b) Transfer or mirror to `eikasia-llc/mcmp_chatbot`** — matches the `eikasia-llc/adk_playground` pattern used by the chatbot_template. Recommended for consistency with existing eikasia infra.
 
 Wizard answers:
 
@@ -415,7 +453,7 @@ Wizard answers:
 | Project selection | Use existing → `mcmp-firebase` |
 | Backend ID | `mcmp-firebase-app` |
 | Region | `us-central1` |
-| GitHub repo | `<your-github-user>/mcmp_chatbot` |
+| GitHub repo | `IgnacioOQ/mcmp_chatbot` or `eikasia-llc/mcmp_chatbot` (per decision above) |
 | Branch | `firebase-branch` |
 | Root directory (relative to repo root) | `firebase/frontend` |
 
@@ -440,7 +478,7 @@ Or via Firebase Console → Firestore → Create database → Production mode �
 - id: mcmp_firebase_migration.phase_2.task_11
 - blocked_by: [mcmp_firebase_migration.phase_2.task_09]
 <!-- content -->
-Firebase Console → Authentication → Get started → Google → Enable → set support email to `ignacioojea@gmail.com` → Save. Required for the `/admin` page Google sign-in.
+Firebase Console (signed in as `eikasia@eikasia.com`) → Authentication → Get started → Google → Enable → set support email to `eikasia@eikasia.com` → Save. Required for the `/admin` page Google sign-in.
 
 ---
 
@@ -499,14 +537,14 @@ Each document stores all fields from the corresponding JSON entry verbatim. No s
 - blocked_by: [mcmp_firebase_migration.phase_3.task_02]
 <!-- content -->
 `firebase/scripts/migrate_to_firestore.py`:
-- Uses Application Default Credentials (run `gcloud auth application-default login` first as project owner)
+- Uses Application Default Credentials (run `gcloud auth application-default login` first while signed in as `eikasia@eikasia.com` — the project owner of `mcmp-firebase`)
 - Reads all local `data/*.json` and `data/graph/*` files
 - Upserts to Firestore collections per schema in 3.2 using `batch.set()` (500-doc batches)
 - Idempotent: safe to re-run without creating duplicates
 - Prints progress and doc counts on completion
 
 ```bash
-gcloud auth application-default login
+gcloud auth application-default login   # sign in as eikasia@eikasia.com
 python firebase/scripts/migrate_to_firestore.py --project=mcmp-firebase
 ```
 
@@ -980,7 +1018,7 @@ Submit the feedback form with test name and message. Open the Google Sheet (`MCM
 - type: task
 - id: mcmp_firebase_migration.phase_7.task_05
 <!-- content -->
-Navigate to `/admin`. Sign in with `ignacioojea@gmail.com` (allowed). Verify admin dashboard renders. Click "Trigger Scrape" — verify the Cloud Run Job starts (`gcloud run jobs executions list`). Then test with a non-allowed email — verify redirect to `/`.
+Navigate to `/admin`. Sign in with `eikasia@eikasia.com` (allowed). Verify admin dashboard renders. Click "Trigger Scrape" — verify the Cloud Run Job starts (`gcloud run jobs executions list`). Then test with a non-allowed email (e.g., `ignacioojea@gmail.com`) — verify redirect to `/`.
 
 ### 7.6 Cold-start latency
 - status: todo

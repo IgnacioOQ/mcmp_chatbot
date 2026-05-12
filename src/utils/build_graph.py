@@ -235,6 +235,7 @@ def run():
         md_lines.append(f"| {e['source']} | {e['target']} | {e['relationship']} | {e['properties']} |")
         
     md_path = base_dir / "data/graph/mcmp_graph.md"
+    md_path.parent.mkdir(parents=True, exist_ok=True)
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write("\n".join(md_lines))
         
