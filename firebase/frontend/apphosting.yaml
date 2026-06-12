@@ -14,3 +14,16 @@ env:
     value: "ignacioojea@gmail.com"
     availability:
       - RUNTIME
+  # Client-visible admin allowlist (used by the /admin page gate).
+  - variable: NEXT_PUBLIC_ALLOWED_ADMIN_EMAILS
+    value: "ignacioojea@gmail.com"
+    availability:
+      - BUILD
+      - RUNTIME
+  # Firebase web API key — public by design. Set after registering the web app
+  # during firebase init (Phase 5.6 / 2.9). Placeholder until then.
+  - variable: NEXT_PUBLIC_FB_API_KEY
+    value: "REPLACE_AFTER_WEBAPP_REGISTRATION"
+    availability:
+      - BUILD
+      - RUNTIME

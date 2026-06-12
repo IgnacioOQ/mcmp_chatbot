@@ -660,7 +660,8 @@ curl -X POST http://localhost:8080/chat \
 Both commands should return 200 with expected JSON.
 
 ### 4.4 First backend deploy via Cloud Build
-- status: todo
+- status: done
+- note: 'Deployed 2026-06-12. Service mcmp-firebase-backend, revision 00001-lq6. URL https://mcmp-firebase-backend-113682704284.us-central1.run.app . /health smoke passed ({"status":"ok","data_backend":"firestore"}). BACKEND_URL secret created. Build context 42 files via .gcloudignore. NOTE: Firestore empty until migration (3.6) runs.'
 - type: task
 - id: mcmp_firebase_migration.phase_4.task_04
 - blocked_by: [mcmp_firebase_migration.phase_4.task_03]
@@ -699,7 +700,8 @@ gcloud run services add-iam-policy-binding mcmp-firebase-backend \
 This is the bridge that allows the Next.js server-side proxy routes to call the IAM-only backend.
 
 ### 4.6 Backend smoke test (IAM token)
-- status: todo
+- status: in-progress
+- note: '/health verified via deploy script smoke test. Full /chat IAM smoke deferred until data migration (3.6) populates Firestore — otherwise chat answers with no MCMP data.'
 - type: task
 - id: mcmp_firebase_migration.phase_4.task_06
 - blocked_by: [mcmp_firebase_migration.phase_4.task_05]
@@ -728,7 +730,7 @@ Both must return HTTP 200. If `/chat` returns a Gemini response, the full backen
 Build the Next.js frontend replicating all Streamlit UI features: interactive sidebar calendar with event-day dots and click-to-query, Events This Week list, chat with live MCP tool-call status icons, feedback form, and admin panel. Push to `firebase-branch` to trigger the first App Hosting rollout.
 
 ### 5.1 Server-side proxy routes
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_5.task_01
 <!-- content -->
@@ -759,7 +761,8 @@ Apply the same pattern to:
 - `POST /api/admin/scrape` → backend `/admin/scrape` (protected in 5.6)
 
 ### 5.2 Chat UI component
-- status: todo
+- status: done
+- note: 'v1 uses blocking POST /api/chat (no SSE). Tool-call icons shown as chips above each assistant message.'
 - type: task
 - id: mcmp_firebase_migration.phase_5.task_02
 - blocked_by: [mcmp_firebase_migration.phase_5.task_01]
@@ -774,7 +777,7 @@ React client component `ChatPanel`:
 v1: blocking POST. The spinner replaces Streamlit's `st.status` expander. Streaming (SSE) is a future iteration.
 
 ### 5.3 Sidebar calendar component
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_5.task_03
 - blocked_by: [mcmp_firebase_migration.phase_5.task_01]
@@ -789,7 +792,7 @@ React client component `CalendarWidget`:
 Layout (top to bottom in sidebar): CalendarWidget → feedback form → EventsThisWeek.
 
 ### 5.4 Events This Week component
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_5.task_04
 - blocked_by: [mcmp_firebase_migration.phase_5.task_01]
@@ -801,7 +804,7 @@ React server component `EventsThisWeek` (or client component with SWR):
 - Skip events whose title starts with `[CANCEL` (mirrors Streamlit logic)
 
 ### 5.5 Feedback form component
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_5.task_05
 - blocked_by: [mcmp_firebase_migration.phase_5.task_01]
@@ -811,7 +814,8 @@ Collapsible React component (collapsed by default, matching Streamlit expander):
 - POST to `/api/feedback`; show success toast on submit, error toast on failure
 
 ### 5.6 Admin page (/admin)
-- status: todo
+- status: done
+- note: 'Client-side Google sign-in + allowlist gate (NEXT_PUBLIC_ALLOWED_ADMIN_EMAILS). Server-side ID-token verification against the allowlist is a hardening follow-up. Needs NEXT_PUBLIC_FB_API_KEY (placeholder) set after web app registration, and Google Auth provider enabled (2.11).'
 - type: task
 - id: mcmp_firebase_migration.phase_5.task_06
 - blocked_by: [mcmp_firebase_migration.phase_5.task_01]
