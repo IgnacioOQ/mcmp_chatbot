@@ -28,7 +28,11 @@
       "Bash(gcloud secrets *)",
       "mcp__cp_mcp__cp_mcp_worklog_append",
       "Bash(rm -f firebase/scripts/.gitkeep)",
-      "Bash(DATA_BACKEND=json GEMINI_API_KEY=dummy PYTHONPATH=. python3 -c ' *)"
+      "Bash(DATA_BACKEND=json GEMINI_API_KEY=dummy PYTHONPATH=. python3 -c ' *)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(git reset *)",
+      "Bash(gcloud iam *)",
+      "Bash(firebase apphosting:backends:list --project mcmp-firebase)"
     ]
   }
 }
