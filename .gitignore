@@ -24,7 +24,3 @@ firebase/frontend/.env.local
 firebase/frontend/node_modules/
 firebase/frontend/.next/
 firebase/.firebaserc
-# Untracked: the lockfile has platform-specific optional deps (@emnapi/* sharp
-# wasm) that differ macOS vs the Linux buildpack, breaking `npm ci`. Without it,
-# App Hosting's buildpack runs `npm install` and resolves Linux deps correctly.
-firebase/frontend/package-lock.json
