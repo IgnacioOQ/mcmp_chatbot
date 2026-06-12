@@ -473,7 +473,8 @@ firebase firestore:databases:create "(default)" \
 Or via Firebase Console → Firestore → Create database → Production mode → `nam5` (US multi-region).
 
 ### 2.11 Enable Google Auth provider
-- status: todo
+- status: done
+- last_checked: 2026-06-12
 - type: task
 - id: mcmp_firebase_migration.phase_2.task_11
 - blocked_by: [mcmp_firebase_migration.phase_2.task_09]
@@ -580,7 +581,8 @@ The `academic_offerings` 30-day freshness check reads `meta/scraping_logs` from 
 The existing `scripts/update_dataset.py` is **not modified** — it continues writing to local JSON for the Streamlit build.
 
 ### 3.6 Run migration and verify
-- status: todo
+- status: done
+- last_checked: 2026-06-12
 - type: task
 - id: mcmp_firebase_migration.phase_3.task_06
 - blocked_by: [mcmp_firebase_migration.phase_3.task_05]
@@ -720,12 +722,12 @@ Both must return HTTP 200. If `/chat` returns a Gemini response, the full backen
 ---
 
 ## Phase 5 — Frontend App & First Deploy
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_5
 - blocked_by: [mcmp_firebase_migration.phase_4]
 - owner: agent
-- last_checked: 2026-05-05
+- last_checked: 2026-06-12
 <!-- content -->
 Build the Next.js frontend replicating all Streamlit UI features: interactive sidebar calendar with event-day dots and click-to-query, Events This Week list, chat with live MCP tool-call status icons, feedback form, and admin panel. Push to `firebase-branch` to trigger the first App Hosting rollout.
 
@@ -841,7 +843,8 @@ export const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfi
 Add `NEXT_PUBLIC_FB_API_KEY` to `apphosting.yaml` env (not a secret — Firebase web API keys are public-facing by design).
 
 ### 5.7 First App Hosting deploy
-- status: todo
+- status: done
+- last_checked: 2026-06-12
 - type: task
 - id: mcmp_firebase_migration.phase_5.task_07
 - blocked_by: [mcmp_firebase_migration.phase_5.task_06]
@@ -862,7 +865,8 @@ curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
 Capture the App Hosting URL from Firebase Console once the rollout completes.
 
 ### 5.8 Add App Hosting domain to Firebase Auth authorized domains
-- status: todo
+- status: done
+- last_checked: 2026-06-12
 - type: task
 - id: mcmp_firebase_migration.phase_5.task_08
 - blocked_by: [mcmp_firebase_migration.phase_5.task_07]
