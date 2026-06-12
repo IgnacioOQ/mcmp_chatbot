@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All client access locked. The backend uses the Firebase Admin SDK,
+    // which bypasses these rules. See FIREBASE_MIGRATION_PLAN.md §3.1.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

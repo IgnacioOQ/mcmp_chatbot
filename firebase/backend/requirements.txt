@@ -1,0 +1,20 @@
+# MCMP Firebase backend — derived from root requirements.txt.
+# Added for the Firebase build: fastapi, uvicorn, firebase-admin.
+# Removed (Streamlit-only): streamlit, streamlit-calendar, chromadb.
+# Shared with the scraper image (firebase/scraper/Dockerfile copies this file),
+# so selenium + webdriver-manager are retained here for the scraper job.
+fastapi
+uvicorn[standard]
+firebase-admin
+google-genai==1.*
+mcp
+pandas
+beautifulsoup4
+requests
+openai
+python-dotenv
+gspread
+google-auth
+selenium
+webdriver-manager
+ftfy

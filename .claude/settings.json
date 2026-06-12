@@ -5,7 +5,30 @@
       "Bash(grep -rn \"gemini-2.5-flash[^-]\" --include=\"*.py\")",
       "Bash(grep -rn 'gemini-2\\\\.5-flash\"' --include=\"*.py\")",
       "Bash(pytest tests/ -v --ignore=tests/stress_test_gemini.py)",
-      "Bash(grep -n \"^## \\\\|^---$\\\\|## Task Template\" TODO_WORKFLOW.md)"
+      "Bash(grep -n \"^## \\\\|^---$\\\\|## Task Template\" TODO_WORKFLOW.md)",
+      "Bash(git checkout *)",
+      "mcp__cp_mcp__cp_mcp_session_start",
+      "Bash(git branch *)",
+      "Bash(mkdir -p firebase/frontend firebase/backend firebase/scraper firebase/scripts)",
+      "Bash(touch firebase/scraper/.gitkeep firebase/scripts/.gitkeep)",
+      "Bash(python -c \"import importlib.metadata as m; print\\('google-genai', m.version\\('google-genai'\\)\\)\")",
+      "Bash(python -c \"import importlib.metadata as m; print\\('mcp', m.version\\('mcp'\\)\\)\")",
+      "Bash(chmod +x firebase/backend/deploy-backend.sh)",
+      "Bash(node --version)",
+      "Bash(npm --version)",
+      "Bash(command -v nvm)",
+      "Bash(ls ~/.nvm/versions/node)",
+      "Bash(npx --yes create-next-app@14 . --typescript --tailwind --app --src-dir --import-alias \"@/*\" --eslint --use-npm)",
+      "Bash(node -p \"require\\('./package.json'\\).dependencies.next\")",
+      "Bash(gcloud organizations *)",
+      "Bash(gcloud billing *)",
+      "Bash(firebase login:list)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(python3 /tmp/mk_secrets.py)",
+      "Bash(gcloud secrets *)",
+      "mcp__cp_mcp__cp_mcp_worklog_append",
+      "Bash(rm -f firebase/scripts/.gitkeep)",
+      "Bash(DATA_BACKEND=json GEMINI_API_KEY=dummy PYTHONPATH=. python3 -c ' *)"
     ]
   }
 }

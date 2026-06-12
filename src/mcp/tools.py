@@ -27,13 +27,59 @@ def _normalize(text: str) -> str:
 # tools to return empty permanently if a dataset didn't exist at first call.
 _data_cache: Dict[str, List[Dict[str, Any]]] = {}
 
+# DATA_BACKEND selects where load_data() reads from:
+#   "json"      (default) — local data/*.json files. The Streamlit build is
+#                unaffected; this is the zero-risk backward-compatible path.
+#   "firestore" — read from Firestore collections (Firebase deploy). See
+#                FIREBASE_MIGRATION_PLAN.md §3.4.
+DATA_BACKEND = os.environ.get("DATA_BACKEND", "json").lower()
+
+# Firestore collection ↔ local-filename mapping (FIREBASE_MIGRATION_PLAN.md §3.2).
+_FIRESTORE_COLLECTIONS = {
+    "people.json": "people",
+    "research.json": "research",
+    "raw_events.json": "events",
+    "academic_offerings.json": "academic_offerings",
+}
+
+_firestore_client = None
+
+
+def _get_firestore_client():
+    global _firestore_client
+    if _firestore_client is None:
+        import firebase_admin
+        from firebase_admin import firestore
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app()
+        _firestore_client = firestore.client()
+    return _firestore_client
+
+
+def _load_from_firestore(filename: str):
+    """Load one logical dataset from Firestore, mirroring the JSON file shape."""
+    db = _get_firestore_client()
+    if filename in _FIRESTORE_COLLECTIONS:
+        return [doc.to_dict() for doc in db.collection(_FIRESTORE_COLLECTIONS[filename]).stream()]
+    if filename == "graph/mcmp_jgraph.json":
+        snap = db.collection("graph").document("mcmp_graph").get()
+        return snap.to_dict().get("jgraph") if snap.exists else None
+    return None
+
+
 def load_data(filename: str) -> List[Dict[str, Any]]:
     if filename not in _data_cache:
-        path = os.path.join(DATA_DIR, filename)
-        if not os.path.exists(path):
-            return []  # not cached — next call will retry the disk
-        with open(path, "r", encoding="utf-8") as f:
-            _data_cache[filename] = json.load(f)
+        if DATA_BACKEND == "firestore":
+            data = _load_from_firestore(filename)
+            if data is None:
+                return []  # not cached — next call retries Firestore
+            _data_cache[filename] = data
+        else:
+            path = os.path.join(DATA_DIR, filename)
+            if not os.path.exists(path):
+                return []  # not cached — next call will retry the disk
+            with open(path, "r", encoding="utf-8") as f:
+                _data_cache[filename] = json.load(f)
     return _data_cache[filename]
 
 def search_people(query: str) -> List[Dict[str, Any]]:

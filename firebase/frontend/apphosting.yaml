@@ -1,0 +1,16 @@
+runConfig:
+  minInstances: 0
+  maxInstances: 2
+  memoryMiB: 512
+  cpu: 1
+  concurrency: 80
+
+env:
+  - variable: BACKEND_URL
+    secret: BACKEND_URL        # populated in Secret Manager after Phase 4 (backend Cloud Run URL)
+    availability:
+      - RUNTIME
+  - variable: ALLOWED_ADMIN_EMAILS
+    value: "ignacioojea@gmail.com"
+    availability:
+      - RUNTIME

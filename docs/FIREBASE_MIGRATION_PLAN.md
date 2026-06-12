@@ -132,16 +132,16 @@ Production branch: `firebase-branch`. All App Hosting auto-deploys and `deploy-b
 ---
 
 ## Phase 1 — Repo & Project Scaffold
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_1
 - owner: agent
-- last_checked: 2026-05-05
+- last_checked: 2026-06-12
 <!-- content -->
 Create the `firebase-branch` production branch and the full `firebase/` folder structure. No GCP resources are created yet. This phase produces a committed scaffold on which all subsequent phases build.
 
 ### 1.1 Create firebase-branch from main
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_1.task_01
 <!-- content -->
@@ -153,7 +153,7 @@ git push -u origin firebase-branch
 This branch is the sole production deploy source. Never merge changes targeting the Firebase deploy back to `main` until the migration is fully validated.
 
 ### 1.2 Create firebase/ folder structure
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_1.task_02
 - blocked_by: [mcmp_firebase_migration.phase_1.task_01]
@@ -161,7 +161,7 @@ This branch is the sole production deploy source. Never merge changes targeting 
 Create `firebase/frontend/`, `firebase/backend/`, `firebase/scraper/`, `firebase/scripts/`. Add `.gitkeep` to each empty directory. Commit on `firebase-branch`.
 
 ### 1.3 Backend: Dockerfile and requirements.txt
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_1.task_03
 - blocked_by: [mcmp_firebase_migration.phase_1.task_02]
@@ -185,7 +185,7 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
 - Pin `google-genai` to the version in use (`google-genai==1.*` or pin exact)
 
 ### 1.4 Backend: cloudbuild.yaml and deploy-backend.sh
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_1.task_04
 - blocked_by: [mcmp_firebase_migration.phase_1.task_03]
@@ -195,7 +195,7 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
 `firebase/backend/deploy-backend.sh`: shell script wrapping `gcloud builds submit`. Hard branch guard — refuses to run unless `git rev-parse --abbrev-ref HEAD` equals `firebase-branch`. Pattern copied verbatim from Chatbot Template `deploy-backend.sh`. After a successful build, the script deploys to Cloud Run with the flags listed in Phase 4.5.
 
 ### 1.5 Frontend: Next.js 14 scaffold
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_1.task_05
 - blocked_by: [mcmp_firebase_migration.phase_1.task_02]
@@ -209,7 +209,7 @@ npm install firebase google-auth-library react-markdown
 Delete the default placeholder page content (`src/app/page.tsx`, `src/app/globals.css` boilerplate). Confirm `npm run dev` starts cleanly at `http://localhost:3000`.
 
 ### 1.6 Frontend: apphosting.yaml
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_1.task_06
 - blocked_by: [mcmp_firebase_migration.phase_1.task_05]
@@ -236,7 +236,7 @@ env:
 `BACKEND_URL` is left as a Secret Manager reference placeholder. After the backend Cloud Run URL is known (Phase 4.5), create the secret and update this file.
 
 ### 1.7 Update .gitignore
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_1.task_07
 - blocked_by: [mcmp_firebase_migration.phase_1.task_05]
@@ -271,7 +271,7 @@ Create the `mcmp-firebase` GCP project, enable all required APIs, provision IAM 
 3. Run `nvm use 20 && firebase login --reauth` (as `eikasia@eikasia.com`) on any workstation executing Firebase CLI commands. Node < 20 and stale auth tokens are the two most common failure modes.
 
 ### 2.1 Create GCP project mcmp-firebase at org root
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_2.task_01
 <!-- content -->
@@ -286,7 +286,7 @@ gcloud billing projects link mcmp-firebase \
 Confirm placement: `gcloud projects describe mcmp-firebase` — `parent.type` must be `organization` and `parent.id` must equal `<EIKASIA_ORG_ID>` (not `folder`, not the default org for any other account).
 
 ### 2.2 Enable required APIs
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_2.task_02
 - blocked_by: [mcmp_firebase_migration.phase_2.task_01]
@@ -312,7 +312,7 @@ gcloud services enable \
 ```
 
 ### 2.3 Artifact Registry repo
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_2.task_03
 - blocked_by: [mcmp_firebase_migration.phase_2.task_02]
@@ -327,7 +327,7 @@ gcloud artifacts repositories create mcmp-firebase-app \
 Both the backend and scraper images go in this repo.
 
 ### 2.4 Runtime service account mcmp-firebase-app-sa
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_2.task_04
 - blocked_by: [mcmp_firebase_migration.phase_2.task_02]
@@ -351,7 +351,7 @@ done
 `roles/datastore.user` grants Firestore read/write via Admin SDK (Admin SDK uses the runtime SA identity in Cloud Run).
 
 ### 2.5 Cloud Build SA roles
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_2.task_05
 - blocked_by: [mcmp_firebase_migration.phase_2.task_02]
@@ -372,7 +372,7 @@ done
 ```
 
 ### 2.6 Secret Manager: GEMINI_API_KEY and SHEETS_SA_JSON
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_2.task_06
 - blocked_by: [mcmp_firebase_migration.phase_2.task_02]
@@ -401,7 +401,7 @@ gcloud secrets create SHEETS_SA_JSON \
 The `SHEETS_SA_JSON` secret holds the complete JSON content of whichever SA you picked. This replaces the `.streamlit/secrets.toml` `[gcp_service_account]` block.
 
 ### 2.7 Log sink: WARNING+ exclusion
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_2.task_07
 - blocked_by: [mcmp_firebase_migration.phase_2.task_02]
@@ -413,7 +413,7 @@ gcloud logging sinks update _Default \
 ```
 
 ### 2.8 Private Google Access on default subnet
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_2.task_08
 - blocked_by: [mcmp_firebase_migration.phase_2.task_02]
@@ -460,7 +460,7 @@ Wizard answers:
 After init, note the auto-created App Hosting runtime SA email (format: `firebase-app-hosting-compute@mcmp-firebase.iam.gserviceaccount.com`). This SA needs `roles/run.invoker` on the Cloud Run backend (granted in Phase 4.6).
 
 ### 2.10 Create Firestore database
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_2.task_10
 - blocked_by: [mcmp_firebase_migration.phase_2.task_09]
@@ -493,7 +493,8 @@ Firebase Console (signed in as `eikasia@eikasia.com`) → Authentication → Get
 Define the Firestore collection schema, write and run the one-time migration from local JSON files to Firestore, update the MCP tools to read from Firestore, and update the scraper to write to Firestore. This phase produces a fully-populated database that the Phase 4 backend can query on startup.
 
 ### 3.1 Firestore security rules
-- status: todo
+- status: in-progress
+- note: 'firestore.rules written (firebase/frontend/firestore.rules, allow read,write: if false). Deploy via `firebase deploy --only firestore:rules` pending the interactive firebase init (2.9). No client access exists yet, so not security-critical until then.'
 - type: task
 - id: mcmp_firebase_migration.phase_3.task_01
 <!-- content -->
@@ -531,7 +532,7 @@ If a future iteration adds client-side Firestore access (e.g., real-time admin p
 Each document stores all fields from the corresponding JSON entry verbatim. No schema transformation.
 
 ### 3.3 Write data migration script
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_3.task_03
 - blocked_by: [mcmp_firebase_migration.phase_3.task_02]
@@ -549,7 +550,7 @@ python firebase/scripts/migrate_to_firestore.py --project=mcmp-firebase
 ```
 
 ### 3.4 Update MCP tools to support Firestore backend
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_3.task_04
 - blocked_by: [mcmp_firebase_migration.phase_3.task_03]
@@ -606,7 +607,7 @@ Verify in Firebase Console → Firestore:
 Create the FastAPI application, deploy it to Cloud Run, and verify it is reachable via IAM token auth. The frontend is not built yet — this phase validates the backend in isolation.
 
 ### 4.1 Create firebase/backend/main.py
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_4.task_01
 <!-- content -->
@@ -626,7 +627,7 @@ FastAPI app with the following endpoints:
 v1: `/chat` is a **blocking POST** — full Gemini response returned at once. SSE streaming is a future iteration.
 
 ### 4.2 Feedback endpoint: Google Sheets via SHEETS_SA_JSON
-- status: todo
+- status: done
 - type: task
 - id: mcmp_firebase_migration.phase_4.task_02
 - blocked_by: [mcmp_firebase_migration.phase_4.task_01]

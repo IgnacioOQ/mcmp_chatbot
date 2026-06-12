@@ -18,3 +18,9 @@ scripts/verify_*.py
 # Claude Code settings
 .claude/settings.json
 .claude/settings.local.json
+
+# Firebase build
+firebase/frontend/.env.local
+firebase/frontend/node_modules/
+firebase/frontend/.next/
+firebase/.firebaserc

@@ -1,0 +1,19 @@
+# Cloud Build upload excludes. The backend image only needs src/, prompts/,
+# and firebase/backend/ (see firebase/backend/Dockerfile). Keep the context small
+# and never upload secrets or node_modules.
+.git/
+.gitignore
+__pycache__/
+**/__pycache__/
+*.pyc
+.DS_Store
+*.log
+# secrets — never upload
+.streamlit/
+# heavy / not needed for the backend image
+node_modules/
+firebase/frontend/
+data/
+tests/
+docs/
+.claude/

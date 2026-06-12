@@ -1,0 +1,26 @@
+# Build the MCMP Firebase chat backend image and push to Artifact Registry.
+# Must run from the repo ROOT so the Dockerfile can COPY src/ and prompts/:
+#   gcloud builds submit --config firebase/backend/cloudbuild.yaml \
+#     --substitutions=_TAG="$(git rev-parse --short HEAD)" --project=mcmp-firebase .
+# (deploy-backend.sh wraps this.)
+substitutions:
+  _REGION: us-central1
+  _REPO: mcmp-firebase-app
+  _IMAGE: backend
+  _TAG: latest
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - firebase/backend/Dockerfile
+      - -t
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:${_TAG}
+      - -t
+      - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:latest
+      - .
+images:
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:${_TAG}
+  - ${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_IMAGE}:latest
+options:
+  logging: CLOUD_LOGGING_ONLY
