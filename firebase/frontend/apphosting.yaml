@@ -6,8 +6,10 @@ runConfig:
   concurrency: 80
 
 env:
+  # The backend Cloud Run URL is IAM-protected, not sensitive — a plain value
+  # avoids App Hosting secret-access wiring. (Was a Secret Manager ref.)
   - variable: BACKEND_URL
-    secret: BACKEND_URL        # populated in Secret Manager after Phase 4 (backend Cloud Run URL)
+    value: "https://mcmp-firebase-backend-113682704284.us-central1.run.app"
     availability:
       - RUNTIME
   - variable: ALLOWED_ADMIN_EMAILS
