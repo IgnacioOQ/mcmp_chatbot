@@ -20,10 +20,9 @@ env:
     availability:
       - BUILD
       - RUNTIME
-  # Firebase web API key — public by design. Set after registering the web app
-  # during firebase init (Phase 5.6 / 2.9). Placeholder until then.
+  # Firebase web API key — public by design (shipped in the client bundle).
   - variable: NEXT_PUBLIC_FB_API_KEY
-    value: "REPLACE_AFTER_WEBAPP_REGISTRATION"
+    value: "AIzaSyD5LltMLgeNVQ53XecHv7fNZIJ-9cEzT6Y"
     availability:
       - BUILD
       - RUNTIME
