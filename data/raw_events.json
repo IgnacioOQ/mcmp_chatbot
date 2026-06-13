@@ -152,7 +152,7 @@
     {
         "title": "Workshop on Epsilon Calculus: between Logic and Philosophy",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/workshop-on-epsilon-calculus-between-logic-and-philosophy-93236c1e.html",
-        "scraped_at": "2026-06-13T06:47:21.615960",
+        "scraped_at": "2026-06-13T06:56:26.726432",
         "metadata": {
             "speaker": "between Logic and Philosophy",
             "year": 2026,
@@ -168,7 +168,7 @@
     {
         "title": "Talk: Francesca Biagioli (Turin)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-francesca-biagioli-turin-8dd11e0a.html",
-        "scraped_at": "2026-06-13T06:47:21.616045",
+        "scraped_at": "2026-06-13T06:56:26.726455",
         "talk_title": "DedekindianAbstraction and Its Philosophical Background",
         "abstract": "Dedekind is known to have made fundamentalcontributions to the modern axiomatization of number theory usingvarious abstraction procedures in a series of writings from1872-1888. However, his way of proceeding has been interpreted indifferent ways. Whereas some saw it as offering a clear example ofstructural or axiomatic definitions of abstract mathematical objects(regardless – and sometimes despite – his language of\"abstraction\" and \"creation\"), others deemed it to show apsychological understanding of abstraction conflating genetic withaxiomatic methods. This paper aims to gain insight into the notion ofabstraction at work in these writings by placing it in the contextnineteenth-century attempts to conceptualize ideal objects such asMoritz Wilhelm Drobisch's and HermannLotze's. Dedekind's connections to nineteenth-century logic openthe door a non-psychologistic rendering of his procedure as firstproposed by the neo-Kantian philosopher Ernst Cassirer, and morerecently by Erich Reck and Audrey Yap. It will be suggested that thisline of interpretation is worth exploring further, not only becauseit sheds light on the philosophical background of Dedekind'snotion, but also because it brings out the premises for a specificversion of mathematical structuralism.",
         "metadata": {
@@ -1670,7 +1670,7 @@
     {
         "title": "Talk (Work in Progress): Luis Lopez (MCMP) (in person)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-luis-lopez-mcmp-in-person-a8077aee.html",
-        "scraped_at": "2026-06-13T06:47:21.616056",
+        "scraped_at": "2026-06-13T06:56:26.726463",
         "talk_title": "Model Transfer as Conceptual Niche Co-Construction",
         "abstract": "Model Transfer (MT) occurs whenever a model template (i.e., a tractable, interpreted mathematical structure) developed in one disciplinary context is repurposed in another disciplinary context (Humphreys 2002, Knuuttila & Loettgers 2014). The key issue is the transfer process that renders a template applicable to a new target system, including the construction of a \"landing zone\" (Price 2019) and the management of conceptual pressure when a template's interpretation conflicts with entrenched commitments in the recipient field (Houkes 2023). In this talk, I refine, extend, and unify previous philosophical accounts of MT by integrating them with niche-based accounts of scientific practice, such as Cognitive Niche Construction (Nersessian 2008) and Conceptual Ecology (Stotz & Griffiths 2008). This integration recasts MT as conceptual niche co-construction: a coupled process in which the conceptualization of a target system is shaped to host a template, and the transferred template is reshaped to fit the target system. To do so, I use a semi-formal definition of 'ecological niche' (Mahner & Bunge, 1997) as a semi-formal template to define 'conceptual niche' and thus account for MT and \"conceptual speciation\" (Stotz & Griffiths 2008); in what can be considered a case of second-order MT or metamodel transfer (i.e., modeling model transfer).",
         "metadata": {
