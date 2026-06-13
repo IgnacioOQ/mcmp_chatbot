@@ -6,7 +6,9 @@ venv/
 .env
 
 # Project specific
-data/
+# data/*.json and data/graph are TRACKED on the routines branch so the scheduled
+# refresh can commit scraped datasets; only the local vector store is ignored.
+data/vectordb/
 *.log
 mcmp_chatbot.log
 debug_env.py
@@ -16,7 +18,8 @@ scripts/verify_*.py
 .streamlit/secrets.toml
 
 # Claude Code settings
-.claude/settings.json
+# .claude/settings.json IS tracked on the routines branch so the SessionStart
+# hook (cloud Selenium setup) persists into scheduled cloud-run sessions.
 .claude/settings.local.json
 
 # Firebase build

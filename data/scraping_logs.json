@@ -1,0 +1,290 @@
+[
+    {
+        "timestamp": "2026-05-27T04:40:35.619626",
+        "changes": {
+            "events": {
+                "added": [
+                    "Talk: Adrià Segarra (Cambridge)",
+                    "Talk: Dominik Ehrenfels (MCMP) (in person)",
+                    "Talk: Susanne Melkonian-Altshuler (Oxford)"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "people": {
+                "added": [
+                    "Dr. Idit Chikurel",
+                    "Dr. John Dougherty",
+                    "Dr. David Colaco",
+                    "Wouter Cohen",
+                    "Felix Rohls, M.A.",
+                    "Dr. Gabriel Târziu",
+                    "Rodrigo Mena González",
+                    "PD Dr. Martin Fischer",
+                    "Junyan Feng, M.A.",
+                    "Dr. Simon Graf",
+                    "Simone Salzano, M.A.",
+                    "Dr. Ron Aboodi",
+                    "Hosea von Hauff, M.A.",
+                    "Dr. Sébastien Rivat",
+                    "Tyko Schuff, M.A.",
+                    "Dr. Dominik Ehrenfels",
+                    "David Hofmann",
+                    "Dr. Luis Lopez",
+                    "Dr. Christian Damböck",
+                    "Johannes Bommes, M.Sc.",
+                    "Dr. Toby C. P. Solomon",
+                    "Anne Deng, M.A.",
+                    "Prof. Dr. Godehard Link, Dipl.Math.",
+                    "Dr. Edi Pavlović",
+                    "Daniel Misselbeck-Wessel, PhD",
+                    "Dr. Daniel A. Di Liscia",
+                    "Marina Moreno",
+                    "Dr. Ina Jäntgen",
+                    "Dr. Conrad Friedrich",
+                    "apl. Prof. Dr. Alexander Reutlinger",
+                    "Dr. Lennart Ackermans",
+                    "Zhouwanyue (Nata) Yang, M.A.",
+                    "Prof. Dr. Ulrike Hahn",
+                    "Dr. Laurie Letertre",
+                    "Ursula Danninger, M.A.",
+                    "Elio La Rosa, M.A.",
+                    "Beinan Li, M.A.",
+                    "Dr. Sophie Kikkert",
+                    "Elena Rabinoff",
+                    "Andreas Frenzel",
+                    "Arthur Saraiva",
+                    "Wu Dawei, M.A.",
+                    "Allie Richards",
+                    "PD Dr. habil. Jürgen Landes",
+                    "Dr. Timo Freiesleben",
+                    "Dr. Tom Sterkenburg",
+                    "Marta Esteves",
+                    "Dr. Dr. André W. Carus",
+                    "PhD Daniele Bruno Garancini",
+                    "Dr. Alessandra Marra",
+                    "Katia Parshina, M.Sc.",
+                    "Dr. Vanessa Carr",
+                    "Dr. Martin King",
+                    "Leon Assaad",
+                    "Dr. Bianca Scheeff",
+                    "Rafael Fuchs",
+                    "Lilian von Bressensdorf",
+                    "Prof. Dr. Stephan Hartmann",
+                    "Dr. Alexander Blum",
+                    "Dr. Naftali Weinberger",
+                    "apl. Prof. Dr. Martin Rechenauer",
+                    "Dr. Levin Hornischer",
+                    "Ragna Talea Oeynhausen, M.A.",
+                    "Diego García Rincón",
+                    "Nicola Bonatti, MPhil",
+                    "Prof. DDr. Hannes Leitgeb",
+                    "Matteo De Benedetto",
+                    "Dr. Bianca Scheeff",
+                    "Cordelia Berz, M.Sc., M.A.",
+                    "Dr. Ignacio Ojea Quintana",
+                    "Dr. Edoardo Baccini",
+                    "Dr. Mario Günther",
+                    "Hannah Pillin, M.Sc., M.A.",
+                    "Dr. Silvia Milano",
+                    "Dr. Borut Trpin",
+                    "Dr. Norbert Gratzl",
+                    "Luca Castaldo",
+                    "Luis F. Bartolo Alegre, M.A.",
+                    "Dr. Jonas Raab",
+                    "Dr. Michael Cuffaro",
+                    "Prof. Dr. Christian List"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "research": {
+                "added": [
+                    "Logic and Philosophy of Language",
+                    "Philosophy of Science",
+                    "Decision Theory",
+                    "Mathematical Philosophy"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "general": {
+                "added": [
+                    "General: News and events",
+                    "General: About the MCMP",
+                    "General: Insitutional setting",
+                    "General: Our history",
+                    "General: About Mathematical Philosophy",
+                    "General: Principal aims"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "academic_offerings": {
+                "added": [
+                    "Bachelor Program in Philosophy",
+                    "Master Program in Logic and Philosophy of Science",
+                    "PhD Program",
+                    "https://www.philosophie.lmu.de/mcmp/en/for-students/_general",
+                    "Learning Materials"
+                ],
+                "removed": [],
+                "updated": []
+            }
+        }
+    },
+    {
+        "timestamp": "2026-05-27T04:46:34.478961",
+        "changes": {
+            "events": {
+                "added": [
+                    "Fifth Irvine-London-Munich-PoliMi-Salzburg Conference in Philosophy and Foundations of Physics",
+                    "Research Seminar in Decision and Action Theory: Modeling instability: From ecological collapse to political transitions",
+                    "Talk: Patrick Todd (Edinburgh)",
+                    "Talk: Ed Zalta (Stanford)",
+                    "Talk (Work in Progress): Ina Jäntgen (MCMP) (in person)",
+                    "Talk: Maciej Głowacki (Warsaw)",
+                    "Workshop on Epsilon Calculus: between Logic and Philosophy",
+                    "Talk: Francesca Biagioli (Turin)",
+                    "Talk (Work in Progress): Sara Pernille Jensen (Oslo) (in person)",
+                    "Talk: Maria Aloni (Amsterdam)",
+                    "Talk: Stuart Glennan (Butler)",
+                    "The Epistemology of Medicine",
+                    "Talk: Szymon Bogacz (Vienna)",
+                    "Talk: Charles Wolfe (Toulouse)",
+                    "Recent Advances in the Philosophy of Logic",
+                    "Talk: Kevin Elliott (MSU)",
+                    "Talk (Work in Progress): Giovanni Sanavio (IUSS Pavia) [online]",
+                    "Talk: Frederik J. Andersen (Copenhagen)",
+                    "Talk: Somayeh Tohidi (Bristol)",
+                    "Talk: Alison Peterman (Rochester)",
+                    "Talk: Anna-Maria Eder (Köln)",
+                    "Philosophy of Machine Learning Conference",
+                    "Talk: Stephan Krämer (Hamburg)",
+                    "Talk: Ole Hjortland (Bergen)",
+                    "Talk: Pablo Dopico (Konstanz)",
+                    "Talk: Peter Brössel (Bochum)",
+                    "Talk: Lena Kästner (Bayreuth)",
+                    "Talk (Work in Progress): Naftali Weinberger (MCMP)",
+                    "Talk: Jo Wolff (Edinburgh)",
+                    "Talk: Andrea Oldofredi (Lisbon)",
+                    "Talk: Johannes Korbmacher (Utrecht)",
+                    "Talk (Work in Progress): Christian Damböck (MCMP/Vienna)",
+                    "Talk: Philipp Haueis (Bielefeld)",
+                    "Talk: Mark Jago (Nottingham)",
+                    "Talk (Work in Progress): Vita Saitta (Catholic University of Milan)",
+                    "Talk: David Teira (UNED)",
+                    "Talk: Marianna Girlando (Amsterdam)",
+                    "Talk: Thomas Uebel (Manchester)",
+                    "Talk: Olivier Roy (Bayreuth)",
+                    "Talk (Work in Progress): Timo Freiesleben (MCMP)",
+                    "Talk: Giacomo Andreoletti (LMU)",
+                    "Postwar Physics Across Scales",
+                    "Talk: Armin Schulz (Kansas)",
+                    "Model Choice in Bayesian Inference",
+                    "Talk: Timothy Williamson (Oxford)",
+                    "[Cancelled] Talk (Work in Progress): Pablo Acuña (UC Chile)",
+                    "Talk: Simon Saunders (Oxford)",
+                    "Talk: Carrie Figdor (Iowa and Edinburgh)",
+                    "Talk: Ivano Ciardelli (Padova)",
+                    "Talk (Work in Progress): Mario Hubert (LMU)",
+                    "Talk: Carl Hoefer (Barcelona)",
+                    "Research Seminar in Decision and Action Theory: Irrational option exclusion?",
+                    "Talk: Luca Incurvati (Amsterdam)",
+                    "Talk (Work in Progress): Francesco Nappo (Milan)",
+                    "Talk: Časlav Brukner (Vienna)",
+                    "Talk: Hilary Greaves (Oxford)",
+                    "Talk (Work in Progress): Enrico Maresca (Pisa)",
+                    "Talk: Christian Wüthrich (Geneva)",
+                    "Talk: Corina Strößner (Greifswald)",
+                    "Talk (Work in Progress): Daniele Garancini (MCMP)",
+                    "Talk: Mario Gollwitzer (LMU)",
+                    "Talk: Caterina Del Sordo (University of the Basque Country)",
+                    "Talk (Work in Progress): Ignacio Ojea Quintana (MCMP)",
+                    "Talk: Manolo Martínez (Barcelona)",
+                    "Talk: Catherine Herfeld (Hannover)",
+                    "Talk: Steffen Koch (Bielefeld)",
+                    "Talk (Work in Progress): Edoardo Baccini (MCMP)",
+                    "Talk: Uljana Feest (Hannover)",
+                    "Workshop on Determinism, Indeterminism, and Counterfactuals in History",
+                    "Talk: Anton Freund (Würzburg)",
+                    "[CANCELLED] Talk (Work in Progress): Flavia Padovani (Drexel)",
+                    "Talk: Max Kistler (Paris)",
+                    "Talk: Balthasar Grabmayr (Tübingen)",
+                    "Talk (Work in Progress): Maria Federica Norelli (NU London)",
+                    "Talk: Kate Vredenburgh (LSE)",
+                    "Research Seminar in Decision and Action Theory: Reflective Transparency and Self-Ascription of Belief",
+                    "Talk: Laura Crosilla (Florence)",
+                    "Talk (Work in Progress): Conrad Friedrich (MCMP)",
+                    "Talk: Elena Castellani (Florence)",
+                    "Research Seminar in Decision and Action Theory: The Phantom of Leeway",
+                    "Interdisciplinary Workshop on Preferences in Artificial Intelligence",
+                    "Talk: Jan von Plato (Helsinki/MCMP)",
+                    "Talk (Work in Progress): David Colaço (MCMP)",
+                    "Talk: Brian Ball & David Freeborn (NU London)",
+                    "Talk: Mark Bowker (Bielefeld)",
+                    "[Cancelled] Talk (Work in Progress): David Colaço (MCMP)",
+                    "Talk: Hanoch Ben-Yami (Central European University)",
+                    "Talk (Work in Progress): Michael Cuffaro (MCMP)",
+                    "Talk: Jonathan Shaheen (Uppsala)",
+                    "Talk: Luca Castaldo (MCMP)",
+                    "Talk: David Papineau (KCL)",
+                    "Talk: Greg Wheeler (Frankfurt School of Finance & Management)",
+                    "Talk (Work in Progress): Xiaoyu Guo (Darmstadt)",
+                    "Talk: Clara Bradley (UCL)",
+                    "Formal Epistemology Meets Philosophy of AI",
+                    "Epistemology and Theory of Machine Learning (30-31 May 2025)",
+                    "Machine Learning meets Mathematical Philosophy (16 June 2023)",
+                    "Epistemology and Theory of Machine Learning (23-24 March 2023)"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            }
+        }
+    },
+    {
+        "timestamp": "2026-06-04T09:43:17.684057",
+        "changes": {
+            "events": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Talk (Work in Progress): Ina Jäntgen (MCMP) (in person)"
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            }
+        }
+    },
+    {
+        "timestamp": "2026-06-04T09:44:47.510538",
+        "changes": {
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            }
+        }
+    }
+]

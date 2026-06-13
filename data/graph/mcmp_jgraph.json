@@ -1,0 +1,810 @@
+{
+    "nodes": [
+        {
+            "id": "chair_of_philosophy_of_science",
+            "name": "Chair of Philosophy of Science",
+            "type": "Organizational Unit",
+            "properties": "MCMP Chair"
+        },
+        {
+            "id": "chair_of_logic_and_philosophy_of_language",
+            "name": "Chair of Logic and Philosophy of Language",
+            "type": "Organizational Unit",
+            "properties": "MCMP Chair"
+        },
+        {
+            "id": "chair_of_philosophy_and_decision_theory",
+            "name": "Chair of Philosophy and Decision Theory",
+            "type": "Organizational Unit",
+            "properties": "MCMP Chair"
+        },
+        {
+            "id": "chair_of_theoretical_philosophy",
+            "name": "Chair of Theoretical Philosophy",
+            "type": "Organizational Unit",
+            "properties": "MCMP Chair"
+        },
+        {
+            "id": "chair_of_philosophy_and_political_theory",
+            "name": "Chair of Philosophy and Political Theory",
+            "type": "Organizational Unit",
+            "properties": "MCMP Chair"
+        },
+        {
+            "id": "idit_chikurel",
+            "name": "Dr. Idit Chikurel",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Fellow"
+        },
+        {
+            "id": "john_dougherty",
+            "name": "Dr. John Dougherty",
+            "type": "Person",
+            "properties": "Role: Assistant Professor"
+        },
+        {
+            "id": "david_colaco",
+            "name": "Dr. David Colaco",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Fellow"
+        },
+        {
+            "id": "wouter_cohen",
+            "name": "Wouter Cohen",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Researcher"
+        },
+        {
+            "id": "felix_rohls",
+            "name": "Felix Rohls, M.A.",
+            "type": "Person",
+            "properties": "Role: Doctoral Student"
+        },
+        {
+            "id": "gabriel_trziu",
+            "name": "Dr. Gabriel T\u00e2rziu",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Researcher"
+        },
+        {
+            "id": "rodrigo_mena_gonzlez",
+            "name": "Rodrigo Mena Gonz\u00e1lez",
+            "type": "Person",
+            "properties": "Role: Doctoral Fellow"
+        },
+        {
+            "id": "martin_fischer",
+            "name": "PD Dr. Martin Fischer",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "junyan_feng",
+            "name": "Junyan Feng, M.A.",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "simon_graf",
+            "name": "Dr. Simon Graf",
+            "type": "Person",
+            "properties": "Role: Research Fellow"
+        },
+        {
+            "id": "simone_salzano",
+            "name": "Simone Salzano, M.A.",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "ron_aboodi",
+            "name": "Dr. Ron Aboodi",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Researcher"
+        },
+        {
+            "id": "hosea_von_hauff",
+            "name": "Hosea von Hauff, M.A.",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "sbastien_rivat",
+            "name": "Dr. S\u00e9bastien Rivat",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Fellow"
+        },
+        {
+            "id": "tyko_schuff",
+            "name": "Tyko Schuff, M.A.",
+            "type": "Person",
+            "properties": "Role: Doctoral Fellow"
+        },
+        {
+            "id": "dominik_ehrenfels",
+            "name": "Dr. Dominik Ehrenfels",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "david_hofmann",
+            "name": "David Hofmann",
+            "type": "Person",
+            "properties": "Role: Doctoral Fellow"
+        },
+        {
+            "id": "luis_lopez",
+            "name": "Dr. Luis Lopez",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "christian_dambck",
+            "name": "Dr. Christian Damb\u00f6ck",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "johannes_bommes",
+            "name": "Johannes Bommes, M.Sc.",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "toby_c_p_solomon",
+            "name": "Dr. Toby C. P. Solomon",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Fellow"
+        },
+        {
+            "id": "anne_deng",
+            "name": "Anne Deng, M.A.",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "godehard_link_diplmath",
+            "name": "Prof. Dr. Godehard Link, Dipl.Math.",
+            "type": "Person",
+            "properties": "Role: Assistant Professor"
+        },
+        {
+            "id": "edi_pavlovi",
+            "name": "Dr. Edi Pavlovi\u0107",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Researcher"
+        },
+        {
+            "id": "daniel_misselbeckwessel_phd",
+            "name": "Daniel Misselbeck-Wessel, PhD",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "daniel_a_di_liscia",
+            "name": "Dr. Daniel A. Di Liscia",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "marina_moreno",
+            "name": "Marina Moreno",
+            "type": "Person",
+            "properties": "Role: Doctoral Fellow"
+        },
+        {
+            "id": "ina_jntgen",
+            "name": "Dr. Ina J\u00e4ntgen",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "conrad_friedrich",
+            "name": "Dr. Conrad Friedrich",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "apl___alexander_reutlinger",
+            "name": "apl. Prof. Dr. Alexander Reutlinger",
+            "type": "Person",
+            "properties": "Role: Visiting Fellow"
+        },
+        {
+            "id": "lennart_ackermans",
+            "name": "Dr. Lennart Ackermans",
+            "type": "Person",
+            "properties": "Role: Research Fellow"
+        },
+        {
+            "id": "zhouwanyue__yang",
+            "name": "Zhouwanyue (Nata) Yang, M.A.",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "ulrike_hahn",
+            "name": "Prof. Dr. Ulrike Hahn",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "laurie_letertre",
+            "name": "Dr. Laurie Letertre",
+            "type": "Person",
+            "properties": "Role: Visiting Researcher"
+        },
+        {
+            "id": "ursula_danninger",
+            "name": "Ursula Danninger, M.A.",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "elio_la_rosa",
+            "name": "Elio La Rosa, M.A.",
+            "type": "Person",
+            "properties": "Role: Doctoral Fellow"
+        },
+        {
+            "id": "beinan_li",
+            "name": "Beinan Li, M.A.",
+            "type": "Person",
+            "properties": "Role: Doctoral Fellow"
+        },
+        {
+            "id": "sophie_kikkert",
+            "name": "Dr. Sophie Kikkert",
+            "type": "Person",
+            "properties": "Role: Assistant Professor"
+        },
+        {
+            "id": "elena_rabinoff",
+            "name": "Elena Rabinoff",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "andreas_frenzel",
+            "name": "Andreas Frenzel",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "arthur_saraiva",
+            "name": "Arthur Saraiva",
+            "type": "Person",
+            "properties": "Role: Doctoral Fellow"
+        },
+        {
+            "id": "wu_dawei",
+            "name": "Wu Dawei, M.A.",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "allie_richards",
+            "name": "Allie Richards",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "habil_jrgen_landes",
+            "name": "PD Dr. habil. J\u00fcrgen Landes",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "timo_freiesleben",
+            "name": "Dr. Timo Freiesleben",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Researcher"
+        },
+        {
+            "id": "tom_sterkenburg",
+            "name": "Dr. Tom Sterkenburg",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "marta_esteves",
+            "name": "Marta Esteves",
+            "type": "Person",
+            "properties": "Role: Doctoral Fellow"
+        },
+        {
+            "id": "andr_w_carus",
+            "name": "Dr. Dr. Andr\u00e9 W. Carus",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "phd_daniele_bruno_garancini",
+            "name": "PhD Daniele Bruno Garancini",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "alessandra_marra",
+            "name": "Dr. Alessandra Marra",
+            "type": "Person",
+            "properties": "Role: Assistant Professor"
+        },
+        {
+            "id": "katia_parshina",
+            "name": "Katia Parshina, M.Sc.",
+            "type": "Person",
+            "properties": "Role: Doctoral Fellow"
+        },
+        {
+            "id": "vanessa_carr",
+            "name": "Dr. Vanessa Carr",
+            "type": "Person",
+            "properties": "Role: Assistant Professor"
+        },
+        {
+            "id": "martin_king",
+            "name": "Dr. Martin King",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Researcher"
+        },
+        {
+            "id": "leon_assaad",
+            "name": "Leon Assaad",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "bianca_scheeff",
+            "name": "Dr. Bianca Scheeff",
+            "type": "Person",
+            "properties": "Role: Secretary"
+        },
+        {
+            "id": "rafael_fuchs",
+            "name": "Rafael Fuchs",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "lilian_von_bressensdorf",
+            "name": "Lilian von Bressensdorf",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "stephan_hartmann",
+            "name": "Prof. Dr. Stephan Hartmann",
+            "type": "Person",
+            "properties": "Role: Chair & Co-Director"
+        },
+        {
+            "id": "alexander_blum",
+            "name": "Dr. Alexander Blum",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "naftali_weinberger",
+            "name": "Dr. Naftali Weinberger",
+            "type": "Person",
+            "properties": "Role: Research Fellow"
+        },
+        {
+            "id": "apl___martin_rechenauer",
+            "name": "apl. Prof. Dr. Martin Rechenauer",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "levin_hornischer",
+            "name": "Dr. Levin Hornischer",
+            "type": "Person",
+            "properties": "Role: Assistant Professor"
+        },
+        {
+            "id": "ragna_talea_oeynhausen",
+            "name": "Ragna Talea Oeynhausen, M.A.",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "diego_garca_rincn",
+            "name": "Diego Garc\u00eda Rinc\u00f3n",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "nicola_bonatti_mphil",
+            "name": "Nicola Bonatti, MPhil",
+            "type": "Person",
+            "properties": "Role: Doctoral Fellow"
+        },
+        {
+            "id": "hannes_leitgeb",
+            "name": "Prof. DDr. Hannes Leitgeb",
+            "type": "Person",
+            "properties": "Role: Chair & Co-Director"
+        },
+        {
+            "id": "matteo_de_benedetto",
+            "name": "Matteo De Benedetto",
+            "type": "Person",
+            "properties": "Role: Assistant Professor"
+        },
+        {
+            "id": "bianca_scheeff",
+            "name": "Dr. Bianca Scheeff",
+            "type": "Person",
+            "properties": "Role: Secretary"
+        },
+        {
+            "id": "cordelia_berz_",
+            "name": "Cordelia Berz, M.Sc., M.A.",
+            "type": "Person",
+            "properties": "Role: Doctoral Fellow"
+        },
+        {
+            "id": "ignacio_ojea_quintana",
+            "name": "Dr. Ignacio Ojea Quintana",
+            "type": "Person",
+            "properties": "Role: Assistant Professor"
+        },
+        {
+            "id": "edoardo_baccini",
+            "name": "Dr. Edoardo Baccini",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Researcher"
+        },
+        {
+            "id": "mario_gnther",
+            "name": "Dr. Mario G\u00fcnther",
+            "type": "Person",
+            "properties": "Role: Assistant Professor"
+        },
+        {
+            "id": "hannah_pillin_",
+            "name": "Hannah Pillin, M.Sc., M.A.",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "silvia_milano",
+            "name": "Dr. Silvia Milano",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Researcher"
+        },
+        {
+            "id": "borut_trpin",
+            "name": "Dr. Borut Trpin",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "norbert_gratzl",
+            "name": "Dr. Norbert Gratzl",
+            "type": "Person",
+            "properties": "Role: Research Associate"
+        },
+        {
+            "id": "luca_castaldo",
+            "name": "Luca Castaldo",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "luis_f_bartolo_alegre",
+            "name": "Luis F. Bartolo Alegre, M.A.",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "jonas_raab",
+            "name": "Dr. Jonas Raab",
+            "type": "Person",
+            "properties": "Role: Postdoctoral Fellow"
+        },
+        {
+            "id": "michael_cuffaro",
+            "name": "Dr. Michael Cuffaro",
+            "type": "Person",
+            "properties": "Role: Visiting Fellow"
+        },
+        {
+            "id": "christian_list",
+            "name": "Prof. Dr. Christian List",
+            "type": "Person",
+            "properties": "Role: Chair & Co-Director"
+        }
+    ],
+    "edges": [
+        {
+            "source": "john_dougherty",
+            "target": "chair_of_philosophy_of_science",
+            "relationship": "affiliated_with",
+            "properties": "Assistant Professor"
+        },
+        {
+            "source": "simon_graf",
+            "target": "chair_of_philosophy_and_decision_theory",
+            "relationship": "affiliated_with",
+            "properties": "Research Fellow"
+        },
+        {
+            "source": "apl___alexander_reutlinger",
+            "target": "chair_of_philosophy_of_science",
+            "relationship": "affiliated_with",
+            "properties": "Visiting Fellow"
+        },
+        {
+            "source": "alessandra_marra",
+            "target": "chair_of_logic_and_philosophy_of_language",
+            "relationship": "affiliated_with",
+            "properties": "Assistant Professor"
+        },
+        {
+            "source": "vanessa_carr",
+            "target": "chair_of_philosophy_and_decision_theory",
+            "relationship": "affiliated_with",
+            "properties": "Assistant Professor"
+        },
+        {
+            "source": "bianca_scheeff",
+            "target": "chair_of_philosophy_and_decision_theory",
+            "relationship": "affiliated_with",
+            "properties": "Secretary"
+        },
+        {
+            "source": "bianca_scheeff",
+            "target": "chair_of_philosophy_and_political_theory",
+            "relationship": "affiliated_with",
+            "properties": "Secretary"
+        },
+        {
+            "source": "stephan_hartmann",
+            "target": "chair_of_philosophy_of_science",
+            "relationship": "affiliated_with",
+            "properties": "Chair & Co-Director"
+        },
+        {
+            "source": "stephan_hartmann",
+            "target": "chair_of_philosophy_of_science",
+            "relationship": "leads",
+            "properties": "Head of Chair"
+        },
+        {
+            "source": "apl___martin_rechenauer",
+            "target": "chair_of_philosophy_and_political_theory",
+            "relationship": "affiliated_with",
+            "properties": "Member"
+        },
+        {
+            "source": "hannes_leitgeb",
+            "target": "chair_of_logic_and_philosophy_of_language",
+            "relationship": "affiliated_with",
+            "properties": "Chair & Co-Director"
+        },
+        {
+            "source": "hannes_leitgeb",
+            "target": "chair_of_logic_and_philosophy_of_language",
+            "relationship": "leads",
+            "properties": "Head of Chair"
+        },
+        {
+            "source": "bianca_scheeff",
+            "target": "chair_of_philosophy_and_decision_theory",
+            "relationship": "affiliated_with",
+            "properties": "Secretary"
+        },
+        {
+            "source": "bianca_scheeff",
+            "target": "chair_of_philosophy_and_political_theory",
+            "relationship": "affiliated_with",
+            "properties": "Secretary"
+        },
+        {
+            "source": "ignacio_ojea_quintana",
+            "target": "chair_of_philosophy_of_science",
+            "relationship": "affiliated_with",
+            "properties": "Assistant Professor"
+        },
+        {
+            "source": "christian_list",
+            "target": "chair_of_philosophy_and_decision_theory",
+            "relationship": "affiliated_with",
+            "properties": "Chair & Co-Director"
+        },
+        {
+            "source": "christian_list",
+            "target": "chair_of_philosophy_and_decision_theory",
+            "relationship": "leads",
+            "properties": "Head of Chair"
+        },
+        {
+            "source": "felix_rohls",
+            "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "rodrigo_mena_gonzlez",
+            "target": "martin_fischer",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "rodrigo_mena_gonzlez",
+            "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "simone_salzano",
+            "target": "stephan_hartmann",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "tyko_schuff",
+            "target": "martin_fischer",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "tyko_schuff",
+            "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "david_hofmann",
+            "target": "martin_fischer",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "david_hofmann",
+            "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "johannes_bommes",
+            "target": "stephan_hartmann",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "marina_moreno",
+            "target": "christian_list",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "conrad_friedrich",
+            "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "conrad_friedrich",
+            "target": "christian_list",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "elio_la_rosa",
+            "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "elio_la_rosa",
+            "target": "norbert_gratzl",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "beinan_li",
+            "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "arthur_saraiva",
+            "target": "stephan_hartmann",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "wu_dawei",
+            "target": "christian_list",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "timo_freiesleben",
+            "target": "tom_sterkenburg",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "timo_freiesleben",
+            "target": "stephan_hartmann",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "marta_esteves",
+            "target": "martin_fischer",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "marta_esteves",
+            "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "katia_parshina",
+            "target": "tom_sterkenburg",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "lilian_von_bressensdorf",
+            "target": "stephan_hartmann",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "nicola_bonatti_mphil",
+            "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "nicola_bonatti_mphil",
+            "target": "norbert_gratzl",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "cordelia_berz_",
+            "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "hannah_pillin_",
+            "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "hannah_pillin_",
+            "target": "christian_list",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "silvia_milano",
+            "target": "christian_list",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "luis_f_bartolo_alegre",
+            "target": "martin_fischer",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "luis_f_bartolo_alegre",
+            "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        }
+    ]
+}

@@ -205,19 +205,26 @@ class MCMPScraper:
         Returns list of (url, title) tuples.
         """
         chrome_options = ChromeOptions()
-        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--ignore-certificate-errors")
+
+        chrome_binary = os.environ.get("MCMP_CHROME_BINARY")
+        chromedriver_path = os.environ.get("MCMP_CHROMEDRIVER")
+        if chrome_binary:
+            chrome_options.binary_location = chrome_binary
 
         driver = None
         event_links = []
 
         try:
-            driver = webdriver.Chrome(
-                service=ChromeService(ChromeDriverManager().install()),
-                options=chrome_options,
-            )
+            if chromedriver_path:
+                service = ChromeService(executable_path=chromedriver_path)
+            else:
+                service = ChromeService(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=chrome_options)
             driver.get(url)
 
             WebDriverWait(driver, 10).until(
@@ -314,6 +321,9 @@ class MCMPScraper:
 
         except Exception as e:
             log_error(f"Error scraping event details for {event['url']}: {e}")
+            # Flag the failure so _accumulate won't let this thin entry
+            # overwrite a previously-stored rich entry (e.g. on a flaky 403).
+            event["fetch_failed"] = True
 
     def _extract_section_content(self, header_elem):
         """Extracts all text content following a header until the next header."""
@@ -1084,8 +1094,17 @@ class MCMPScraper:
         merged = {get_id(item): item for item in existing if get_id(item)}
         for item in new_data:
             item_id = get_id(item)
-            if item_id:
-                merged[item_id] = item
+            if not item_id:
+                continue
+            # If this run failed to fetch an item's detail page, don't let the
+            # resulting thin/degraded entry overwrite a previously-stored rich
+            # entry — a transient error (e.g. a flaky 403) must never wipe good
+            # committed data. Keep the existing entry instead.
+            if item.get("fetch_failed") and item_id in merged:
+                log_info(f"Detail fetch failed for {item_id}; preserving existing entry.")
+                continue
+            item.pop("fetch_failed", None)  # internal flag, never persisted
+            merged[item_id] = item
         return list(merged.values())
 
     def save_to_json(self):

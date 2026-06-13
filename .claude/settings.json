@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \":*)",
+      "Bash(grep -rn \"gemini-2.5-flash[^-]\" --include=\"*.py\")",
+      "Bash(grep -rn 'gemini-2\\\\.5-flash\"' --include=\"*.py\")",
+      "Bash(pytest tests/ -v --ignore=tests/stress_test_gemini.py)",
+      "Bash(grep -n \"^## \\\\|^---$\\\\|## Task Template\" TODO_WORKFLOW.md)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
