@@ -286,5 +286,34 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-06-13T06:47:42.734879",
+        "changes": {
+            "events": {
+                "added": [
+                    "Talk (Work in Progress): Luis Lopez (MCMP) (in person)"
+                ],
+                "removed": [],
+                "updated": [
+                    "Workshop on Epsilon Calculus: between Logic and Philosophy",
+                    "Talk: Francesca Biagioli (Turin)"
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            }
+        }
     }
 ]
