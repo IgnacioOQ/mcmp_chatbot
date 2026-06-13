@@ -327,5 +327,30 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-06-13T07:10:02.725690",
+        "changes": {
+            "events": {
+                "added": [
+                    "Talk (Work in Progress): Kevin Zollman (CMU)"
+                ],
+                "removed": [],
+                "updated": [
+                    "Fifth Irvine-London-Munich-PoliMi-Salzburg Conference in Philosophy and Foundations of Physics",
+                    "Research Seminar in Decision and Action Theory: Modeling instability: From ecological collapse to political transitions",
+                    "Talk: Ed Zalta (Stanford)",
+                    "Talk (Work in Progress): Ina Jäntgen (MCMP) (in person)",
+                    "Talk: Maciej Głowacki (Warsaw)"
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            }
+        }
     }
 ]
