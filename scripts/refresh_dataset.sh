@@ -87,6 +87,21 @@ if [ -n "${GCP_SA_KEY:-}" ] && [ -z "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; the
   echo "[refresh] Loaded service-account key from GCP_SA_KEY into \$GOOGLE_APPLICATION_CREDENTIALS."
 fi
 
+# gRPC bundles its own CA roots and ignores the system trust store, so in a
+# cloud container behind a TLS-inspecting proxy the Firestore gRPC endpoint
+# fails verification (CERTIFICATE_VERIFY_FAILED: self signed certificate in
+# certificate chain) even though git/pip/HTTPS already work. Point gRPC and the
+# Python HTTPS clients at the system CA bundle, which trusts the proxy.
+for _ca in /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt /etc/ssl/cert.pem; do
+  if [ -f "$_ca" ]; then
+    export GRPC_DEFAULT_SSL_ROOTS_FILE_PATH="$_ca"
+    export SSL_CERT_FILE="$_ca"
+    export REQUESTS_CA_BUNDLE="$_ca"
+    echo "[refresh] Using system CA bundle for TLS verification: $_ca"
+    break
+  fi
+done
+
 echo "[refresh] Migrating dataset to Firestore (project: $FIREBASE_PROJECT)..."
 if python firebase/scripts/migrate_to_firestore.py --project="$FIREBASE_PROJECT"; then
   echo "[refresh] Firestore updated; live app is now current."
