@@ -1,6 +1,8 @@
 import re
 import json
 import os
+import shutil
+import subprocess
 import requests
 from bs4 import BeautifulSoup
 import ftfy
@@ -28,6 +30,71 @@ try:
     from src.utils import build_graph
 except ImportError:
     import src.utils.build_graph as build_graph
+
+
+def _chrome_major(chrome_binary):
+    """Return Chrome's major version (e.g. '141') or None."""
+    try:
+        out = subprocess.run(
+            [chrome_binary or "google-chrome", "--version"],
+            capture_output=True, text=True, timeout=15,
+        ).stdout
+        m = re.search(r"(\d+)\.\d+\.\d+", out)
+        return m.group(1) if m else None
+    except Exception:
+        return None
+
+
+def _resolve_chrome():
+    """Locate a Chrome/Chromium binary and a MATCHING chromedriver.
+
+    Priority for each: explicit env var (set by the SessionStart hook) ->
+    a binary already on PATH -> (driver only) webdriver-manager pinned to
+    Chrome's major version -> webdriver-manager latest.
+
+    Preferring an on-PATH chromedriver fixes the cloud-container failure where
+    webdriver-manager downloads the newest driver (e.g. 149.x) while the image
+    ships an older Chrome (e.g. 141.x), so Chrome exits immediately and the
+    scraper silently falls back to static (incomplete) scraping.
+
+    Returns (chrome_binary or None, chromedriver_path or None).
+    """
+    chrome_binary = os.environ.get("MCMP_CHROME_BINARY")
+    if not chrome_binary or not os.path.exists(chrome_binary):
+        chrome_binary = None
+        for name in ("google-chrome", "google-chrome-stable", "chromium",
+                     "chromium-browser", "chrome"):
+            found = shutil.which(name)
+            if found:
+                chrome_binary = found
+                break
+
+    chromedriver_path = os.environ.get("MCMP_CHROMEDRIVER")
+    if not chromedriver_path or not os.path.exists(chromedriver_path):
+        on_path = shutil.which("chromedriver")
+        if on_path:
+            chromedriver_path = on_path
+        else:
+            chromedriver_path = _install_chromedriver(chrome_binary)
+    return chrome_binary, chromedriver_path
+
+
+def _install_chromedriver(chrome_binary):
+    """webdriver-manager fallback, pinned to Chrome's major version when known."""
+    if not SELENIUM_AVAILABLE:
+        return None
+    major = _chrome_major(chrome_binary)
+    if major:
+        try:  # newer webdriver-manager uses driver_version=, older uses version=
+            return ChromeDriverManager(driver_version=major).install()
+        except TypeError:
+            try:
+                return ChromeDriverManager(version=major).install()
+            except Exception as e:
+                log_error(f"Pinned chromedriver for Chrome {major} failed: {e}")
+        except Exception as e:
+            log_error(f"Pinned chromedriver for Chrome {major} failed: {e}")
+    return ChromeDriverManager().install()
 
 
 class MCMPScraper:
@@ -211,10 +278,11 @@ class MCMPScraper:
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--ignore-certificate-errors")
 
-        chrome_binary = os.environ.get("MCMP_CHROME_BINARY")
-        chromedriver_path = os.environ.get("MCMP_CHROMEDRIVER")
+        chrome_binary, chromedriver_path = _resolve_chrome()
         if chrome_binary:
             chrome_options.binary_location = chrome_binary
+        log_info(f"Selenium chrome={chrome_binary or 'default'} "
+                 f"chromedriver={chromedriver_path or 'webdriver-manager'}")
 
         driver = None
         event_links = []
