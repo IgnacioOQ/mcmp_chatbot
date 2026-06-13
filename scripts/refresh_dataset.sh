@@ -60,10 +60,19 @@ if [ "$pushed" != true ]; then
 fi
 
 # Push the refreshed data to Firestore so the live Firebase app is updated.
-# Requires Firebase credentials in the environment: either GOOGLE_APPLICATION_
-# CREDENTIALS pointing at a service-account key, or Application Default
-# Credentials (`gcloud auth application-default login`). The migration is an
-# idempotent upsert that never deletes (matches the accumulation model).
+# Requires Firebase credentials. In a Google Cloud runtime the attached service
+# account supplies these automatically; in other environments (e.g. the Claude
+# Code on the web cloud runner) there is no attached SA, so provide a key:
+#   - set GCP_SA_KEY to the full JSON contents of a service-account key (for
+#     mcmp-firebase-app-sa@mcmp-firebase, which has roles/datastore.user), OR
+#   - set GOOGLE_APPLICATION_CREDENTIALS to a key file path / use ADC directly.
+# The migration is an idempotent upsert that never deletes (accumulation model).
+if [ -n "${GCP_SA_KEY:-}" ] && [ -z "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
+  printf '%s' "$GCP_SA_KEY" > /tmp/gcp-sa-key.json
+  export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-sa-key.json
+  echo "[refresh] Wrote service-account key from GCP_SA_KEY to \$GOOGLE_APPLICATION_CREDENTIALS."
+fi
+
 echo "[refresh] Migrating dataset to Firestore (project: $FIREBASE_PROJECT)..."
 if python firebase/scripts/migrate_to_firestore.py --project="$FIREBASE_PROJECT"; then
   echo "[refresh] Firestore updated; live app is now current."
