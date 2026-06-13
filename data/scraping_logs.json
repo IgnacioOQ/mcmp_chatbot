@@ -352,5 +352,29 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-06-13T07:32:36.740851",
+        "changes": {
+            "events": {
+                "added": [
+                    "WiP: Miklós Rédei (LSE) (in person)",
+                    "LPS Colloquium: Mario Günther (Paris 1) [in person]"
+                ],
+                "removed": [],
+                "updated": [
+                    "The Epistemology of Medicine",
+                    "Talk: Szymon Bogacz (Vienna)",
+                    "Talk: Frederik J. Andersen (Copenhagen)"
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            }
+        }
     }
 ]
