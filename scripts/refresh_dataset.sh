@@ -62,15 +62,29 @@ fi
 # Push the refreshed data to Firestore so the live Firebase app is updated.
 # Requires Firebase credentials. In a Google Cloud runtime the attached service
 # account supplies these automatically; in other environments (e.g. the Claude
-# Code on the web cloud runner) there is no attached SA, so provide a key:
-#   - set GCP_SA_KEY to the full JSON contents of a service-account key (for
-#     mcmp-firebase-app-sa@mcmp-firebase, which has roles/datastore.user), OR
-#   - set GOOGLE_APPLICATION_CREDENTIALS to a key file path / use ADC directly.
-# The migration is an idempotent upsert that never deletes (accumulation model).
+# Code on the web cloud runner) there is no attached SA, so provide a key via
+# the GCP_SA_KEY env var (service account mcmp-firebase-app-sa@mcmp-firebase,
+# which has roles/datastore.user). The migration is an idempotent upsert that
+# never deletes (accumulation model).
+#
+# IMPORTANT: env-var fields often truncate multi-line values at the first
+# newline, so a pretty-printed JSON key arrives as just "{". Pass the key as a
+# SINGLE LINE — either base64 (preferred) or minified JSON. This block
+# auto-detects which, then validates the result is real JSON before trusting it.
 if [ -n "${GCP_SA_KEY:-}" ] && [ -z "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
-  printf '%s' "$GCP_SA_KEY" > /tmp/gcp-sa-key.json
+  case "$(printf '%s' "$GCP_SA_KEY" | head -c1)" in
+    '{') printf '%s' "$GCP_SA_KEY" > /tmp/gcp-sa-key.json ;;            # raw JSON
+    *)   printf '%s' "$GCP_SA_KEY" | base64 -d > /tmp/gcp-sa-key.json 2>/dev/null || {
+           echo "[refresh] ERROR: GCP_SA_KEY is neither JSON nor valid base64." >&2; exit 1; } ;;
+  esac
+  if ! python -c "import json; json.load(open('/tmp/gcp-sa-key.json'))" 2>/dev/null; then
+    echo "[refresh] ERROR: GCP_SA_KEY did not yield valid JSON — the env var was" >&2
+    echo "[refresh] probably truncated at a newline. Set it to SINGLE-LINE base64:" >&2
+    echo "[refresh]   base64 < mcmp-sa-key.json | tr -d '\\n'   (paste that as GCP_SA_KEY)" >&2
+    exit 1
+  fi
   export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-sa-key.json
-  echo "[refresh] Wrote service-account key from GCP_SA_KEY to \$GOOGLE_APPLICATION_CREDENTIALS."
+  echo "[refresh] Loaded service-account key from GCP_SA_KEY into \$GOOGLE_APPLICATION_CREDENTIALS."
 fi
 
 echo "[refresh] Migrating dataset to Firestore (project: $FIREBASE_PROJECT)..."
