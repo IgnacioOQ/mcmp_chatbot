@@ -395,5 +395,31 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-06-22T07:07:58.018335",
+        "changes": {
+            "events": {
+                "added": [
+                    "Talk: Maria Aloni (Amsterdam)"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            }
+        }
     }
 ]
