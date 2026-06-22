@@ -51,7 +51,7 @@ export default function Home() {
   return (
     <div className="flex flex-col md:flex-row min-h-screen">
       {/* Sidebar */}
-      <aside className="w-full md:w-80 shrink-0 border-r border-gray-200 p-4 space-y-4 bg-gray-50">
+      <aside className="w-full md:w-[560px] shrink-0 border-r border-gray-200 p-4 space-y-4 bg-gray-50">
         <CalendarWidget onPick={onCalendarPick} />
         <hr />
         <FeedbackForm />

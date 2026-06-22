@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import ReactMarkdown from "react-markdown";
+import type { MonthEvent } from "@/lib/types";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -38,6 +40,8 @@ export default function CalendarWidget({
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1); // 1-12
   const [eventDays, setEventDays] = useState<number[]>([]);
+  const [events, setEvents] = useState<MonthEvent[]>([]);
+  const [previewDay, setPreviewDay] = useState<number | null>(null);
 
   const today = new Date();
   const isCurrentMonth =
@@ -52,13 +56,16 @@ export default function CalendarWidget({
       });
       const data = await res.json();
       setEventDays(Array.isArray(data?.event_days) ? data.event_days : []);
+      setEvents(Array.isArray(data?.events) ? data.events : []);
     } catch {
       setEventDays([]);
+      setEvents([]);
     }
   }, [year, month]);
 
   useEffect(() => {
     loadEventDays();
+    setPreviewDay(null); // a month change invalidates the previewed day
   }, [loadEventDays]);
 
   function prev() {
@@ -103,7 +110,10 @@ export default function CalendarWidget({
             <button
               key={i}
               data-iso={iso}
-              onClick={() => onPick(formatted)}
+              onClick={() => {
+                setPreviewDay(day);
+                onPick(formatted);
+              }}
               className={
                 "h-9 rounded flex flex-col items-center justify-center leading-none " +
                 (isToday ? "bg-blue-600 text-white" : "hover:bg-gray-200")
@@ -117,6 +127,34 @@ export default function CalendarWidget({
           );
         })}
       </div>
+
+      {previewDay !== null && (
+        <div className="mt-3 border-t border-gray-200 pt-2">
+          <div className="font-semibold text-xs text-gray-600 mb-2">
+            📅 {MONTHS[month - 1]} {previewDay}, {year}
+          </div>
+          {events.filter((e) => e.day === previewDay).length === 0 ? (
+            <p className="text-xs text-gray-500">No events scheduled for this day.</p>
+          ) : (
+            events
+              .filter((e) => e.day === previewDay)
+              .map((ev, i) => (
+                <div key={i} className="mb-3 border-b border-gray-200 pb-2 last:border-b-0">
+                  <div className="font-semibold text-sm">{ev.title}</div>
+                  {ev.speaker && <div className="text-xs text-gray-500 mt-1">🎤 {ev.speaker}</div>}
+                  {ev.location && ev.location !== "TBD" && (
+                    <div className="text-xs text-gray-500">📍 {ev.location}</div>
+                  )}
+                  {ev.description && (
+                    <div className="prose prose-sm max-w-none text-xs text-gray-700 mt-1">
+                      <ReactMarkdown>{ev.description}</ReactMarkdown>
+                    </div>
+                  )}
+                </div>
+              ))
+          )}
+        </div>
+      )}
     </div>
   );
 }

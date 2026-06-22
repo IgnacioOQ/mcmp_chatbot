@@ -11,6 +11,15 @@ export interface Message {
   toolCalls?: ToolCall[];
 }
 
+export interface MonthEvent {
+  day: number;
+  title: string;
+  speaker: string;
+  location?: string | null;
+  description: string;
+  url: string;
+}
+
 export interface WeekEvent {
   title: string;
   speaker: string;
