@@ -75,6 +75,22 @@ The canonical path is linear. The dotted edge from Phase 3 marks the conditional
 
 ---
 
+## Variant — syncing without throwaway branches
+
+The canonical procedure stages each merge on a throwaway `sync/*` branch (Steps 3.1, 4.1) and fast-forwards the real branches onto it at publish (Step 6.1). The **direct variant** instead runs the merge and the by-path backport on the local **real** branches (`git switch routines` / `git switch firebase-branch`), skipping branch creation, the Phase 6.1 fast-forward, and the Step 6.3 branch cleanup. Everything else — the `--no-commit` merge, invariant restoration (Step 3.3), the HITL gates, and verification — is unchanged.
+
+The safety guarantee is preserved by two facts, not by the throwaway branch:
+
+- **`origin` is untouched until the Phase 6 push.** All commits land on local branches first; nothing is published without the per-push approval at Gate 6.
+- **The `sync-backup/*` tags (Step 1.2) are the rollback.** Any local branch can be reset to its origin tip with `git reset --hard sync-backup/<branch>-<date>` if a merge goes wrong.
+
+Two cautions specific to this variant:
+
+- **Re-fetch and re-tag at the start of every phase that mutates a branch** — without a frozen `sync/*` snapshot, a branch that moves mid-session (e.g. an external commit pushed from another terminal) will silently change your merge base. If `origin/<branch>` advanced, restart from Phase 1.
+- **Merge the source branch's local tip, not `origin/<branch>`, when it carries unpushed commits you intend to include** (e.g. a just-made deletion). The local tip is then published in Phase 6.
+
+---
+
 ## Phase 1 — Pre-flight & safety
 
 Establish a clean, recoverable starting state. Executed by the agent; no writes to either long-lived branch happen yet.
@@ -162,13 +178,15 @@ git merge --no-ff --no-commit origin/firebase-branch || true   # conflicts are e
 
 ### Step 3.3 — Restore routines-owned invariants
 
-Force the routines-owned classes back to the routines version, overriding whatever the merge produced. (`--ours` = the sync branch, which is routines.)
+Force the routines-owned classes back to the routines version, overriding whatever the merge produced. Restore each from an **explicit ref** (`git checkout origin/routines -- <path>`), **not** `git checkout --ours`. `--ours` only acts on files left in a *conflicted* state; when a merge auto-resolves a file cleanly — which git readily does for `.gitignore`, combining both sides — `--ours` is a silent no-op and the auto-merged version survives. In our case that auto-merge **duplicated** the SA-key block (both branches had added it at different line positions), and `--ours` did nothing to fix it. Use the explicit-ref form for every owned class:
 
 ```text
-git checkout --ours -- .gitignore                              # keep data-tracking + cloud-settings policy
+git checkout origin/routines -- .gitignore                     # keep data-tracking + cloud-settings policy (NOT --ours — see note above)
 git checkout origin/routines -- data/                          # never let a merge mutate tracked datasets
 git checkout origin/routines -- .claude/settings.json .claude/hooks/ scripts/refresh_dataset.sh
 ```
+
+After restoring, **verify** each owned path now equals the routines tip before committing — `git diff --staged origin/routines -- .gitignore` must be empty.
 
 **Modify/delete reconciliation.** When one branch deleted a file the other branch still tracks, a merge silently applies (or reverts) the deletion. The information-preserving default is to **keep** the content unless a human explicitly confirms the deletion is intended on both branches. Inspect every such path before committing:
 
@@ -298,7 +316,7 @@ git branch -d sync/fb-to-routines-$(date -u +%Y%m%d) sync/routines-to-fb-$(date 
 |:---|:---|
 | `routines..firebase-branch` has only data + routine-infra commits | Skip Phase 4 (nothing shared to backport). |
 | One branch deleted a file the other still tracks | Default: preserve the surviving copy (Step 3.3); delete on both only on explicit human approval. |
-| `.gitignore` shows a staged change during forward-sync | Override with `git checkout --ours .gitignore`; the policy is branch-local and never merged. |
+| `.gitignore` shows a staged change during forward-sync | Override with `git checkout origin/routines -- .gitignore` (explicit ref, **not** `--ours` — a clean auto-merge leaves nothing for `--ours` to act on); the policy is branch-local and never merged. |
 | `git merge --ff-only` refused in Phase 6 | A branch moved since Phase 1 — restart from Phase 1; do not force-push. |
 | Dataset count drops below the Phase 1.3 snapshot | STOP — a merge mutated `data/`; reset the sync branch and redo Step 3.3. |
 
@@ -322,6 +340,7 @@ Use as a final check before calling the sync complete:
 | Symptom | Cause | Fix |
 |:---|:---|:---|
 | `data/` files vanish or shrink on routines after merge | A merge from firebase-branch (which ignores `data/`) staged deletions | `git checkout origin/routines -- data/` before committing (Step 3.3); never skip it. |
+| `.gitignore` has a rule block (e.g. SA-key ignores) duplicated after sync | Both branches added the same block at different line positions, so git auto-merged them into two copies; `git checkout --ours` did **not** fix it (a cleanly auto-merged file is not conflicted) | Force the branch's own version with an explicit ref — `git checkout origin/routines -- .gitignore` (forward-sync) or `origin/firebase-branch -- .gitignore` (backport) — then confirm `git diff --staged <that-ref> -- .gitignore` is empty (Step 3.3). |
 | SA-key files no longer ignored on firebase-branch | `.gitignore` was merged from routines, dropping the SA-key rules | `.gitignore` is never backported — revert it (`git checkout origin/firebase-branch -- .gitignore`) and redo Phase 4. |
 | Live app data didn't change after sync | The sync touches branches, not Firestore; the live app reads Firestore | Run the dataset-refresh routine (`scripts/refresh_dataset.sh`) — it migrates `data/` into Firestore. |
 | `git merge --ff-only` refused in Phase 6 | The published branch advanced mid-sync | Re-fetch and restart from Phase 1; do not force-push or rebase published history. |
