@@ -17,6 +17,12 @@ scripts/verify_*.py
 .DS_Store
 .streamlit/secrets.toml
 
+# Service-account keys — never commit (this branch is public and the cloud
+# routine materializes /tmp/gcp-sa-key.json at runtime; keep these out of git)
+*-sa-key.json
+mcmp-sa-key.json
+gcp-sa-key.json
+
 # Claude Code settings
 # .claude/settings.json IS tracked on the routines branch so the SessionStart
 # hook (cloud Selenium setup) persists into scheduled cloud-run sessions.

@@ -47,7 +47,6 @@ The sync is decided by **which branch owns each file class**, not by a whole-bra
 - `routines` keeps its `.gitignore` (tracks `data/` and `.claude/settings.json`; does **not** re-ignore them).
 - `firebase-branch` keeps its `.gitignore` (ignores `data/`; ignores `*-sa-key.json` / `mcmp-sa-key.json` / `gcp-sa-key.json` — a security rule that must never be dropped).
 - `routines` keeps its tracked `data/` and cloud `.claude/settings.json` + `session-start.sh` hook.
-- `firebase-branch` keeps its deletions of the legacy Streamlit files (`app.py`, `src/ui/`, `src/utils/calendar_utils.py`) unless a human explicitly decides to resurrect them.
 
 ---
 
@@ -89,7 +88,7 @@ git status                       # must be clean — stash or commit first if no
 git fetch origin firebase-branch routines
 ```
 
-If the working tree is dirty, STOP and resolve it before continuing — an unsynced local change can be silently swallowed by a merge.
+If the working tree is dirty, STOP and resolve it before continuing — an unsynced local change can be silently swallowed by a merge. Note: an **untracked** file (one never committed) does not travel between branches on a switch and is easy to lose track of — commit or stash anything you mean to keep before changing branches.
 
 ### Step 1.2 — Record recovery refs
 
@@ -171,10 +170,11 @@ git checkout origin/routines -- data/                          # never let a mer
 git checkout origin/routines -- .claude/settings.json .claude/hooks/ scripts/refresh_dataset.sh
 ```
 
-**Modify/delete reconciliation.** Where `firebase-branch` deleted a legacy Streamlit file that `routines` still tracks (`app.py`, `src/ui/`, `src/utils/calendar_utils.py`), the information-preserving default is to **keep** the routines copy unless the human explicitly approves the deletion for routines too:
+**Modify/delete reconciliation.** When one branch deleted a file the other branch still tracks, a merge silently applies (or reverts) the deletion. The information-preserving default is to **keep** the content unless a human explicitly confirms the deletion is intended on both branches. Inspect every such path before committing:
 
 ```text
-git checkout origin/routines -- app.py src/ui src/utils/calendar_utils.py   # default: preserve
+git status --short | grep -E '^(DU|UD|D )'   # surfaces add/delete conflicts and pending deletions
+git checkout <branch> -- <path>              # restore the copy you mean to keep
 ```
 
 ### Step 3.4 — Resolve shared-file conflicts by hand
@@ -200,7 +200,7 @@ git commit -m "sync: merge firebase-branch into routines ($(date -u +%Y-%m-%d))"
 hitl_gate: true
 ```
 
-Conditional (see Step 2.3). Propagate only **shared, non-data improvements** authored on `routines` back to `firebase-branch` — never the dataset, routine infrastructure, branch-policy, or legacy Streamlit files. **Human approves the cherry-pick set and the staged diff.**
+Conditional (see Step 2.3). Propagate only **shared, non-data improvements** authored on `routines` back to `firebase-branch` — never the dataset, routine infrastructure, or branch-policy files. **Human approves the cherry-pick set and the staged diff.**
 
 ### Step 4.1 — Create the backport branch
 
@@ -297,7 +297,7 @@ git branch -d sync/fb-to-routines-$(date -u +%Y%m%d) sync/routines-to-fb-$(date 
 | Condition | Action |
 |:---|:---|
 | `routines..firebase-branch` has only data + routine-infra commits | Skip Phase 4 (nothing shared to backport). |
-| `firebase-branch` deleted a file `routines` still uses | Default: preserve the routines copy (Step 3.3); delete only on explicit human approval. |
+| One branch deleted a file the other still tracks | Default: preserve the surviving copy (Step 3.3); delete on both only on explicit human approval. |
 | `.gitignore` shows a staged change during forward-sync | Override with `git checkout --ours .gitignore`; the policy is branch-local and never merged. |
 | `git merge --ff-only` refused in Phase 6 | A branch moved since Phase 1 — restart from Phase 1; do not force-push. |
 | Dataset count drops below the Phase 1.3 snapshot | STOP — a merge mutated `data/`; reset the sync branch and redo Step 3.3. |
@@ -325,4 +325,4 @@ Use as a final check before calling the sync complete:
 | SA-key files no longer ignored on firebase-branch | `.gitignore` was merged from routines, dropping the SA-key rules | `.gitignore` is never backported — revert it (`git checkout origin/firebase-branch -- .gitignore`) and redo Phase 4. |
 | Live app data didn't change after sync | The sync touches branches, not Firestore; the live app reads Firestore | Run the dataset-refresh routine (`scripts/refresh_dataset.sh`) — it migrates `data/` into Firestore. |
 | `git merge --ff-only` refused in Phase 6 | The published branch advanced mid-sync | Re-fetch and restart from Phase 1; do not force-push or rebase published history. |
-| Legacy Streamlit files reappear on firebase-branch | A backport or merge resurrected files firebase-branch deleted | Backport by path only (Step 4.2); never merge whole-branch routines → firebase-branch. |
+| A file deleted on one branch reappears after sync | A whole-branch merge re-introduced it from the other side | Resolve deletions per Step 3.3 and backport by path only (Step 4.2); never whole-branch merge routines → firebase-branch. |
