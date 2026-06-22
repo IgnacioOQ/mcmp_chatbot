@@ -140,6 +140,8 @@ The live app reads **Firestore**, not the JSON files — so a scrape only update
 
 Data is kept fresh by a **weekly scheduled cloud agent** (Claude Code on the web) running on the **`routines` branch**, which is `firebase-branch` plus the refresh machinery. Each run executes `scripts/refresh_dataset.sh`, which: scrapes the MCMP site (Selenium) → commits and pushes the updated `data/*.json` to `routines` → runs `firebase/scripts/migrate_to_firestore.py` to upsert into Firestore. (`data/` is tracked only on `routines`; it is gitignored on `main`/`firebase-branch`.)
 
+> **Security note — routine credentials live in the cloud.** This repository is **public**. The scheduled cloud agent authenticates to Firestore with a dedicated service-account key (`mcmp-firebase-app-sa@mcmp-firebase`, scoped to `roles/datastore.user` only), supplied to the job as the single-line `GCP_SA_KEY` environment variable in its Claude Code (web) trigger environment. **That key is stored on the claude.ai side, not in this repo** — no key file is committed, and `*-sa-key.json` is gitignored on every branch. Its blast radius is limited to read/write on this project's Firestore (it cannot touch the Google account, billing, IAM, or other services). If you suspect exposure, rotate it: delete and recreate the SA key, then update the `GCP_SA_KEY` env var on the trigger.
+
 The Firestore migration is an **idempotent upsert that never deletes** — datasets accumulate, so Firestore counts run higher than any single scrape. To make the live app current manually, run the migration locally against the latest data:
 
 ```bash
