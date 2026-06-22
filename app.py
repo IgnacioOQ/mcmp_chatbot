@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from src.core.engine import ChatEngine, DEFAULT_GEMINI_MODEL
 from src.utils.logger import log_info, log_error
 from src.ui.styles import inject_global_mobile_css
+from src.utils.calendar_utils import prepare_calendar_events
 
 @st.cache_data
 def load_raw_events():
@@ -202,8 +203,15 @@ def main():
                             use_container_width=True,
                             type=btn_type
                         ):
-                            st.session_state.calendar_query_date = f"{cal_year}-{cal_month:02d}-{day:02d}"
-                            st.session_state.calendar_query_formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
+                            iso = f"{cal_year}-{cal_month:02d}-{day:02d}"
+                            formatted = datetime(cal_year, cal_month, day).strftime("%B %d, %Y")
+                            st.session_state.calendar_query_date = iso
+                            st.session_state.calendar_query_formatted = formatted
+                            # Persist the clicked day so the sidebar can show an inline
+                            # event preview that survives reruns (the *_query_* keys are
+                            # consumed and deleted by the main-area chat fast path).
+                            st.session_state.calendar_preview_date = iso
+                            st.session_state.calendar_preview_formatted = formatted
 
                         if has_event:
                             st.markdown(
@@ -211,7 +219,35 @@ def main():
                                 "color:#60a5fa;font-size:15px;line-height:1'>●</div>",
                                 unsafe_allow_html=True
                             )
-        
+
+        # Inline preview of the clicked day's events — speaker / location /
+        # description pulled from prepare_calendar_events' extendedProps. Shown
+        # in the sidebar alongside the full chat response (the day-click fast path).
+        preview_iso = st.session_state.get("calendar_preview_date")
+        if preview_iso:
+            preview_events = [
+                e for e in prepare_calendar_events(raw_events)
+                if str(e.get("start", "")).startswith(preview_iso)
+            ]
+            label = f"📅 {st.session_state.get('calendar_preview_formatted', preview_iso)}"
+            with st.expander(label, expanded=True):
+                if not preview_events:
+                    st.caption("No events scheduled for this day.")
+                else:
+                    for ev in preview_events:
+                        props = ev.get("extendedProps", {})
+                        st.markdown(f"**{ev.get('title', 'Event')}**")
+                        speaker = props.get("speaker")
+                        if speaker:
+                            st.caption(f"🎤 {speaker}")
+                        location = props.get("location")
+                        if location and location != "TBD":
+                            st.caption(f"📍 {location}")
+                        description = props.get("description")
+                        if description:
+                            st.markdown(description)
+                        st.markdown("---")
+
         st.markdown("---")
         
         # 2. Feedback form
@@ -310,10 +346,6 @@ def main():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
     _TOOL_ICONS = {
         "search_people":            "🔍 Searching people",
         "search_research":          "📚 Searching research areas",
@@ -324,12 +356,35 @@ def main():
         "ask_clarification":        "❓ Asking for clarification",
     }
 
+    def _render_steps(steps) -> None:
+        """Render the tool-call trace that produced an answer in a collapsible box.
+
+        Used both live (after streaming completes) and on history replay, so the
+        generation process stays visible after the transient status box collapses.
+        """
+        if not steps:
+            return
+        with st.expander(f"🔧 Generation steps ({len(steps)})", expanded=False):
+            for step in steps:
+                label = _TOOL_ICONS.get(step["tool"], f"⚙️ Calling {step['tool']}")
+                hint = next(iter(step["args"].values()), "") if step["args"] else ""
+                if hint:
+                    label += f": *{str(hint)[:80]}*"
+                st.markdown(f"- {label}")
+
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+            _render_steps(message.get("steps"))
+
     def render_assistant_response(prompt_text: str, use_tools: bool = True) -> None:
         """Render the assistant's reply with a tool-call status box and a streamed answer."""
         with st.chat_message("assistant"):
             status = st.status("Leopold is thinking...", expanded=True)
+            steps = []  # tool-call trace, persisted with the message so it survives reruns
 
             def _callback(tool_name, args):
+                steps.append({"tool": tool_name, "args": dict(args) if args else {}})
                 label = _TOOL_ICONS.get(tool_name, f"⚙️ Calling {tool_name}")
                 hint = next(iter(args.values()), "") if args else ""
                 if hint:
@@ -358,7 +413,12 @@ def main():
                     status.update(label="Done!", state="complete", expanded=False)
 
             full = st.write_stream(_chunks())
-            st.session_state.messages.append({"role": "assistant", "content": full})
+            # Persist the trace below the answer so the generation process stays
+            # visible after the live status box collapses and across reruns.
+            _render_steps(steps)
+            st.session_state.messages.append(
+                {"role": "assistant", "content": full, "steps": steps}
+            )
 
     def render_calendar_response(iso_date: str, formatted: str) -> None:
         """

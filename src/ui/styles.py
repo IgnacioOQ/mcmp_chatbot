@@ -30,8 +30,8 @@ def inject_global_mobile_css() -> None:
 
         /* Sidebar — desktop */
         [data-testid="stSidebar"] {
-            min-width: 450px;
-            max-width: 500px;
+            min-width: 560px;
+            max-width: 640px;
         }
 
         /* Main container — desktop */

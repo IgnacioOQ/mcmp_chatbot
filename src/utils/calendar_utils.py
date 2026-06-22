@@ -61,16 +61,21 @@ def prepare_calendar_events(raw_events):
                 # If parsing fails, fall back to date-only
                 pass
 
+        # Truncate the description with an ellipsis only when it actually overflows,
+        # so empty descriptions don't render as a bare "...".
+        raw_description = event.get("description", "") or ""
+        description = raw_description[:200] + "..." if len(raw_description) > 200 else raw_description
+
         cal_event = {
             "title": title,
             "start": start_iso,
             "url": url, # Optional: linking to the event page
             # Custom props for tooltip/modal
             "extendedProps": {
-                "description": event.get("description", "")[:200] + "...",
+                "description": description,
                 "location": metadata.get("location", "TBD"),
                 "speaker": metadata.get("speaker", "")
-            } 
+            }
         }
         
         if end_iso:
