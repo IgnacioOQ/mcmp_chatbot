@@ -87,7 +87,20 @@ export default function Home() {
               >
                 {m.role === "assistant" ? (
                   <div className="prose prose-sm max-w-none">
-                    <ReactMarkdown>{m.content}</ReactMarkdown>
+                    <ReactMarkdown
+                      components={{
+                        a: (props) => (
+                          <a
+                            {...props}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline hover:text-blue-800"
+                          />
+                        ),
+                      }}
+                    >
+                      {m.content}
+                    </ReactMarkdown>
                   </div>
                 ) : (
                   m.content
