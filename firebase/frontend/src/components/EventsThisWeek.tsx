@@ -31,7 +31,7 @@ export default function EventsThisWeek() {
         events?.map((ev, i) => (
           <div key={i} className="mb-3 border-b border-gray-200 pb-2">
             <div className="font-semibold text-sm">{ev.speaker}</div>
-            <a href={ev.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+            <a href={ev.url} target="_blank" rel="noopener noreferrer" className="text-sm text-brand hover:underline">
               {ev.title}
             </a>
             <div className="text-xs text-gray-500 mt-1">

@@ -49,9 +49,9 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen">
+    <div className="flex flex-col md:flex-row min-h-screen md:h-screen">
       {/* Sidebar */}
-      <aside className="w-full md:w-80 shrink-0 border-r border-gray-200 p-4 space-y-4 bg-gray-50">
+      <aside className="w-full md:w-[560px] shrink-0 border-r border-gray-200 p-4 space-y-4 bg-gray-50 md:overflow-y-auto">
         <CalendarWidget onPick={onCalendarPick} />
         <hr />
         <FeedbackForm />
@@ -60,7 +60,7 @@ export default function Home() {
       </aside>
 
       {/* Main chat */}
-      <main className="flex-1 flex flex-col p-4 max-w-3xl mx-auto w-full">
+      <main className="flex-1 flex flex-col p-4 max-w-3xl mx-auto w-full md:overflow-hidden">
         <h1 className="text-2xl font-bold mb-1">Leopold — The MCMP Chatbot</h1>
         <p className="text-sm text-gray-600 mb-4">
           Ask about talks, speakers, people, research, and academic programs at the Munich
@@ -82,7 +82,7 @@ export default function Home() {
               <div
                 className={
                   "inline-block rounded-lg px-3 py-2 text-left " +
-                  (m.role === "user" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900")
+                  (m.role === "user" ? "bg-brand text-white" : "bg-gray-100 text-gray-900")
                 }
               >
                 {m.role === "assistant" ? (
@@ -116,7 +116,7 @@ export default function Home() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50"
+            className="bg-brand text-white rounded px-4 py-2 disabled:opacity-50"
           >
             Send
           </button>

@@ -77,19 +77,53 @@ def chat(req: ChatRequest):
 
 @app.post("/events/month")
 def events_month(req: MonthRequest):
-    """Day numbers in the given month that have at least one event."""
+    """Events in the given month, plus the day numbers that have at least one.
+
+    `event_days` powers the calendar dots; `events` powers the inline day-click
+    preview (speaker / location / description). Speaker/title resolution mirrors
+    /events/week and the Streamlit sidebar.
+    """
     days = set()
+    events = []
     for event in load_data("raw_events.json"):
-        date_str = event.get("metadata", {}).get("date")
+        outer_title = event.get("title", "")
+        if outer_title.upper().startswith("[CANCEL"):
+            continue
+        meta = event.get("metadata", {})
+        date_str = meta.get("date")
         if not date_str:
             continue
         try:
             d = datetime.strptime(date_str, "%Y-%m-%d").date()
         except ValueError:
             continue
-        if d.year == req.year and d.month == req.month:
-            days.add(d.day)
-    return {"event_days": sorted(days)}
+        if d.year != req.year or d.month != req.month:
+            continue
+        days.add(d.day)
+
+        speaker = meta.get("speaker")
+        title = event.get("talk_title") or outer_title or "Untitled"
+        if (not speaker or speaker == "Unknown Speaker") and "Talk" in outer_title and ":" in outer_title:
+            parts = outer_title.split(":", 1)
+            if len(parts) > 1:
+                speaker = parts[1].strip()
+
+        # Truncate with an ellipsis only when the description actually overflows,
+        # so empty descriptions don't render as a bare "..." (ports the
+        # calendar_utils.prepare_calendar_events fix from commit 2036672).
+        raw_description = event.get("description", "") or ""
+        description = raw_description[:200] + "..." if len(raw_description) > 200 else raw_description
+
+        events.append({
+            "day": d.day,
+            "title": title,
+            "speaker": speaker or "",
+            "location": meta.get("location"),
+            "description": description,
+            "url": event.get("url", "#"),
+        })
+    events.sort(key=lambda e: e["day"])
+    return {"event_days": sorted(days), "events": events}
 
 
 @app.get("/events/week")
