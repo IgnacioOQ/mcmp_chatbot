@@ -94,14 +94,14 @@ export default function CalendarWidget({
         <h4 className="font-semibold">{MONTHS[month - 1]} {year}</h4>
         <button onClick={next} className="px-2 py-1 rounded hover:bg-gray-200" aria-label="Next month">▶</button>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 mb-1">
+      <div className="grid grid-cols-7 text-center text-xs font-bold text-gray-600 mb-1">
         {WEEKDAYS.map((d, i) => (
-          <div key={i}>{d}</div>
+          <div key={i} className="py-1">{d}</div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 border-l border-t border-gray-300">
         {weeks.flat().map((day, i) => {
-          if (day === 0) return <div key={i} className="h-9" />;
+          if (day === 0) return <div key={i} className="h-12 border-r border-b border-gray-300" />;
           const isToday = isCurrentMonth && day === today.getDate();
           const hasEvent = eventDays.includes(day);
           const iso = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -115,13 +115,13 @@ export default function CalendarWidget({
                 onPick(formatted);
               }}
               className={
-                "h-9 rounded flex flex-col items-center justify-center leading-none " +
-                (isToday ? "bg-blue-600 text-white" : "hover:bg-gray-200")
+                "h-12 border-r border-b border-gray-300 flex flex-col items-center justify-center leading-none " +
+                (isToday ? "bg-brand text-white" : "hover:bg-gray-100")
               }
             >
               <span>{day}</span>
               {hasEvent && (
-                <span className={isToday ? "text-white text-[10px]" : "text-blue-500 text-[10px]"}>●</span>
+                <span className={isToday ? "text-white text-[10px]" : "text-brand text-[10px]"}>●</span>
               )}
             </button>
           );

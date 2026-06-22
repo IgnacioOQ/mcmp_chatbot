@@ -82,7 +82,7 @@ export default function Home() {
               <div
                 className={
                   "inline-block rounded-lg px-3 py-2 text-left " +
-                  (m.role === "user" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900")
+                  (m.role === "user" ? "bg-brand text-white" : "bg-gray-100 text-gray-900")
                 }
               >
                 {m.role === "assistant" ? (
@@ -116,7 +116,7 @@ export default function Home() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50"
+            className="bg-brand text-white rounded px-4 py-2 disabled:opacity-50"
           >
             Send
           </button>

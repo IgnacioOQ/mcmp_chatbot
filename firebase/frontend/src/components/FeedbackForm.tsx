@@ -54,7 +54,7 @@ export default function FeedbackForm() {
           <button
             type="submit"
             disabled={status === "sending"}
-            className="bg-blue-600 text-white rounded px-3 py-1 text-sm disabled:opacity-50"
+            className="bg-brand text-white rounded px-3 py-1 text-sm disabled:opacity-50"
           >
             {status === "sending" ? "Sending…" : "Submit"}
           </button>

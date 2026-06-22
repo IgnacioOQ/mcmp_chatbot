@@ -11,6 +11,8 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        // MCMP / LMU brand green — single source of truth for accent color.
+        brand: "#00883A",
       },
     },
   },

@@ -67,7 +67,7 @@ export default function Admin() {
       {!checked && <p className="text-gray-500">Loading…</p>}
 
       {checked && !user && (
-        <button onClick={login} className="bg-blue-600 text-white rounded px-4 py-2">
+        <button onClick={login} className="bg-brand text-white rounded px-4 py-2">
           Sign in with Google
         </button>
       )}
@@ -85,12 +85,12 @@ export default function Admin() {
         <div className="space-y-4">
           <p className="text-sm text-gray-600">Signed in as {email}</p>
           <div className="flex flex-col gap-2 items-start">
-            <button onClick={triggerScrape} className="bg-blue-600 text-white rounded px-4 py-2">
+            <button onClick={triggerScrape} className="bg-brand text-white rounded px-4 py-2">
               Trigger Scrape
             </button>
             {scrapeStatus && <p className="text-sm text-gray-700">{scrapeStatus}</p>}
             {FEEDBACK_SHEET_URL && (
-              <a href={FEEDBACK_SHEET_URL} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-sm">
+              <a href={FEEDBACK_SHEET_URL} target="_blank" rel="noopener noreferrer" className="text-brand underline text-sm">
                 Open feedback spreadsheet →
               </a>
             )}
