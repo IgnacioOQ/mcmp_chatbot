@@ -49,11 +49,7 @@ export default function CalendarWidget({
 
   const loadEventDays = useCallback(async () => {
     try {
-      const res = await fetch("/api/events/month", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ year, month }),
-      });
+      const res = await fetch(`/api/events/month?year=${year}&month=${month}`);
       const data = await res.json();
       setEventDays(Array.isArray(data?.event_days) ? data.event_days : []);
       setEvents(Array.isArray(data?.events) ? data.events : []);

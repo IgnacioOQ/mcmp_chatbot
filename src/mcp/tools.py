@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import threading
 import unicodedata
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
@@ -26,6 +27,12 @@ def _normalize(text: str) -> str:
 # lru_cache was replaced because it caches missing-file [] results, causing
 # tools to return empty permanently if a dataset didn't exist at first call.
 _data_cache: Dict[str, List[Dict[str, Any]]] = {}
+
+# Serialises the first (cold) load of each dataset. FastAPI runs sync endpoints
+# in a threadpool, so the parallel sidebar requests (/events/week + /events/month)
+# can both miss the cache and stream the whole Firestore collection at once; the
+# lock makes the second caller wait and reuse the first one's result.
+_data_cache_lock = threading.Lock()
 
 # DATA_BACKEND selects where load_data() reads from:
 #   "json"      (default) — local data/*.json files. The Streamlit build is
@@ -68,7 +75,13 @@ def _load_from_firestore(filename: str):
 
 
 def load_data(filename: str) -> List[Dict[str, Any]]:
-    if filename not in _data_cache:
+    if filename in _data_cache:
+        return _data_cache[filename]
+    with _data_cache_lock:
+        # Re-check inside the lock: another thread may have populated the cache
+        # while we were waiting on a concurrent cold load.
+        if filename in _data_cache:
+            return _data_cache[filename]
         if DATA_BACKEND == "firestore":
             data = _load_from_firestore(filename)
             if data is None:
