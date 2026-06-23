@@ -61,7 +61,7 @@ export default function Home() {
 
       {/* Main chat */}
       <main className="flex-1 flex flex-col p-4 max-w-3xl mx-auto w-full md:overflow-hidden">
-        <h1 className="text-4xl font-bold mb-1">Leopold — The MCMP Chatbot</h1>
+        <h1 className="text-4xl font-bold mb-1">Leopold: The MCMP Chatbot</h1>
         <p className="text-lg text-gray-600 mb-4">
           Ask about talks, speakers, people, research, and academic programs at the Munich
           Center for Mathematical Philosophy. Click a calendar day to see that day&apos;s events.

@@ -14,7 +14,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Leopold — The MCMP Chatbot",
+  title: "Leopold: The MCMP Chatbot",
   description: "Chatbot for the Munich Center for Mathematical Philosophy (MCMP).",
 };
 
