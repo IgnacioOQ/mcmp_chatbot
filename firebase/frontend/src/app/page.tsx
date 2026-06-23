@@ -67,7 +67,7 @@ export default function Home() {
           Center for Mathematical Philosophy. Click a calendar day to see that day&apos;s events.
         </p>
 
-        <div className="flex-1 space-y-4 overflow-y-auto">
+        <div className="flex-1 space-y-4 overflow-y-auto rounded-lg border border-green-600 p-4">
           {messages.map((m, i) => (
             <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
               {m.role === "assistant" && m.toolCalls && m.toolCalls.length > 0 && (
