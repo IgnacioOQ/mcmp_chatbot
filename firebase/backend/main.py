@@ -11,6 +11,7 @@ import os
 from datetime import datetime, timedelta
 
 from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from src.core.engine import ChatEngine, DEFAULT_GEMINI_MODEL
@@ -57,20 +58,53 @@ def health():
 
 @app.post("/chat")
 def chat(req: ChatRequest):
-    """Blocking chat turn. Returns the answer plus the tool calls that ran."""
-    tool_calls: list[dict] = []
+    """Streaming chat turn (NDJSON).
 
-    def _callback(tool_name, args):
-        tool_calls.append({"name": tool_name, "args": args or {}})
+    Emits one event per line as the turn unfolds so the UI can show progress in
+    real time instead of waiting for the whole answer:
+      {"type": "tool_call", "name": ..., "args": ...}  — each time a tool fires
+      {"type": "token", "text": ...}                   — answer chunks as they stream
+      {"type": "done"}                                 — turn complete
+      {"type": "error", "message": ...}                — failure mid-turn
 
-    response = _get_engine().generate_response(
-        req.message,
-        use_mcp_tools=True,
-        model_name=DEFAULT_GEMINI_MODEL,
-        chat_history=req.history,
-        status_callback=_callback,
+    The instrumented tools fire `status_callback` synchronously while the model
+    runs them (before the answer text streams), so draining the pending tool
+    events before each token keeps the wire order matching execution order.
+    """
+    engine = _get_engine()
+
+    def event_stream():
+        pending: list[dict] = []
+
+        def _callback(tool_name, args):
+            pending.append({"type": "tool_call", "name": tool_name, "args": args or {}})
+
+        def _drain():
+            while pending:
+                yield json.dumps(pending.pop(0)) + "\n"
+
+        try:
+            for chunk in engine.generate_response_stream(
+                req.message,
+                use_mcp_tools=True,
+                model_name=DEFAULT_GEMINI_MODEL,
+                chat_history=req.history,
+                status_callback=_callback,
+            ):
+                yield from _drain()
+                if chunk:
+                    yield json.dumps({"type": "token", "text": chunk}) + "\n"
+            yield from _drain()
+            yield json.dumps({"type": "done"}) + "\n"
+        except Exception as e:  # noqa: BLE001 — surface any turn failure to the client
+            yield json.dumps({"type": "error", "message": str(e)}) + "\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="application/x-ndjson",
+        # Discourage proxy/CDN buffering so events flush as they are produced.
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
-    return {"response": response, "tool_calls": tool_calls}
 
 
 @app.get("/events/month")
