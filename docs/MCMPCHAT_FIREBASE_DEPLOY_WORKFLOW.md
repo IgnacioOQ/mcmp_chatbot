@@ -9,7 +9,7 @@ volatility: evolving
 scope: project-specific
 repository: [mcmp_chatbot]
 execution_model: mixed
-last_checked: '2026-06-22'
+last_checked: '2026-06-24'
 ---
 
 # MCMP Chatbot — Firebase Deploy Workflow
@@ -18,7 +18,7 @@ The production app is a two-part Firebase stack, and each part deploys by a diff
 
 It reflects the *live* deployment. Where it disagrees with [FIREBASE_MIGRATION_PLAN.md](FIREBASE_MIGRATION_PLAN.md) (the original blueprint), this workflow wins — the plan has drifted on the operating account (`ignacioojea@gmail.com`, not `eikasia@eikasia.com`) and the App Hosting region (`us-east4`).
 
-**Live URL:** https://mcmp-chatbot--mcmp-firebase.us-east4.hosted.app
+**Live URL:** https://mcmp-chat.ignacioojea.com (custom domain; auto-URL `https://mcmp-chatbot--mcmp-firebase.us-east4.hosted.app` also serves). Custom-domain setup: [MCMPCHAT_CUSTOM_DOMAIN_WORKFLOW.md](MCMPCHAT_CUSTOM_DOMAIN_WORKFLOW.md).
 
 **Execution model:** mixed — a linear preflight + verify wrapping two independent deploy tracks (backend, frontend) that may run in either order or on their own.
 
@@ -125,7 +125,7 @@ Confirm the live stack responds for whatever was deployed.
 ### Step 4.1 — Frontend reachability
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}\n" https://mcmp-chatbot--mcmp-firebase.us-east4.hosted.app/   # expect 200
+curl -s -o /dev/null -w "%{http_code}\n" https://mcmp-chat.ignacioojea.com/   # expect 200 (custom domain; auto-URL …us-east4.hosted.app/ also works)
 ```
 
 ### Step 4.2 — Backend health (IAM token required)

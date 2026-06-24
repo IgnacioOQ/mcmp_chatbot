@@ -8,7 +8,7 @@
 
 A structured-data chatbot for the **Munich Center for Mathematical Philosophy (MCMP)**. It scrapes the MCMP website for the latest events, people, and research, stores the data in **Firestore**, and uses an LLM (Google Gemini) with structured MCP tools to answer questions about the center's activities.
 
-**Live:** https://mcmp-chatbot--mcmp-firebase.us-east4.hosted.app
+**Live:** https://mcmp-chat.ignacioojea.com (custom domain; the auto-generated `https://mcmp-chatbot--mcmp-firebase.us-east4.hosted.app` also still works)
 
 The production application is built as a **Firebase stack**: a **Next.js 14** frontend on **Firebase App Hosting**, calling a **FastAPI backend on Cloud Run** (IAM-only), backed by **Firestore**. The backend wraps a shared Python core (`src/`) — the AI engine, the in-process MCP tools, and the scrapers — that is reused unchanged from the project's earlier Streamlit incarnation. The Streamlit UI (`app.py`, `src/ui/`) has been retired; the engine it used lives on in `src/core/`.
 
@@ -121,7 +121,7 @@ git checkout firebase-branch
 ./firebase/backend/deploy-backend.sh   # hard branch guard; builds via Cloud Build, deploys, smoke-tests /health
 ```
 
-**Frontend → Firebase App Hosting:** push to `firebase-branch`; App Hosting auto-detects the push and rolls out a new build. Capture the URL from the Firebase Console (production: `mcmp-chatbot--mcmp-firebase.us-east4.hosted.app`).
+**Frontend → Firebase App Hosting:** push to `firebase-branch`; App Hosting auto-detects the push and rolls out a new build. Production is served at the custom domain `mcmp-chat.ignacioojea.com` (auto-URL `mcmp-chatbot--mcmp-firebase.us-east4.hosted.app` also works). Custom-domain setup is documented in [docs/MCMPCHAT_CUSTOM_DOMAIN_WORKFLOW.md](docs/MCMPCHAT_CUSTOM_DOMAIN_WORKFLOW.md).
 
 Key infrastructure (full details in [docs/FIREBASE_MIGRATION_PLAN.md](docs/FIREBASE_MIGRATION_PLAN.md)):
 
