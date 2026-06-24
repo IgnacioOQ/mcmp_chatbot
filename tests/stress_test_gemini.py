@@ -98,6 +98,12 @@ CASES = [
         set(),  # at least one tool should fire (search_people probably empty → fallback)
         [],
     ),
+    (
+        "misspelled_person_name",
+        "Tell me about Hannes Leitgib.",  # typo for "Hannes Leitgeb"
+        set(),  # exact search_people misses the typo → fuzzy fallback / fuzzy_search resolves it
+        ["leitgeb"],  # the CORRECTED name must surface — verifies typo tolerance end-to-end
+    ),
 ]
 
 

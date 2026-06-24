@@ -115,3 +115,67 @@ def test_search_people_exact_not_flagged_approximate(patch_people):
     results = search_people("Hartmann")
     assert results[0]["name"] == "Stephan Hartmann"
     assert "approximate" not in results[0]
+
+
+# ── Fuzzy search: events / research / all ────────────────────────────────────
+
+_FIXTURE_EVENTS = [
+    {"title": "Talk: Tom F. Sterkenburg (MCMP)", "talk_title": "No Free Lunch and machine learning",
+     "url": "https://example.org/ev1",
+     "metadata": {"speaker": "Tom F. Sterkenburg", "date": "2026-05-12"}},
+    {"title": "Workshop: Modal Logic", "talk_title": "",
+     "url": "https://example.org/ev2",
+     "metadata": {"speaker": "Hannes Leitgeb", "date": "2026-06-01"}},
+]
+
+_FIXTURE_RESEARCH = [
+    {"name": "Philosophy of Science", "description": "Confirmation, induction, ML.", "people": []},
+    {"name": "Logic and Philosophy of Language", "description": "Modal logic, semantics.", "people": []},
+]
+
+
+@pytest.fixture
+def patch_all(monkeypatch):
+    """Route each logical dataset to its inline fixture."""
+    mapping = {
+        "people.json": _FIXTURE_PEOPLE,
+        "raw_events.json": _FIXTURE_EVENTS,
+        "research.json": _FIXTURE_RESEARCH,
+    }
+    monkeypatch.setattr(mcp_tools, "load_data", lambda filename: mapping.get(filename, []))
+
+
+def test_fuzzy_search_events_by_speaker_typo(patch_all):
+    # Misspelled speaker name should surface the event via the speaker field.
+    results = fuzzy_search("Sternkenberg", database="events")
+    assert results, "expected an event match on the misspelled speaker"
+    assert results[0]["speaker"] == "Tom F. Sterkenburg"
+    assert results[0]["database"] == "events"
+    assert results[0]["date"] == "2026-05-12"
+
+
+def test_fuzzy_search_research_by_area_typo(patch_all):
+    results = fuzzy_search("Filosophy of Sience", database="research")
+    assert results, "expected a research-area match"
+    assert results[0]["name"] == "Philosophy of Science"
+    assert results[0]["database"] == "research"
+
+
+def test_fuzzy_search_all_merges_and_ranks(patch_all):
+    results = fuzzy_search("Sterkenburg", database="all", max_results=10)
+    dbs = {r["database"] for r in results}
+    # Matches the person AND the event (both carry the name), ranked together.
+    assert "people" in dbs and "events" in dbs
+    scores = [r["score"] for r in results]
+    assert scores == sorted(scores, reverse=True)
+
+
+def test_fuzzy_search_respects_max_results(patch_all):
+    results = fuzzy_search("Sterkenburg", database="all", max_results=1)
+    assert len(results) == 1
+
+
+def test_fuzzy_search_high_threshold_filters_out(patch_all):
+    # A near-impossible threshold should drop every candidate.
+    results = fuzzy_search("Sternkenberg", database="people", threshold=0.99)
+    assert results == []

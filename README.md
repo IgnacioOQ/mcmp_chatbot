@@ -21,6 +21,7 @@ The production application is built as a **Firebase stack**: a **Next.js 14** fr
 - **Interactive calendar**: A month calendar with event-day dots and click-to-query — clicking a day injects a prompt asking about that day's events.
 - **Events This Week**: A sidebar list of the current week's talks (speaker, title, time, location), linked to the MCMP event pages.
 - **Structured Data Tools (MCP)**: An in-process Model Context Protocol server exposes the Firestore-backed data as precise query tools, so the LLM can answer structured questions (e.g. "List all events next week", "Who researches Logic?") without fuzzy text retrieval.
+- **Typo-tolerant name search**: A `fuzzy_search` tool (stdlib `difflib` edit-distance) and a fuzzy fallback inside `search_people` resolve misspelled names — e.g. a query for "Tom Sternkenberg" still surfaces "Tom F. Sterkenburg" instead of "no results".
 - **Institutional Graph**: A graph layer captures organizational structure (Chairs, Leadership) and links people to hierarchical **Research Topics**.
 - **Configurable Personality (Leopold)**: The chatbot's identity and tone live in `prompts/personality.md`, separate from code.
 - **Feedback**: User feedback is appended to a Google Sheet via the backend.
@@ -163,6 +164,7 @@ The in-process MCP server (`src/mcp/`) exposes these tools to the LLM; the engin
 | `search_graph` | Institutional structure — Chairs, leadership, affiliations. |
 | `search_academic_offerings` | Degree programs: ECTS, deadlines, coordinators, documents. |
 | `grep_data` | Substring/regex search across the raw datasets. |
+| `fuzzy_search` | Typo-tolerant (edit-distance) name lookup across people, events, and research — surfaces "Tom F. Sterkenburg" for a misspelled "Tom Sternkenberg" when an exact search returns nothing. |
 | `ask_clarification` | Ask the user a clarifying question when intent is ambiguous. |
 
 ## Tests
