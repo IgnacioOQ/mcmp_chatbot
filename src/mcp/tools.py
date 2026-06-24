@@ -211,26 +211,53 @@ def search_people(query: str) -> List[Dict[str, Any]]:
 def search_research(topic: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Search for research areas and projects.
-    
+
+    Each result carries the area `url` and a `projects` list (each with its own
+    `title` and `url`), so individual project pages — e.g. the Philosophy of
+    Machine Learning page — surface with a direct link. The `topic` filter
+    matches the area name OR any project title, so a query like "machine
+    learning" finds the project even though no top-level area is named for it;
+    when the match is on specific projects, only those are returned in `projects`.
+
     Args:
-        topic: Research topic to filter by (e.g., "Logic", "Philosophy of Science").
+        topic: Research topic to filter by (e.g., "Logic", "machine learning").
     """
     research = load_data("research.json")
     results = []
-    
-    topic_query = topic.lower() if topic else ""
-    
+
+    topic_query = _normalize(topic) if topic else ""
+
     for area in research:
-        area_name = area.get("name", "").lower()
-        
-        if not topic or topic_query in area_name:
-            results.append({
-                "area": area.get("name"),
-                "description": area.get("description"),
-                "people_count": len(area.get("people", [])),
-                "subtopics": area.get("subtopics", [])
-            })
-            
+        area_name = _normalize(area.get("name", ""))
+        projects = area.get("projects", []) or []
+
+        # A query matches when it is a substring of the area name OR of any
+        # project title. This is what lets "machine learning" reach a project
+        # that lives under an unrelated area name.
+        project_matches = [
+            p for p in projects
+            if topic_query and topic_query in _normalize(p.get("title", ""))
+        ]
+        name_match = (not topic_query) or topic_query in area_name
+
+        if not (name_match or project_matches):
+            continue
+
+        # Surface the projects the query actually hit; if it matched on the area
+        # name (or there was no query), surface every project in the area.
+        shown = project_matches if project_matches else projects
+        results.append({
+            "area": area.get("name"),
+            "description": area.get("description"),
+            "url": area.get("url"),
+            "people_count": len(area.get("people", [])),
+            "subtopics": area.get("subtopics", []),
+            "projects": [
+                {"title": p.get("title"), "url": p.get("url")}
+                for p in shown
+            ],
+        })
+
     return results
 
 def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None, query: Optional[str] = None) -> List[Dict[str, Any]]:

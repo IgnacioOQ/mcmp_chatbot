@@ -6,6 +6,48 @@ from src.mcp.tools import (
     search_people, search_research, get_events, fuzzy_search, _name_similarity,
 )
 
+# Mirrors the shape the scraper produces: fixed top-level areas whose individual
+# project pages (with their own URLs) live nested under `projects`. The Philosophy
+# of Machine Learning page is captured as a project under the catch-all area.
+_FIXTURE_RESEARCH_AREAS = [
+    {"name": "Mathematical Philosophy",
+     "description": "Research area focusing on Mathematical Philosophy",
+     "url": "https://www.philosophie.lmu.de/mcmp/en/research/index.html",
+     "subtopics": ["Philosophy of machine learning at the MCMP"],
+     "projects": [
+         {"title": "Philosophy of machine learning at the MCMP",
+          "url": "https://www.philosophie.lmu.de/mcmp/en/research/philosophy-of-machine-learning/"},
+     ]},
+    {"name": "Logic and Philosophy of Language",
+     "description": "Research area focusing on Logic and Philosophy of Language",
+     "url": "https://www.philosophie.lmu.de/mcmp/en/research/index.html",
+     "subtopics": [], "projects": []},
+]
+
+
+@pytest.fixture
+def patch_research(monkeypatch):
+    monkeypatch.setattr(
+        mcp_tools, "load_data",
+        lambda filename: _FIXTURE_RESEARCH_AREAS if filename == "research.json" else [],
+    )
+
+
+def test_search_research_surfaces_project_url_by_topic(patch_research):
+    # "machine learning" matches no AREA name, only a project title — and the
+    # project's own page URL must come back so the link can reach the user.
+    results = search_research("machine learning")
+    assert results, "expected the ML project to surface via its title"
+    ml = next(p for r in results for p in r["projects"]
+              if "machine learning" in p["title"].lower())
+    assert ml["url"].endswith("/philosophy-of-machine-learning/")
+
+
+def test_search_research_empty_topic_lists_areas_with_urls(patch_research):
+    results = search_research()
+    assert len(results) == len(_FIXTURE_RESEARCH_AREAS)
+    assert all("url" in r and "projects" in r for r in results)
+
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
