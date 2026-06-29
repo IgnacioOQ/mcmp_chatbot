@@ -421,5 +421,31 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-06-29T07:10:56.598084",
+        "changes": {
+            "events": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Recent Advances in the Philosophy of Logic"
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            }
+        }
     }
 ]
