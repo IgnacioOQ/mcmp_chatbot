@@ -63,12 +63,12 @@ The suite covers: the OpenAI-mocked engine path (`test_engine.py`), MCP server u
 python -m tests.stress_test_gemini 2>&1 | tee tests/reports/stress_$(date -u +%Y-%m-%d).log
 ```
 
-The harness runs 12 cases covering every tool (`search_people`, `search_research`, `get_events`, `search_graph`, `search_academic_offerings`, `grep_data`), multi-tool chains, the fallback cascade, missing-name handling, and YYYY-MM-DD date formatting. Each case verifies the expected tools fired and that the response is not an `Error: …` string. The harness exits 0 only if all cases pass.
+The harness runs 13 cases covering every tool (`search_people`, `search_research`, `get_events`, `search_graph`, `search_academic_offerings`, `grep_data`, `fuzzy_search`), multi-tool chains, the fallback cascade, missing-name handling, misspelled-name handling (the `misspelled_person_name` case asserts the *corrected* name surfaces, whether via the `search_people` fuzzy fallback or an explicit `fuzzy_search` call), and YYYY-MM-DD date formatting. Each case verifies the expected tools fired and that the response is not an `Error: …` string. The harness exits 0 only if all cases pass.
 
 **Save the full transcript.** The `tee` invocation above captures the run to `tests/reports/stress_YYYY-MM-DD.log`. Create the `tests/reports/` directory the first time. Keep at least the three most recent transcripts; older ones can be deleted.
 
 **Interpreting results:**
-- **All 12 PASS:** baseline preserved.
+- **All 13 PASS:** baseline preserved.
 - **One or two transient `503` failures that recover on retry:** acceptable — Google-side spike, the engine's retry block (`engine.py`) handles them. Note the count in the report.
 - **A repeatable `FAIL_TOOLS`:** the model is no longer selecting the expected tool for that query type. Common causes: system-prompt drift, a new tool added without updating the **TOOL SELECTION GUIDE** section in `engine.py`, or a model regression.
 - **A repeatable `FAIL_RESPONSE_ERROR`:** an exception is being swallowed by the engine. Check `logs/` for the underlying cause.
@@ -125,7 +125,7 @@ The harness runs 12 cases covering every tool (`search_people`, `search_research
 ```
 [ ] Phase 1: Prior report read; recent WORKLOG entries skimmed; env confirmed
 [ ] Phase 2: pytest tests/ — all green (or failures characterized)
-[ ] Phase 3: stress battery — 12/12 PASS; transcript saved to tests/reports/
+[ ] Phase 3: stress battery — 13/13 PASS; transcript saved to tests/reports/
 [ ] Phase 4: data files fresh, JSON-valid, counts steady-or-higher
 [ ] Phase 5: Latest Report appended; follow-ups filed; last_checked bumped
 ```

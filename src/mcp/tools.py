@@ -1,7 +1,9 @@
 import json
 import os
 import re
+import threading
 import unicodedata
+from difflib import SequenceMatcher
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
 
@@ -22,10 +24,52 @@ def _normalize(text: str) -> str:
     """Lowercase and strip diacritics so 'gonzalez' matches 'González'."""
     return unicodedata.normalize("NFD", text.lower()).encode("ascii", "ignore").decode("ascii")
 
+
+# Default similarity floor for fuzzy (edit-distance) matching, in [0, 1].
+# Tuned so a one- or two-character surname typo clears it (Sternkenberg→Sterkenburg
+# scores ~0.85) while unrelated names stay below.
+_FUZZY_THRESHOLD = 0.6
+
+
+def _name_similarity(query: str, candidate: str) -> float:
+    """Token-aware edit-distance similarity in [0, 1] between a query and a name.
+
+    Combines the whole-string ratio with a per-query-token best match: each query
+    token is scored against its closest candidate token and those are averaged,
+    taking the max of that and the full-string ratio. This way 'Tom Sternkenberg'
+    still scores high against 'Tom F. Sterkenburg' despite the dropped middle
+    initial, while 'Tom Smith' vs 'Tom Jones' stays low. Uses difflib (stdlib,
+    Ratcliff-Obershelp) — no external dependency. Diacritics/case are normalised
+    first, reusing the same rules as the exact matchers.
+    """
+    q = _normalize(query)
+    c = _normalize(candidate)
+    if not q or not c:
+        return 0.0
+
+    full = SequenceMatcher(None, q, c).ratio()
+
+    # Drop stop words so natural-language noise ("a researcher named ...") doesn't
+    # dilute the average; fall back to all tokens if everything was stripped.
+    q_tokens = [t for t in q.split() if t not in _STOP_WORDS and len(t) > 1] or q.split()
+    c_tokens = c.split() or [c]
+    per_token = [
+        max(SequenceMatcher(None, qt, ct).ratio() for ct in c_tokens)
+        for qt in q_tokens
+    ]
+    avg = sum(per_token) / len(per_token)
+    return max(full, avg)
+
 # Manual cache: only stores files that were successfully loaded.
 # lru_cache was replaced because it caches missing-file [] results, causing
 # tools to return empty permanently if a dataset didn't exist at first call.
 _data_cache: Dict[str, List[Dict[str, Any]]] = {}
+
+# Serialises the first (cold) load of each dataset. FastAPI runs sync endpoints
+# in a threadpool, so the parallel sidebar requests (/events/week + /events/month)
+# can both miss the cache and stream the whole Firestore collection at once; the
+# lock makes the second caller wait and reuse the first one's result.
+_data_cache_lock = threading.Lock()
 
 # DATA_BACKEND selects where load_data() reads from:
 #   "json"      (default) — local data/*.json files. The Streamlit build is
@@ -68,7 +112,13 @@ def _load_from_firestore(filename: str):
 
 
 def load_data(filename: str) -> List[Dict[str, Any]]:
-    if filename not in _data_cache:
+    if filename in _data_cache:
+        return _data_cache[filename]
+    with _data_cache_lock:
+        # Re-check inside the lock: another thread may have populated the cache
+        # while we were waiting on a concurrent cold load.
+        if filename in _data_cache:
+            return _data_cache[filename]
         if DATA_BACKEND == "firestore":
             data = _load_from_firestore(filename)
             if data is None:
@@ -81,6 +131,26 @@ def load_data(filename: str) -> List[Dict[str, Any]]:
             with open(path, "r", encoding="utf-8") as f:
                 _data_cache[filename] = json.load(f)
     return _data_cache[filename]
+
+def _person_result(person: Dict[str, Any]) -> Dict[str, Any]:
+    """Shape a raw people.json record into the search_people result dict.
+    Shared by the exact-match path and the fuzzy fallback so the two stay in sync.
+    """
+    meta = person.get("metadata", {})
+    return {
+        "name": person.get("name"),
+        "role": meta.get("role") or meta.get("position") or "Unknown",
+        "chair": meta.get("organizational_unit", "Unknown"),
+        "url": person.get("url"),
+        "image_url": person.get("image_url"),
+        "email": meta.get("email"),
+        "phone": meta.get("phone"),
+        "room": meta.get("room"),
+        "website": meta.get("website"),
+        "description": person.get("description", ""),
+        "research_interests": meta.get("research_interests_text", ""),
+    }
+
 
 def search_people(query: str) -> List[Dict[str, Any]]:
     """
@@ -113,47 +183,81 @@ def search_people(query: str) -> List[Dict[str, Any]]:
         desc_match = " ".join(search_tokens) in desc
 
         if name_match or desc_match:
-            display_role = person.get("metadata", {}).get("role") or person.get("metadata", {}).get("position") or "Unknown"
+            results.append(_person_result(person))
 
-            results.append({
-                "name": person.get("name"),
-                "role": display_role,
-                "chair": person.get("metadata", {}).get("organizational_unit", "Unknown"),
-                "url": person.get("url"),
-                "image_url": person.get("image_url"),
-                "email": person.get("metadata", {}).get("email"),
-                "phone": person.get("metadata", {}).get("phone"),
-                "room": person.get("metadata", {}).get("room"),
-                "website": person.get("metadata", {}).get("website"),
-                "description": person.get("description", ""),
-                "research_interests": person.get("metadata", {}).get("research_interests_text", "")
-            })
-            
-    return results[:10] # Limit results
+    if results:
+        return results[:10]  # Limit results
+
+    # Exact AND-match found nothing — the name may be misspelled. Fall back to
+    # fuzzy (edit-distance) ranking over person names so a typo like
+    # "Sternkenberg" still surfaces "Tom F. Sterkenburg". Entries are tagged
+    # `approximate` (with the score) so the model can hedge — "Did you mean…?" —
+    # rather than presenting a guess as a confirmed hit.
+    fuzzy = sorted(
+        (
+            (_name_similarity(query, person.get("name", "")), person)
+            for person in people
+        ),
+        key=lambda pair: pair[0],
+        reverse=True,
+    )
+    for score, person in fuzzy[:5]:
+        if score < _FUZZY_THRESHOLD:
+            break
+        results.append({**_person_result(person), "approximate": True, "match_score": round(score, 3)})
+
+    return results
 
 def search_research(topic: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Search for research areas and projects.
-    
+
+    Each result carries the area `url` and a `projects` list (each with its own
+    `title` and `url`), so individual project pages — e.g. the Philosophy of
+    Machine Learning page — surface with a direct link. The `topic` filter
+    matches the area name OR any project title, so a query like "machine
+    learning" finds the project even though no top-level area is named for it;
+    when the match is on specific projects, only those are returned in `projects`.
+
     Args:
-        topic: Research topic to filter by (e.g., "Logic", "Philosophy of Science").
+        topic: Research topic to filter by (e.g., "Logic", "machine learning").
     """
     research = load_data("research.json")
     results = []
-    
-    topic_query = topic.lower() if topic else ""
-    
+
+    topic_query = _normalize(topic) if topic else ""
+
     for area in research:
-        area_name = area.get("name", "").lower()
-        
-        if not topic or topic_query in area_name:
-            results.append({
-                "area": area.get("name"),
-                "description": area.get("description"),
-                "people_count": len(area.get("people", [])),
-                "subtopics": area.get("subtopics", [])
-            })
-            
+        area_name = _normalize(area.get("name", ""))
+        projects = area.get("projects", []) or []
+
+        # A query matches when it is a substring of the area name OR of any
+        # project title. This is what lets "machine learning" reach a project
+        # that lives under an unrelated area name.
+        project_matches = [
+            p for p in projects
+            if topic_query and topic_query in _normalize(p.get("title", ""))
+        ]
+        name_match = (not topic_query) or topic_query in area_name
+
+        if not (name_match or project_matches):
+            continue
+
+        # Surface the projects the query actually hit; if it matched on the area
+        # name (or there was no query), surface every project in the area.
+        shown = project_matches if project_matches else projects
+        results.append({
+            "area": area.get("name"),
+            "description": area.get("description"),
+            "url": area.get("url"),
+            "people_count": len(area.get("people", [])),
+            "subtopics": area.get("subtopics", []),
+            "projects": [
+                {"title": p.get("title"), "url": p.get("url")}
+                for p in shown
+            ],
+        })
+
     return results
 
 def get_events(date_range: Optional[str] = None, type_filter: Optional[str] = None, start_date: Optional[str] = None, end_date: Optional[str] = None, query: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -474,6 +578,102 @@ def grep_data(
                     return results
 
     return results
+
+
+# ── Fuzzy (edit-distance) search ─────────────────────────────────────────────
+
+# Per-database: (filename, fn → the name-like strings to fuzzy-match a query against).
+# These are the fields a user is liable to misspell — a person's name, an event's
+# speaker or talk title, a research area's name — NOT free-text bios (grep_data
+# already covers full-text substring search).
+_FUZZY_DB_MAP: Dict[str, Tuple[str, Any]] = {
+    "people":   ("people.json",     lambda e: [e.get("name", "")]),
+    "research": ("research.json",   lambda e: [e.get("name", "")]),
+    "events":   ("raw_events.json", lambda e: [
+        (e.get("metadata", {}) or {}).get("speaker", ""),
+        e.get("talk_title", ""),
+        e.get("title", ""),
+    ]),
+}
+
+
+def _fuzzy_result(db_name: str, entry: Dict[str, Any], score: float, matched_on: str) -> Dict[str, Any]:
+    """Compact, ranked match. `name`/`matched_on` are the corrected term the model
+    should feed into the precise tool next (search_people / get_events / search_research)."""
+    meta = entry.get("metadata", {}) or {}
+    base = {"database": db_name, "score": round(score, 3), "matched_on": matched_on}
+    if db_name == "people":
+        base.update({
+            "name": entry.get("name"),
+            "role": meta.get("role") or meta.get("position") or "Unknown",
+            "url": entry.get("url"),
+        })
+    elif db_name == "events":
+        base.update({
+            "name": entry.get("talk_title") or entry.get("title"),
+            "speaker": meta.get("speaker"),
+            "date": meta.get("date"),
+            "url": entry.get("url"),
+        })
+    elif db_name == "research":
+        base.update({
+            "name": entry.get("name"),
+            "description": (entry.get("description") or "")[:200],
+        })
+    return base
+
+
+def fuzzy_search(
+    query: str,
+    database: str = "people",
+    max_results: int = 5,
+    threshold: float = _FUZZY_THRESHOLD,
+) -> List[Dict[str, Any]]:
+    """
+    Approximate (typo-tolerant) name search across MCMP databases using
+    edit-distance matching. Returns the closest-matching names ranked by a
+    similarity score in [0, 1], even when the spelling is wrong.
+
+    Use this as a FALLBACK when an exact tool (search_people, get_events,
+    search_research) returns nothing and the query is a name that may be
+    misspelled — e.g. "Tom Sternkenberg" should surface "Tom F. Sterkenburg".
+    Each result's `name`/`matched_on` is the corrected term to feed back into the
+    precise tool for full details. Do NOT use this as a first resort or for
+    free-text/topic search (use search_people or grep_data for those).
+
+    Args:
+        query:       The (possibly misspelled) name to match.
+        database:    "people" (default), "events", "research", or "all".
+        max_results: Maximum number of ranked matches to return (default 5).
+        threshold:   Minimum similarity in [0, 1] to include (default 0.6).
+                     Lower it (~0.45) to widen the net on very garbled input.
+    """
+    if not query or not query.strip():
+        return [{"error": "query must be a non-empty string"}]
+
+    if database == "all":
+        db_names = list(_FUZZY_DB_MAP.keys())
+    elif database in _FUZZY_DB_MAP:
+        db_names = [database]
+    else:
+        return [{"error": f"Unknown database '{database}'. Choose from: people, events, research, all."}]
+
+    scored: List[Tuple[float, Dict[str, Any]]] = []
+    for db_name in db_names:
+        filename, candidates_fn = _FUZZY_DB_MAP[db_name]
+        for entry in load_data(filename):
+            best, best_str = 0.0, ""
+            for cand in candidates_fn(entry):
+                if not cand or not cand.strip():
+                    continue
+                s = _name_similarity(query, cand)
+                if s > best:
+                    best, best_str = s, cand
+            if best >= threshold:
+                scored.append((best, _fuzzy_result(db_name, entry, best, best_str)))
+
+    scored.sort(key=lambda pair: pair[0], reverse=True)
+    return [result for _, result in scored[:max_results]]
 
 
 def search_academic_offerings(

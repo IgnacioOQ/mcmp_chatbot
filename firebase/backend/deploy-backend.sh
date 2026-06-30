@@ -47,7 +47,7 @@ gcloud run deploy "${SERVICE}" \
   --service-account="${RUNTIME_SA}" \
   --set-secrets=GEMINI_API_KEY=GEMINI_API_KEY:latest,SHEETS_SA_JSON=SHEETS_SA_JSON:latest,SHEETS_ID=SHEETS_ID:latest \
   --set-env-vars=DATA_BACKEND=firestore \
-  --min-instances=0 --max-instances=2 --memory=512Mi --cpu=1
+  --min-instances=1 --max-instances=2 --memory=512Mi --cpu=1
 
 # --- smoke test -------------------------------------------------------------
 URL="$(gcloud run services describe "${SERVICE}" --region="${REGION}" --project="${PROJECT_ID}" --format='value(status.url)')"

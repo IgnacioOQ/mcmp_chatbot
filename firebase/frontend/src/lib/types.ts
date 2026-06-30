@@ -35,6 +35,7 @@ export const TOOL_ICONS: Record<string, string> = {
   get_events: "📅",
   search_graph: "🏛️",
   grep_data: "🔎",
+  fuzzy_search: "🪄",
   search_academic_offerings: "🎓",
   ask_clarification: "❓",
 };

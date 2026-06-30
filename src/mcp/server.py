@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Tuple
-from src.mcp.tools import search_people, search_research, get_events, search_graph, grep_data, ask_clarification, search_academic_offerings
+from src.mcp.tools import search_people, search_research, get_events, search_graph, grep_data, fuzzy_search, ask_clarification, search_academic_offerings
 from src.utils.logger import log_latency
 import json
 
@@ -17,6 +17,7 @@ class MCPServer:
             "get_events": get_events,
             "search_graph": search_graph,
             "grep_data": grep_data,
+            "fuzzy_search": fuzzy_search,
             "search_academic_offerings": search_academic_offerings,
         }
         # Per-request dedupe cache: (tool_name, frozen_args) -> result.
@@ -248,6 +249,46 @@ class MCPServer:
                         }
                     },
                     "required": ["pattern"]
+                }
+            },
+            {
+                "name": "fuzzy_search",
+                "description": (
+                    "Typo-tolerant (approximate) NAME search across MCMP databases using edit-distance matching. "
+                    "Returns the closest-matching names ranked by a similarity score, even when the spelling is wrong. "
+                    "Use this as a FALLBACK when an exact tool (search_people, get_events, search_research) returns "
+                    "nothing and the query is a name that might be misspelled — e.g. 'Tom Sternkenberg' surfaces "
+                    "'Tom F. Sterkenburg'. Take the returned `name` and re-query the precise tool for full details. "
+                    "Do NOT use this as a first resort, and NOT for topic/free-text search (use search_people or grep_data for those)."
+                ),
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": (
+                                "The possibly-misspelled name to match. Extract just the name, not the full sentence. "
+                                "Examples: 'Sternkenberg', 'Leitgib', 'Nida Rumelin'."
+                            )
+                        },
+                        "database": {
+                            "type": "string",
+                            "enum": ["people", "events", "research", "all"],
+                            "description": (
+                                "Which database of names to match against. 'people' (default) for person names, "
+                                "'events' for speaker names / talk titles, 'research' for area names, or 'all'."
+                            )
+                        },
+                        "max_results": {
+                            "type": "integer",
+                            "description": "Maximum number of ranked matches to return. Default 5."
+                        },
+                        "threshold": {
+                            "type": "number",
+                            "description": "Minimum similarity 0-1 to include. Default 0.6; lower (~0.45) for very garbled input."
+                        }
+                    },
+                    "required": ["query"]
                 }
             }
         ]
