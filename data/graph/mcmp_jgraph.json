@@ -515,6 +515,12 @@
             "name": "Prof. Dr. Christian List",
             "type": "Person",
             "properties": "Role: Chair & Co-Director"
+        },
+        {
+            "id": "erik_curiel",
+            "name": "Dr. Erik Curiel",
+            "type": "Person",
+            "properties": "Role: Member"
         }
     ],
     "edges": [

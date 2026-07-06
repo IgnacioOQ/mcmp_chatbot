@@ -92,6 +92,7 @@
 | jonas_raab | Dr. Jonas Raab | Person | Role: Postdoctoral Fellow |
 | michael_cuffaro | Dr. Michael Cuffaro | Person | Role: Visiting Fellow |
 | christian_list | Prof. Dr. Christian List | Person | Role: Chair & Co-Director |
+| erik_curiel | Dr. Erik Curiel | Person | Role: Member |
 
 ### Edges
 | source | target | relationship | properties |

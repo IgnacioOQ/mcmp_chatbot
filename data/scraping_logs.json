@@ -447,5 +447,39 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-07-06T07:08:23.006035",
+        "changes": {
+            "events": {
+                "added": [
+                    "Research Seminar in Decision and Action Theory: On What There Is, Was, and Can Be",
+                    "The Philosophy of Unfolding"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "people": {
+                "added": [
+                    "Dr. Erik Curiel"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            }
+        }
     }
 ]
