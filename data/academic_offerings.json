@@ -17,7 +17,7 @@
                 "International applicants apply through the International Office"
             ]
         },
-        "scraped_at": "2026-07-06T07:08:22.103251"
+        "scraped_at": "2026-07-13T07:07:46.501842"
     },
     {
         "title": "Master Program in Logic and Philosophy of Science",
@@ -53,7 +53,7 @@
                 "German language: A1 level by end of Year 1"
             ]
         },
-        "scraped_at": "2026-07-06T07:08:22.996859"
+        "scraped_at": "2026-07-13T07:07:47.165711"
     },
     {
         "title": "PhD Program",
@@ -62,7 +62,7 @@
         "description": "The doctorate (Dr. phil.) serves to demonstrate the ability of the doctoral student to perform original and in-depth academic research and is based on a written dissertation (doctoral thesis), conducted independently, and, finally, a defense of the dissertation. The core element of the doctorate is the doctoral thesis or dissertation. The topic of the dissertation is agreed upon with the candidate's academic supervisor. The student then produces the dissertation as a piece of independent research, which serves to demonstrate the new academic knowledge gained during the doctoral project.\n\nAt the MCMP, such a dissertation prepared in the form of an individual project, supervised by one of our authorized examiners. More information can be found in the tabs below.",
         "type": "academic_offering",
         "metadata": {},
-        "scraped_at": "2026-07-06T07:08:22.997159"
+        "scraped_at": "2026-07-13T07:07:47.166037"
     },
     {
         "title": "",
@@ -71,7 +71,7 @@
         "description": "Basic Teach Yourself Logic: A Guide Eine Einführung in die klassische Aussagen- und Prädikatenlogik (PDF, 1,106 KB) (lecture notes on introductory logic in German, 277 pages) An Introduction to Mathematical Logic (PDF, 549 KB) (for mathematicians, 147 pages) Logic in Philosophy of Mathematics (PDF, 174 KB) (article, 27 pages) Logic in Philosophy of Science (PDF, 162 KB) (article, 14 pages) Basic Set Theory (PDF, 166 KB) (lecture notes, 6 pages) Basic Set Theory II (PDF, 170 KB) (lecture notes, 5 pages) Introduction to Model Theory (PDF, 309 KB) (lecture notes, 4 pages) Notes on Formal Methods (PDF, 360 KB) (55 pages) Notes on Modal Logic (14 pages) Introduction to Formal Epistemology (lecture notes, 52 pages) Advanced A Philosophers' Guide to Forcing (PDF, 402 KB) (by Toby Meadows) Advanced Logic (PDF, 650 KB) (lecture notes by Toby Meadows, 145 pages) Introduction to Categorical Logic (lecture notes by Steve Awodey and Andrej Bauer, 57 pages) Bayesian epistemology I: Probabilism and its Dutch Book argument (PDF, 84 KB) (by Richard Pettigrew, 2 pages) Bayesian epistemology II: Arguments for Probabilism (PDF, 119 KB) (by Richard Pettigrew, 5 pages) Bayesian epistemology III: Arguments for Conditionalization (PDF, 93 KB) (by Richard Pettigrew, 4 pages) Introduction to Neighborhood Semantics (lecture notes by Eric Pacuit, 38 pages) Set theory - basics and advanced overview (PDF, 521 KB) (by Toby Meadows, 91 pages) The Compactness and Löwenheim-Skolem Theorems (PDF, 220 KB) (by Benedict Eastaugh, 6 pages) Truth and Paradox (PDF, 323 KB) (by Toby Meadows, 45 pages) An Introduction to Toposes (PDF, 420 KB) (lecture notes for mathematicians by Richard Pettigrew, 63 pages)",
         "type": "academic_offering",
         "metadata": {},
-        "scraped_at": "2026-07-06T07:08:22.998256"
+        "scraped_at": "2026-07-13T07:07:47.167267"
     },
     {
         "title": "Learning Materials",
@@ -80,6 +80,6 @@
         "description": "Just as in any other area in which logical or mathematical methods are being used, it is necessary to understand and practise these methods before they can be applied successfully. One way of achieving this is of course to take courses at the MCMP. Additionally, here is some background material on logic and philosophy that will be of use for self-study:",
         "type": "academic_offering",
         "metadata": {},
-        "scraped_at": "2026-07-06T07:08:22.998059"
+        "scraped_at": "2026-07-13T07:07:47.166980"
     }
 ]

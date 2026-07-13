@@ -481,5 +481,38 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-07-13T07:07:47.175584",
+        "changes": {
+            "events": {
+                "added": [
+                    "Research Seminar in Decision and Action Theory: On What There Is, Was, and Can Be"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "people": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Dr. Erik Curiel"
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            }
+        }
     }
 ]
