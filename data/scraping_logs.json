@@ -514,5 +514,31 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-07-20T07:08:39.896409",
+        "changes": {
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            },
+            "academic_offerings": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "https://www.philosophie.lmu.de/mcmp/en/for-students/_general"
+                ]
+            }
+        }
     }
 ]
