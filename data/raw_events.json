@@ -395,7 +395,7 @@
     {
         "title": "Philosophy of Machine Learning Conference",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/philosophy-of-machine-learning-conference-062d7eee.html",
-        "scraped_at": "2026-07-20T07:07:21.786552",
+        "scraped_at": "2026-07-27T07:14:30.302186",
         "metadata": {
             "year": 2026,
             "month": "October",
@@ -407,7 +407,7 @@
     {
         "title": "Talk: Stephan Krämer (Hamburg)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-stephan-kraemer-hamburg-a45108ef.html",
-        "scraped_at": "2026-07-20T07:07:21.786578",
+        "scraped_at": "2026-07-27T07:14:30.302258",
         "talk_title": "TBA",
         "abstract": "TBA",
         "metadata": {
@@ -1801,5 +1801,22 @@
             "wed": "10:00 am\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t- 12:00 pm"
         },
         "description": "Abstract: Purely past objects like Plato and merely possible object like Pegasus do not exist, but they have so much else going for them. They are (evidently) nameable, assignable to variables, and eligible relata of love and so many other relations. Here lies a range of long-standing metaphysical puzzles, which Quine called \"Plato's beard,\" concerning what does not exist. I propose a solution which rejects the Quinean precept that the domain is what there is, instead extending the domain into what there was and can be. This proposed solution has two main working parts. The first part is a big constant domain (ala Lewis or Williamson), always including Plato, Pegasus, and Putin, and any creature under any possible sun. The second part is a relationalist semantics on which 'exists'' (/'is') is not a single item but a blend of at least three distinct items: root-exist (/root-be), present tense, and indicative mood, with root-exist (/root-be) interpreted as a ternary relation between a thing, a world, and a time. The result is claimed to deliver plausible truth values for existence claims, and so resolve the puzzles of what does not exist, while yielding something like \"modal realism without tears\": the full expressive power of a big domain with none of the incredulous-stare-drawing claims about the existence of talking donkeys, flying horses, or other possible worlds."
+    },
+    {
+        "title": "Talk: Anna-Maria Eder (Köln)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-anna-maria-eder-koeln-eb7d2e95.html",
+        "scraped_at": "2026-07-27T07:14:30.302250",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "speaker": "Anna-Maria Eder (Köln)",
+            "year": 2026,
+            "month": "October",
+            "date": "2026-10-15",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: TBA\n\nAbstract: TBA"
     }
 ]

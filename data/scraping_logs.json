@@ -540,5 +540,31 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-07-27T07:15:41.693324",
+        "changes": {
+            "events": {
+                "added": [
+                    "Talk: Anna-Maria Eder (Köln)"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            }
+        }
     }
 ]
