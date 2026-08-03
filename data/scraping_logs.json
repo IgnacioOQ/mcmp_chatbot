@@ -566,5 +566,25 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-08-03T07:12:10.014268",
+        "changes": {
+            "people": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Dr. Daniel A. Di Liscia",
+                    "Prof. DDr. Hannes Leitgeb"
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            }
+        }
     }
 ]
