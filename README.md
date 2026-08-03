@@ -23,6 +23,7 @@ The production application is built as a **Firebase stack**: a **Next.js 14** fr
 - **Structured Data Tools (MCP)**: An in-process Model Context Protocol server exposes the Firestore-backed data as precise query tools, so the LLM can answer structured questions (e.g. "List all events next week", "Who researches Logic?") without fuzzy text retrieval.
 - **Typo-tolerant name search**: A `fuzzy_search` tool (stdlib `difflib` edit-distance) and a fuzzy fallback inside `search_people` resolve misspelled names — e.g. a query for "Tom Sternkenberg" still surfaces "Tom F. Sterkenburg" instead of "no results".
 - **Institutional Graph**: A graph layer captures organizational structure (Chairs, Leadership) and links people to hierarchical **Research Topics**.
+- **Live tool observation**: The answer streams in token by token, and each MCP tool the model fires appears as an icon chip above the reply as it happens (`🔍 search_people`, `📅 get_events`, …) — so the user can see the query was understood correctly before the prose arrives. Implemented as an NDJSON event stream; see [MCP tools](#mcp-tools).
 - **Configurable Personality (Leopold)**: The chatbot's identity and tone live in `prompts/personality.md`, separate from code.
 - **Feedback**: User feedback is appended to a Google Sheet via the backend.
 - **Admin panel** (`/admin`): Google sign-in gated by an email allowlist; triggers a manual scrape and links to the feedback sheet.
@@ -44,7 +45,7 @@ graph TD
 ```
 
 - **Frontend — Next.js 14 (App Router) on Firebase App Hosting.** Server-side route handlers under `firebase/frontend/src/app/api/*` mint OIDC identity tokens with `google-auth-library` and proxy to the IAM-only backend. The browser never holds the backend credentials or the Gemini key. Chat is public; `/admin` requires Google sign-in against an email allowlist.
-- **Backend — FastAPI on Cloud Run (IAM-only).** `firebase/backend/main.py` wraps the existing `ChatEngine` (`src/core/engine.py`) and MCP tools (`src/mcp/`). Endpoints: `/health`, `/chat`, `/events/month`, `/events/week`, `/feedback`, `/admin/scrape`. The Gemini key and Sheets service-account JSON are mounted from Secret Manager. `/chat` is a blocking POST in v1 (no SSE streaming yet).
+- **Backend — FastAPI on Cloud Run (IAM-only).** `firebase/backend/main.py` wraps the existing `ChatEngine` (`src/core/engine.py`) and MCP tools (`src/mcp/`). Endpoints: `/health`, `/chat`, `/events/month`, `/events/week`, `/feedback`, `/admin/scrape`. The Gemini key and Sheets service-account JSON are mounted from Secret Manager. `/chat` streams its turn back as **NDJSON** (`application/x-ndjson`) — one JSON event per line (`tool_call`, `token`, `done`, `error`) — rather than blocking until the answer is complete. NDJSON is used in preference to SSE because the turn is a single POST carrying a request body, so `EventSource` (GET-only, auto-reconnecting) does not fit.
 - **Data — Firestore.** With `DATA_BACKEND=firestore`, the MCP tools load the `people`, `events`, `research`, `academic_offerings`, `graph`, and `meta` collections into memory at startup via the Firebase Admin SDK (which bypasses security rules; client access is locked off). Setting `DATA_BACKEND=json` instead reads the local `data/*.json` files — the path used for local development.
 
 ## Repository layout

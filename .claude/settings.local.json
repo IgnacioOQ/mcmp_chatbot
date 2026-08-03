@@ -5,7 +5,10 @@
       "mcp__cp_mcp__cp_mcp_worklog_append",
       "mcp__cp_mcp__cp_mcp_session_end",
       "mcp__cp_mcp__cp_mcp_session_start",
-      "mcp__cp_mcp__cp_mcp_task_list"
+      "mcp__cp_mcp__cp_mcp_task_list",
+      "mcp__cps_admin_mcp__cps_session_start",
+      "mcp__cps_admin_mcp__cps_worklog_append",
+      "mcp__cps_admin_mcp__cps_session_end"
     ]
   }
 }
