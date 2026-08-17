@@ -759,6 +759,12 @@
             "properties": "PhD/Research Supervision"
         },
         {
+            "source": "katia_parshina",
+            "target": "stephan_hartmann",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
             "source": "lilian_von_bressensdorf",
             "target": "stephan_hartmann",
             "relationship": "supervised_by",

@@ -598,5 +598,24 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-08-17T07:23:12.074425",
+        "changes": {
+            "people": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Katia Parshina, M.Sc."
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            }
+        }
     }
 ]

@@ -136,6 +136,7 @@
 | marta_esteves | martin_fischer | supervised_by | PhD/Research Supervision |
 | marta_esteves | hannes_leitgeb | supervised_by | PhD/Research Supervision |
 | katia_parshina | tom_sterkenburg | supervised_by | PhD/Research Supervision |
+| katia_parshina | stephan_hartmann | supervised_by | PhD/Research Supervision |
 | lilian_von_bressensdorf | stephan_hartmann | supervised_by | PhD/Research Supervision |
 | nicola_bonatti_mphil | hannes_leitgeb | supervised_by | PhD/Research Supervision |
 | nicola_bonatti_mphil | norbert_gratzl | supervised_by | PhD/Research Supervision |
