@@ -28,3 +28,9 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  # Google Analytics Measurement ID
+  - variable: NEXT_PUBLIC_GA_MEASUREMENT_ID
+    value: "G-6RT18K6TLG"
+    availability:
+      - BUILD
+      - RUNTIME
