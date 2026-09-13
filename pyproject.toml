@@ -1,0 +1,31 @@
+[project]
+name = "mcmp-chatbot"
+version = "0.1.0"
+description = "MCMP Chatbot"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit",
+    "pandas",
+    "beautifulsoup4",
+    "requests",
+    "chromadb",
+    "openai",
+    "python-dotenv",
+    "google-genai==1.*",
+    "gspread",
+    "google-auth",
+    "streamlit-calendar",
+    "mcp",
+    "selenium",
+    "webdriver-manager",
+    "ftfy",
+    "firebase-admin",
+    "fastapi",
+    "uvicorn[standard]",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+]
