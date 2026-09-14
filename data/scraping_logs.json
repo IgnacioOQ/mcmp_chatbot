@@ -660,5 +660,38 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-09-14T07:08:23.443244",
+        "changes": {
+            "events": {
+                "added": [
+                    "Talk (Work in Progress): David Colaço (MCMP)"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "people": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "apl. Prof. Dr. Alexander Reutlinger"
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            }
+        }
     }
 ]
