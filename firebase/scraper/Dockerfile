@@ -3,6 +3,12 @@
 FROM python:3.11-slim
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
+# Chromium + matching chromedriver for the Selenium 'Load more' events scrape
+# (the scraper finds both on PATH; without them it falls back to static scraping).
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends chromium chromium-driver \
+ && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1
 

@@ -43,6 +43,7 @@ gcloud run jobs deploy "${JOB}" \
   --region="${REGION}" \
   --project="${PROJECT_ID}" \
   --service-account="${RUNTIME_SA}" \
+  --memory=2Gi \
   --max-retries=0 \
   --task-timeout=30m
 
