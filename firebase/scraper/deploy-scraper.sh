@@ -46,6 +46,13 @@ gcloud run jobs deploy "${JOB}" \
   --max-retries=0 \
   --task-timeout=30m
 
+# Cloud Scheduler calls the job as RUNTIME_SA, which needs run.jobs.run on it.
+gcloud run jobs add-iam-policy-binding "${JOB}" \
+  --region="${REGION}" \
+  --project="${PROJECT_ID}" \
+  --member="serviceAccount:${RUNTIME_SA}" \
+  --role="roles/run.invoker"
+
 # --- configure Cloud Scheduler ----------------------------------------------
 echo ">> Configuring Cloud Scheduler job..."
 if gcloud scheduler jobs describe "${JOB}-schedule" --location="${REGION}" --project="${PROJECT_ID}" > /dev/null 2>&1; then
