@@ -693,5 +693,40 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-09-21T07:07:04.663209",
+        "changes": {
+            "events": {
+                "added": [
+                    "Talk: Youness Ayaita (SND, Sorbonne Université)",
+                    "Talk (Work in Progress): Javier Belastegui (MCMP)",
+                    "Talk: Ásgeir Berg (Iceland)",
+                    "Talk: Pablo Dopico (Konstanz)",
+                    "Universality and Indifference: Is Logic Neutral?",
+                    "Talk (Work in Progress) Magdalena Warner (LMU Munich)",
+                    "Talk: Eric Stei (Utrecht)",
+                    "Talk: Thomas Schmidt (Berlin)",
+                    "Talk: Grigory Olkhovikov (Bochum)",
+                    "Talk: Bjørn Jespersen",
+                    "Talk: Sophia Arbeiter (Bielefeld)",
+                    "Talk: Pierre Wagner (Paris)",
+                    "Talk: Simone Migliaro (Toronto)",
+                    "Talk: Walter Dean (Warwick)",
+                    "Talk (Work in Progress): Amit Karmon (Oxford)"
+                ],
+                "removed": [],
+                "updated": [
+                    "Talk (Work in Progress): David Colaço (MCMP)"
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            }
+        }
     }
 ]

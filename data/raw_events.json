@@ -395,7 +395,7 @@
     {
         "title": "Philosophy of Machine Learning Conference",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/philosophy-of-machine-learning-conference-062d7eee.html",
-        "scraped_at": "2026-09-14T07:06:53.528837",
+        "scraped_at": "2026-09-21T07:05:10.397336",
         "metadata": {
             "year": 2026,
             "month": "October",
@@ -407,7 +407,7 @@
     {
         "title": "Talk: Stephan Krämer (Hamburg)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-stephan-kraemer-hamburg-a45108ef.html",
-        "scraped_at": "2026-09-07T07:07:29.429274",
+        "scraped_at": "2026-09-21T07:05:10.397355",
         "talk_title": "TBA",
         "abstract": "TBA",
         "metadata": {
@@ -458,7 +458,7 @@
     {
         "title": "Talk: Peter Brössel (Bochum)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-peter-broessel-bochum-1be0ef00.html",
-        "scraped_at": "2026-06-13T07:31:57.580340",
+        "scraped_at": "2026-09-21T07:05:10.397379",
         "talk_title": "TBA",
         "abstract": "TBA",
         "metadata": {
@@ -1805,7 +1805,7 @@
     {
         "title": "Talk: Anna-Maria Eder (Köln)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-anna-maria-eder-koeln-eb7d2e95.html",
-        "scraped_at": "2026-09-14T07:06:53.528917",
+        "scraped_at": "2026-09-21T07:05:10.397352",
         "talk_title": "TBA",
         "abstract": "TBA",
         "metadata": {
@@ -1822,14 +1822,264 @@
     {
         "title": "Talk (Work in Progress): David Colaço (MCMP)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-david-colaco-mcmp-2afab864.html",
-        "scraped_at": "2026-09-14T07:06:53.528928",
-        "talk_title": "TBA",
-        "abstract": "TBA",
+        "scraped_at": "2026-09-21T07:05:10.397354",
+        "talk_title": "Can metabolism explain the difference between biological and artificial intelligence?",
+        "abstract": "Cognition underwritten by the brain uses energy unlike other biological systems or current artificial computational systems. These metabolic considerations are explanatorily relevant to cognition because they constrain how cognitive systems process information. This raises the question of whether these considerations can explain differences between biological cognition and artificial computation. Are differences in energy use explanatorily relevant to other differences between biological and artificial systems? Are there functional differences between these systems that are explained by how they use energy? In this talk, we explore three differences between these types of systems that are informed by the explanatory relevance of metabolic considerations. First, metabolic considerations explain robustness differences: systems are sensitive to different perturbations. For instance, brain systems metabolize energy from different chemical sources, allowing them to operate under different energy availability conditions. Artificial systems are optimized for conditions with comparatively tight tolerances. Second, metabolic considerations explain architectural differences: these systems have different entities, activities, and organizations. For instance, biological memory systems include motifs that permit life-preserving electrochemical gradients in neuronal populations, while artificial neural networks do not. Third, metabolic considerations explain informational capacity differences: these systems can acquire, store, and transform information in terms of different constraints. In neural systems, short-term lack of energy increases the likelihood that a stimulus causes an action potential by which brains process information. Artificial systems, given their underpinnings, at best maintain and typically lose information processing capabilities during energy disruption. These differences indicate that distinct explanations can be given for phenomena exhibited by biological and artificial systems. While explaining systems differently does not prove that the phenomena are unlike, these differences can explain why behaviors of AI are unlike human cognition. These differences raise the question of functional differences between systems, stemming from differences in how they use energy. We show how energetic differences should inform our assessments of differences between biological and artificial systems. We also propose that incorporating energetic constraints into the design of artificial systems can move these systems closer to how biological cognition is organized and functions.",
         "metadata": {
             "speaker": "David Colaço (MCMP)",
             "year": 2026,
             "month": "October",
             "date": "2026-10-22",
+            "time_start": "12:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "12:00 pm"
+        },
+        "description": "Title: Can metabolism explain the difference between biological and artificial intelligence?\n\nAbstract: Cognition underwritten by the brain uses energy unlike other biological systems or current artificial computational systems. These metabolic considerations are explanatorily relevant to cognition because they constrain how cognitive systems process information. This raises the question of whether these considerations can explain differences between biological cognition and artificial computation. Are differences in energy use explanatorily relevant to other differences between biological and artificial systems? Are there functional differences between these systems that are explained by how they use energy? In this talk, we explore three differences between these types of systems that are informed by the explanatory relevance of metabolic considerations. First, metabolic considerations explain robustness differences: systems are sensitive to different perturbations. For instance, brain systems metabolize energy from different chemical sources, allowing them to operate under different energy availability conditions. Artificial systems are optimized for conditions with comparatively tight tolerances. Second, metabolic considerations explain architectural differences: these systems have different entities, activities, and organizations. For instance, biological memory systems include motifs that permit life-preserving electrochemical gradients in neuronal populations, while artificial neural networks do not. Third, metabolic considerations explain informational capacity differences: these systems can acquire, store, and transform information in terms of different constraints. In neural systems, short-term lack of energy increases the likelihood that a stimulus causes an action potential by which brains process information. Artificial systems, given their underpinnings, at best maintain and typically lose information processing capabilities during energy disruption. These differences indicate that distinct explanations can be given for phenomena exhibited by biological and artificial systems. While explaining systems differently does not prove that the phenomena are unlike, these differences can explain why behaviors of AI are unlike human cognition. These differences raise the question of functional differences between systems, stemming from differences in how they use energy. We show how energetic differences should inform our assessments of differences between biological and artificial systems. We also propose that incorporating energetic constraints into the design of artificial systems can move these systems closer to how biological cognition is organized and functions."
+    },
+    {
+        "title": "Talk: Youness Ayaita (SND, Sorbonne Université)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-youness-ayaita-snd-sorbonne-universite-c905cbc2.html",
+        "scraped_at": "2026-09-21T07:05:10.397358",
+        "talk_title": "Probability by Convention",
+        "abstract": "Probabilism -- the doctrine that ideally rational degrees of belief conform to the calculus of probabilities -- is habitually defended by citing Dutch-book and accuracy-dominance arguments. Yet these arguments rely on premises that are not plausibly necessary truths. I argue that the premises in question can be understood as fixing a convention (along the lines of Poincaré's conventionalism about Euclidean geometry). Relaxing these premises leads to alternative calculi which are intertranslatable with the probability calculus. This applies to Dutch-book and accuracy-dominance arguments alike; I show a general mathematical correspondence between them.",
+        "metadata": {
+            "speaker": "Youness Ayaita (SND, Sorbonne Université)",
+            "year": 2026,
+            "month": "October",
+            "date": "2026-10-29",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: Probability by Convention\n\nAbstract: Probabilism -- the doctrine that ideally rational degrees of belief conform to the calculus of probabilities -- is habitually defended by citing Dutch-book and accuracy-dominance arguments. Yet these arguments rely on premises that are not plausibly necessary truths. I argue that the premises in question can be understood as fixing a convention (along the lines of Poincaré's conventionalism about Euclidean geometry). Relaxing these premises leads to alternative calculi which are intertranslatable with the probability calculus. This applies to Dutch-book and accuracy-dominance arguments alike; I show a general mathematical correspondence between them."
+    },
+    {
+        "title": "Talk (Work in Progress): Javier Belastegui (MCMP)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-javier-belastegui-mcmp-3cbad69f.html",
+        "scraped_at": "2026-09-21T07:05:10.397360",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "speaker": "Javier Belastegui (MCMP)",
+            "year": 2026,
+            "month": "November",
+            "date": "2026-11-05",
+            "time_start": "12:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "12:00 pm"
+        },
+        "description": "Title: TBA\n\nAbstract: TBA"
+    },
+    {
+        "title": "Talk: Ásgeir Berg (Iceland)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-asgeir-berg-iceland-35dc39ff.html",
+        "scraped_at": "2026-09-21T07:05:10.397361",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "speaker": "Ásgeir Berg (Iceland)",
+            "year": 2026,
+            "month": "November",
+            "date": "2026-11-05",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: TBA\n\nAbstract: TBA"
+    },
+    {
+        "title": "Talk: Pablo Dopico (Konstanz)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-pablo-dopico-konstanz-b52842c6.html",
+        "scraped_at": "2026-09-21T07:05:10.397370",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "speaker": "Pablo Dopico (Konstanz)",
+            "year": 2026,
+            "month": "November",
+            "date": "2026-11-12",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: TBA\n\nAbstract: TBA"
+    },
+    {
+        "title": "Universality and Indifference: Is Logic Neutral?",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/universality-and-indifference-is-logic-neutral-9423941a.html",
+        "scraped_at": "2026-09-21T07:05:10.397373",
+        "metadata": {
+            "speaker": "Is Logic Neutral?",
+            "year": 2026,
+            "month": "November",
+            "date": "2026-11-13",
+            "location": "Room M210 (CEPP library) Geschwister-Scholl-Platz 1 80539 Munich, Germany"
+        },
+        "description": "13\nNov\n—\n14\nNov\nUniversality and Indifference: Is Logic Neutral?\nDate:\n13 November 2026\n- 14 November 2026\nLocation:\nRoom M210 (CEPP library)\nGeschwister-Scholl-Platz 1\n80539 Munich, Germany\nIdea & Motivation\nLogic is often regarded as neutral within a theoretical and conceptual framework.\nOn a traditional view, it is topic-neutral and metaphysically neutral: its laws and principles apply irrespective of subject matter, abstracting from the particular domains to which they are applied. In this sense, logic provides a framework for reasoning independently of what we are reasoning about. Moreover, as a scientific discipline, logic is commonly expected to be neutral with respect to social and political commitments. Given its high degree of abstraction, this expectation may be particularly strong in the case of logic.\nAt the same time, the purely theoretical view of logic has increasingly been challenged by research practices and the use of logical devices. Within a practical framework, philosophers and logicians have questioned whether logic is genuinely neutral. For instance, debates over logical pluralism, expressive power, and domain pertinence raise questions about whether topic-neutrality can be sustained. Others have considered whether logic can, in practice, be disentangled from the social and institutional contexts in which it is developed, taught, and applied.\nThis workshop will examine the idea of logical neutrality from multiple perspectives.\nConfirmed Speakers\nDiderik Batens University of Ghent\nFranz Berto University of St Andrews\nOtávio Bueno University of Miami\nChristian Damböck University of Vienna\nMaria J. Frápolli Sanz University of Granada\nMaría del Rosario Martínez-Ordaz Czech Academy of Sciences\nGillian Russell Australian National University\nSara L. Uckelman Durham University\nOrganizers\nLuis F. Bartolo Alegre (LMU Munich)\nZhouwanyue Nata Yang (LMU Munich)\nAcknowledgement\nThe workshop is generously funded by the mentoring program.\nBluesky"
+    },
+    {
+        "title": "Talk (Work in Progress) Magdalena Warner (LMU Munich)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-magdalena-warner-lmu-munich-b5bb4da0.html",
+        "scraped_at": "2026-09-21T07:05:10.397375",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "year": 2026,
+            "month": "November",
+            "date": "2026-11-19",
+            "time_start": "12:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "12:00 pm"
+        },
+        "description": "Title: TBA\n\nAbstract: TBA"
+    },
+    {
+        "title": "Talk: Eric Stei (Utrecht)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-eric-stei-utrecht-3293dc59.html",
+        "scraped_at": "2026-09-21T07:05:10.397376",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "speaker": "Eric Stei (Utrecht)",
+            "year": 2026,
+            "month": "November",
+            "date": "2026-11-19",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: TBA\n\nAbstract: TBA"
+    },
+    {
+        "title": "Talk: Thomas Schmidt (Berlin)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-thomas-schmidt-berlin-2fc231c9.html",
+        "scraped_at": "2026-09-21T07:05:10.397378",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "speaker": "Thomas Schmidt (Berlin)",
+            "year": 2026,
+            "month": "November",
+            "date": "2026-11-26",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: TBA\n\nAbstract: TBA"
+    },
+    {
+        "title": "Talk: Grigory Olkhovikov (Bochum)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-grigory-olkhovikov-bochum-f5da2d26.html",
+        "scraped_at": "2026-09-21T07:05:10.397381",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "speaker": "Grigory Olkhovikov (Bochum)",
+            "year": 2026,
+            "month": "December",
+            "date": "2026-12-10",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: TBA\n\nAbstract: TBA"
+    },
+    {
+        "title": "Talk: Bjørn Jespersen",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-bjorn-jespersen-fae74af3.html",
+        "scraped_at": "2026-09-21T07:05:10.397382",
+        "talk_title": "Why is furze as prickly as gorse?",
+        "abstract": "(Joint work with Marie Duží) Somebody wonders why furze is as prickly as gorse. The explanation is that it is because furze is gorse. The predicates 'is furze' and 'is gorse' are assumed to be synonymous. Williamson argues that hyperintensional logic finds itself assigning different truth-values to two synonymous sentences, which is awkward, yet cannot prevent substituting 'furze' for 'gorse' within the scope of 'because', thereby trading a good explanation for a bad explanation, which is close to being a reductio of hyperintensional logic. We demonstrate how our procedural semantics can provide a principled solution to this challenge, one that respects the difference in informational and explanatory value between \"furze is gorse\" and \"furze is furze\". The solution explores the limits of hyperintensional individuation and the interface between semantics and syntax without being strictly metalinguistic. Hyperintensional logic × synonymous predicates × explanation × semantics/syntax interface × meaning postulate",
+        "metadata": {
+            "speaker": "Bjørn Jespersen",
+            "year": 2027,
+            "month": "January",
+            "date": "2027-01-07",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: Why is furze as prickly as gorse?\n\nAbstract: (Joint work with Marie Duží) Somebody wonders why furze is as prickly as gorse. The explanation is that it is because furze is gorse. The predicates 'is furze' and 'is gorse' are assumed to be synonymous. Williamson argues that hyperintensional logic finds itself assigning different truth-values to two synonymous sentences, which is awkward, yet cannot prevent substituting 'furze' for 'gorse' within the scope of 'because', thereby trading a good explanation for a bad explanation, which is close to being a reductio of hyperintensional logic. We demonstrate how our procedural semantics can provide a principled solution to this challenge, one that respects the difference in informational and explanatory value between \"furze is gorse\" and \"furze is furze\". The solution explores the limits of hyperintensional individuation and the interface between semantics and syntax without being strictly metalinguistic. Hyperintensional logic × synonymous predicates × explanation × semantics/syntax interface × meaning postulate"
+    },
+    {
+        "title": "Talk: Sophia Arbeiter (Bielefeld)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-sophia-arbeiter-bielefeld-e6c1a904.html",
+        "scraped_at": "2026-09-21T07:05:10.397383",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "speaker": "Sophia Arbeiter (Bielefeld)",
+            "year": 2027,
+            "month": "January",
+            "date": "2027-01-14",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: TBA\n\nAbstract: TBA"
+    },
+    {
+        "title": "Talk: Pierre Wagner (Paris)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-pierre-wagner-paris-15a2df9a.html",
+        "scraped_at": "2026-09-21T07:05:10.397384",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "speaker": "Pierre Wagner (Paris)",
+            "year": 2027,
+            "month": "January",
+            "date": "2027-01-21",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: TBA\n\nAbstract: TBA"
+    },
+    {
+        "title": "Talk: Simone Migliaro (Toronto)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-simone-migliaro-toronto-211f85fe.html",
+        "scraped_at": "2026-09-21T07:05:10.397386",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "speaker": "Simone Migliaro (Toronto)",
+            "year": 2027,
+            "month": "January",
+            "date": "2027-01-28",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: TBA\n\nAbstract: TBA"
+    },
+    {
+        "title": "Talk: Walter Dean (Warwick)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-walter-dean-warwick-767f009d.html",
+        "scraped_at": "2026-09-21T07:05:10.397388",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "speaker": "Walter Dean (Warwick)",
+            "year": 2027,
+            "month": "February",
+            "date": "2027-02-04",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: TBA\n\nAbstract: TBA"
+    },
+    {
+        "title": "Talk (Work in Progress): Amit Karmon (Oxford)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-work-in-progress-amit-karmon-oxford-83426c4d.html",
+        "scraped_at": "2026-09-21T07:05:10.397396",
+        "talk_title": "TBA",
+        "abstract": "TBA",
+        "metadata": {
+            "speaker": "Amit Karmon (Oxford)",
+            "year": 2027,
+            "month": "April",
+            "date": "2027-04-15",
             "time_start": "12:00 pm",
             "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
             "thu": "12:00 pm"
