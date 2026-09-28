@@ -74,7 +74,7 @@
 | naftali_weinberger | Dr. Naftali Weinberger | Person | Role: Research Fellow |
 | apl___martin_rechenauer | apl. Prof. Dr. Martin Rechenauer | Person | Role: Member |
 | levin_hornischer | Dr. Levin Hornischer | Person | Role: Assistant Professor |
-| ragna_talea_oeynhausen | Ragna Talea Oeynhausen, M.A. | Person | Role: Member |
+| ragna_talea_oeynhausen | Ragna Talea Oeynhausen, M.A. | Person | Role: Doctoral Fellow |
 | diego_garca_rincn | Diego García Rincón | Person | Role: Member |
 | nicola_bonatti_mphil | Nicola Bonatti, MPhil | Person | Role: Doctoral Fellow |
 | hannes_leitgeb | Prof. DDr. Hannes Leitgeb | Person | Role: Chair & Co-Director |
@@ -138,6 +138,7 @@
 | katia_parshina | tom_sterkenburg | supervised_by | PhD/Research Supervision |
 | katia_parshina | stephan_hartmann | supervised_by | PhD/Research Supervision |
 | lilian_von_bressensdorf | stephan_hartmann | supervised_by | PhD/Research Supervision |
+| ragna_talea_oeynhausen | hannes_leitgeb | supervised_by | PhD/Research Supervision |
 | nicola_bonatti_mphil | hannes_leitgeb | supervised_by | PhD/Research Supervision |
 | nicola_bonatti_mphil | norbert_gratzl | supervised_by | PhD/Research Supervision |
 | cordelia_berz_ | hannes_leitgeb | supervised_by | PhD/Research Supervision |

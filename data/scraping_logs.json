@@ -728,5 +728,49 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-09-28T07:09:26.114171",
+        "changes": {
+            "events": {
+                "added": [
+                    "Talk (Work in Progress): Yotam Harel (Oxford)",
+                    "Talk (Work in Progress): Gino Elia (Stonybrook)",
+                    "Talk (Work in Progress): Emilia Margoni (MCMP)",
+                    "Talk (Work in Progress): Max Hellrigel-Holderbaum (FAU)",
+                    "Evening Lecture by Prof. Dr. Sabina Leonelli (TUM)",
+                    "Talk: Conrad Friedrich (MCMP)",
+                    "Talk (Work in Progress): Miklós Rédei (LSE) (in person)",
+                    "Talk (WiP): Giovanni Sanavio (IUSS Pavia) [online]",
+                    "Talk: Ole Hjortland (Bergen)",
+                    "Online Talk (WiP): Martín Gutiérrez Benardos (USACH)",
+                    "Research Seminar in Decision and Action Theory: Agency as an emergent physical phenomenon",
+                    "Workshop on Bell’s Theorem and Beyond"
+                ],
+                "removed": [],
+                "updated": [
+                    "The Epistemology of Medicine",
+                    "Recent Advances in the Philosophy of Logic",
+                    "LPS Colloquium: Mario Günther (Paris 1) [in person]",
+                    "The Philosophy of Unfolding",
+                    "Universality and Indifference: Is Logic Neutral?"
+                ]
+            },
+            "people": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Prof. Dr. Stephan Hartmann",
+                    "Ragna Talea Oeynhausen, M.A."
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            }
+        }
     }
 ]

@@ -406,7 +406,7 @@
             "id": "ragna_talea_oeynhausen",
             "name": "Ragna Talea Oeynhausen, M.A.",
             "type": "Person",
-            "properties": "Role: Member"
+            "properties": "Role: Doctoral Fellow"
         },
         {
             "id": "diego_garca_rincn",
@@ -767,6 +767,12 @@
         {
             "source": "lilian_von_bressensdorf",
             "target": "stephan_hartmann",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "ragna_talea_oeynhausen",
+            "target": "hannes_leitgeb",
             "relationship": "supervised_by",
             "properties": "PhD/Research Supervision"
         },
