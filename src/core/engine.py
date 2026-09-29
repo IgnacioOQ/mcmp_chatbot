@@ -12,6 +12,11 @@ load_dotenv()
 
 DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
 
+# Tool-call rounds allowed per turn under automatic function calling. When the
+# cap is reached the turn ends with no text, so it must cover the longest chain
+# the tool guide invites: lookup → grep_data fallback → per-person follow-ups.
+MAX_TOOL_ROUNDS = 5
+
 
 class ChatEngine:
     """
@@ -32,7 +37,6 @@ class ChatEngine:
         if not self.api_key:
             key_map = {
                 "openai":    "OPENAI_API_KEY",
-                "anthropic": "ANTHROPIC_API_KEY",
                 "gemini":    "GEMINI_API_KEY",
             }
             self.api_key = os.getenv(key_map.get(provider, ""))
@@ -189,17 +193,6 @@ class ChatEngine:
                     return response.choices[0].message.content
                 return message.content
 
-            # ── Anthropic ────────────────────────────────────────────────────
-            elif self.provider == "anthropic":
-                client = Anthropic(api_key=self.api_key)
-                response = client.messages.create(
-                    model="claude-3-5-sonnet-20240620",
-                    max_tokens=1024,
-                    system=system_instruction,
-                    messages=[{"role": "user", "content": query}],
-                )
-                return response.content[0].text
-
             # ── Gemini ───────────────────────────────────────────────────────
             elif self.provider == "gemini":
                 from google.genai import types
@@ -227,12 +220,8 @@ class ChatEngine:
                             temperature=0,
                             thinking_config=types.ThinkingConfig(thinking_budget=0),
                             automatic_function_calling=types.AutomaticFunctionCallingConfig(
-                                # 3 is enough for: tool call → answer, plus one
-                                # speculative retry. Tighter than the previous
-                                # 10 to cap token spend and discourage runaway
-                                # tool chains.
                                 disable=False,
-                                maximum_remote_calls=3,
+                                maximum_remote_calls=MAX_TOOL_ROUNDS,
                             ),
                         ),
                         history=gemini_history,
@@ -319,7 +308,7 @@ class ChatEngine:
                 thinking_config=types.ThinkingConfig(thinking_budget=0),
                 automatic_function_calling=types.AutomaticFunctionCallingConfig(
                     disable=False,
-                    maximum_remote_calls=3,
+                    maximum_remote_calls=MAX_TOOL_ROUNDS,
                 ),
             ),
             history=gemini_history,

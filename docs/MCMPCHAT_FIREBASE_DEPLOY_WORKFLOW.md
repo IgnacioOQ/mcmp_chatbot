@@ -162,7 +162,7 @@ curl -fsS -H "Authorization: Bearer $TOKEN" \
 | App Hosting backend | `mcmp-chatbot` (us-east4) |
 | Connected repo | `IgnacioOQ/mcmp_chatbot`, branch `firebase-branch` |
 | Artifact Registry | `us-central1-docker.pkg.dev/mcmp-firebase/mcmp-firebase-app` |
-| Secrets (Secret Manager) | `GEMINI_API_KEY`, `SHEETS_SA_JSON`, `SHEETS_ID`, `BACKEND_URL` |
+| Secrets (Secret Manager) | `GEMINI_API_KEY`, `BACKEND_URL` |
 
 ---
 

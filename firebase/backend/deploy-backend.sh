@@ -45,7 +45,7 @@ gcloud run deploy "${SERVICE}" \
   --project="${PROJECT_ID}" \
   --no-allow-unauthenticated \
   --service-account="${RUNTIME_SA}" \
-  --set-secrets=GEMINI_API_KEY=GEMINI_API_KEY:latest,SHEETS_SA_JSON=SHEETS_SA_JSON:latest,SHEETS_ID=SHEETS_ID:latest \
+  --set-secrets=GEMINI_API_KEY=GEMINI_API_KEY:latest \
   --set-env-vars=DATA_BACKEND=firestore \
   --min-instances=0 --max-instances=2 --memory=512Mi --cpu=1
 

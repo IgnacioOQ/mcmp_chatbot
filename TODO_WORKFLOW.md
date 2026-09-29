@@ -74,33 +74,6 @@ Cross-session task backlog. Tasks are added here when work started in a session 
 
 ---
 
-## Migrate feedback from Google Sheets to Firestore (deferred)
-- status: todo
-- type: task
-- id: todo.feedback_firestore
-- description: Replace Google Sheets feedback storage with Firestore — update the FastAPI /feedback endpoint to write to a Firestore collection and update the admin panel to read feedback from Firestore.
-- owner: agent
-- estimate: 2h
-- blocked_by: [todo.firebase_phase_1]
-- last_checked: 2026-05-05
-<!-- content -->
-
-**Context:** Phase 0.6 of `docs/FIREBASE_MIGRATION_PLAN.md` deferred this. Google Sheets is kept in v1 to avoid migration risk. This task replaces it with Firestore once the stack is stable.
-
-**Preconditions:** Firebase deployment fully live. Firestore `mcmp-firebase` project active.
-
-**Steps:**
-1. Add a `feedback` Firestore collection. Update Firestore security rules to allow authenticated admin users to read from `feedback` (extend `firestore.rules`).
-2. Update `firebase/backend/main.py` `/feedback` endpoint to write `{timestamp, name, message}` to Firestore `feedback` collection instead of Google Sheets.
-3. Remove `SHEETS_SA_JSON` and `SHEETS_ID` secrets from Secret Manager (after confirming feedback writes to Firestore in production).
-4. Update `/admin` page to display feedback from Firestore via a new `/api/admin/feedback` proxy route.
-
-**Verification:** Submit feedback from the chat page. Verify a Firestore document appears in the `feedback` collection. Verify it is visible in the `/admin` page.
-
-**On completion:** Delete this entire task block from TODO_WORKFLOW.md.
-
----
-
 ## Task Template
 
 Copy the block below (without the outer fences), fill in all fields, and insert it as a new `## [Task Title]` task block.

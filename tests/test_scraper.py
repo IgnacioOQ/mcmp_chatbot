@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, patch
 from src.scrapers.mcmp_scraper import MCMPScraper
 
 # Sample HTML content for mocking

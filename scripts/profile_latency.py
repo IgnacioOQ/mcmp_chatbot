@@ -130,7 +130,6 @@ def bench_gemini_client():
     client, ms = timer("import google.genai + Client()", _import_and_create_client)
     results["gemini_import_and_client_ms"] = ms
 
-    from google import genai
     from google.genai import types
 
     def _create_chat():

@@ -184,7 +184,6 @@ def run():
                 if supervisor_id != pid:
                     # check "First Last" in description
                     # Normalize name for check
-                    sn_parts = supervisor_name.split()
                     
                     # Heuristics: Check "Hannes Leitgeb", "Stephan Hartmann"
                     # people.json names include titles: "Prof. DDr. Hannes Leitgeb"

@@ -1,7 +1,4 @@
 import pytest
-import os
-import shutil
-import json
 from src.core.vector_store import VectorStore
 from unittest.mock import patch, mock_open
 
@@ -36,8 +33,8 @@ def test_add_events(temp_db_path, mock_data_files):
 
     # Let's mock json.load and os.path.exists to simulate files
     with patch('os.path.exists', return_value=True), \
-         patch('builtins.open', mock_open(read_data='[]')) as mocked_file, \
-         patch('json.load') as mock_json_load:
+         patch('builtins.open', mock_open(read_data='[]')), \
+         patch('json.load'):
 
         # Make json.load return different data based on call?
         # Hard to do with simple mock, usually side_effect iterable.

@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 def extract_event_metadata(description: str) -> Dict[str, Any]:
     """

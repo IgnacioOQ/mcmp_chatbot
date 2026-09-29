@@ -25,8 +25,8 @@ The production application is built as a **Firebase stack**: a **Next.js 14** fr
 - **Institutional Graph**: A graph layer captures organizational structure (Chairs, Leadership) and links people to hierarchical **Research Topics**.
 - **Live tool observation**: The answer streams in token by token, and each MCP tool the model fires appears as an icon chip above the reply as it happens (`🔍 search_people`, `📅 get_events`, …) — so the user can see the query was understood correctly before the prose arrives. Implemented as an NDJSON event stream; see [MCP tools](#mcp-tools).
 - **Configurable Personality (Leopold)**: The chatbot's identity and tone live in `prompts/personality.md`, separate from code.
-- **Feedback**: User feedback is appended to a Google Sheet via the backend.
-- **Admin panel** (`/admin`): Google sign-in gated by an email allowlist; triggers a manual scrape and links to the feedback sheet.
+- **Feedback**: User feedback is stored in the Firestore `feedback` collection via the backend.
+- **Admin panel** (`/admin`): Google sign-in gated by an email allowlist; triggers a manual scrape and lists submitted feedback.
 
 ## Architecture
 
@@ -37,7 +37,6 @@ graph TD
     BE --> Engine[ChatEngine + in-process MCP tools<br/>src/core, src/mcp]
     Engine --> Gemini[Google Gemini API]
     Engine --> FS[(Firestore<br/>people / events / research /<br/>academic_offerings / graph / meta)]
-    BE --> Sheets[(Google Sheet — feedback)]
     Scraper[Weekly refresh routine<br/>routines branch] --> FS
 
     style FS fill:#e8f5e9,stroke:#1b5e20
@@ -45,7 +44,7 @@ graph TD
 ```
 
 - **Frontend — Next.js 14 (App Router) on Firebase App Hosting.** Server-side route handlers under `firebase/frontend/src/app/api/*` mint OIDC identity tokens with `google-auth-library` and proxy to the IAM-only backend. The browser never holds the backend credentials or the Gemini key. Chat is public; `/admin` requires Google sign-in against an email allowlist.
-- **Backend — FastAPI on Cloud Run (IAM-only).** `firebase/backend/main.py` wraps the existing `ChatEngine` (`src/core/engine.py`) and MCP tools (`src/mcp/`). Endpoints: `/health`, `/chat`, `/events/month`, `/events/week`, `/feedback`, `/admin/scrape`. The Gemini key and Sheets service-account JSON are mounted from Secret Manager. `/chat` streams its turn back as **NDJSON** (`application/x-ndjson`) — one JSON event per line (`tool_call`, `token`, `done`, `error`) — rather than blocking until the answer is complete. NDJSON is used in preference to SSE because the turn is a single POST carrying a request body, so `EventSource` (GET-only, auto-reconnecting) does not fit.
+- **Backend — FastAPI on Cloud Run (IAM-only).** `firebase/backend/main.py` wraps the existing `ChatEngine` (`src/core/engine.py`) and MCP tools (`src/mcp/`). Endpoints: `/health`, `/chat`, `/events/month`, `/events/week`, `/feedback`, `/admin/feedback`, `/admin/scrape`. The Gemini key is mounted from Secret Manager. `/chat` streams its turn back as **NDJSON** (`application/x-ndjson`) — one JSON event per line (`tool_call`, `token`, `done`, `error`) — rather than blocking until the answer is complete. NDJSON is used in preference to SSE because the turn is a single POST carrying a request body, so `EventSource` (GET-only, auto-reconnecting) does not fit.
 - **Data — Firestore.** With `DATA_BACKEND=firestore`, the MCP tools load the `people`, `events`, `research`, `academic_offerings`, `graph`, and `meta` collections into memory at startup via the Firebase Admin SDK (which bypasses security rules; client access is locked off). Setting `DATA_BACKEND=json` instead reads the local `data/*.json` files — the path used for local development.
 
 ## Repository layout
@@ -134,7 +133,7 @@ Key infrastructure (full details in [docs/FIREBASE_MIGRATION_PLAN.md](docs/FIREB
 | App Hosting backend | `mcmp-chatbot` (us-east4) |
 | Firestore | default database, `nam5` |
 | Runtime service account | `mcmp-firebase-app-sa@mcmp-firebase.iam.gserviceaccount.com` |
-| Secrets (Secret Manager) | `GEMINI_API_KEY`, `SHEETS_SA_JSON`, `SHEETS_ID` |
+| Secrets (Secret Manager) | `GEMINI_API_KEY` |
 
 ## Data & the refresh routine
 

@@ -1,7 +1,6 @@
 from typing import List, Dict, Any, Tuple
 from src.mcp.tools import search_people, search_research, get_events, search_graph, grep_data, fuzzy_search, ask_clarification, search_academic_offerings
 from src.utils.logger import log_latency
-import json
 
 class MCPServer:
     """

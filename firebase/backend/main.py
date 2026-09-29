@@ -1,8 +1,9 @@
 """MCMP Firebase backend — FastAPI wrapper around the existing ChatEngine.
 
 Deployed to Cloud Run (IAM-only). All data access goes through the MCP tools,
-which read from Firestore when DATA_BACKEND=firestore. The Gemini key and the
-Google Sheets service account are mounted from Secret Manager as env vars.
+which read from Firestore when DATA_BACKEND=firestore. The Gemini key is mounted
+from Secret Manager as an env var. Feedback is stored in the Firestore
+`feedback` collection.
 
 v1: /chat is a blocking POST (no SSE streaming) — see FIREBASE_MIGRATION_PLAN.md §4.1.
 """
@@ -15,7 +16,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from src.core.engine import ChatEngine, DEFAULT_GEMINI_MODEL
-from src.mcp.tools import load_data
+from src.mcp.tools import load_data, _get_firestore_client
 
 DATA_BACKEND = os.environ.get("DATA_BACKEND", "json")
 
@@ -48,6 +49,10 @@ class ChatRequest(BaseModel):
 class FeedbackRequest(BaseModel):
     name: str = ""
     message: str
+
+
+class AdminFeedbackRequest(BaseModel):
+    id_token: str
 
 
 # ── Endpoints ──────────────────────────────────────────────────────────────--
@@ -204,18 +209,31 @@ def events_week():
 
 @app.post("/feedback")
 def feedback(req: FeedbackRequest):
-    """Append a feedback row to the existing Google Sheet (ports app.save_feedback)."""
-    import gspread
-    from google.oauth2.service_account import Credentials
-
-    sa_info = json.loads(os.environ["SHEETS_SA_JSON"])
-    scope = ["https://www.googleapis.com/auth/spreadsheets",
-             "https://www.googleapis.com/auth/drive"]
-    creds = Credentials.from_service_account_info(sa_info, scopes=scope)
-    client = gspread.authorize(creds)
-    sheet = client.open_by_key(os.environ["SHEETS_ID"]).sheet1
-    sheet.append_row([datetime.now().isoformat(), req.name, req.message])
+    """Store a feedback entry in the Firestore `feedback` collection."""
+    _get_firestore_client().collection("feedback").add({
+        "timestamp": datetime.now().isoformat(),
+        "name": req.name,
+        "message": req.message,
+    })
     return {"status": "ok"}
+
+
+@app.post("/admin/feedback")
+def admin_feedback(req: AdminFeedbackRequest):
+    """List feedback, newest first, for the caller behind a verified Firebase ID
+    token. Returns the token's email; the frontend proxy checks it against the
+    admin allowlist before passing the entries on."""
+    from fastapi import HTTPException
+    from firebase_admin import auth
+
+    _get_firestore_client()  # ensures firebase_admin is initialised
+    try:
+        email = auth.verify_id_token(req.id_token).get("email", "")
+    except Exception:
+        raise HTTPException(status_code=401, detail="invalid token")
+    docs = (_get_firestore_client().collection("feedback")
+            .order_by("timestamp", direction="DESCENDING").stream())
+    return {"email": email, "items": [d.to_dict() for d in docs]}
 
 
 @app.post("/admin/scrape")

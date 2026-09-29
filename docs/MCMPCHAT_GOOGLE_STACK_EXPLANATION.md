@@ -46,10 +46,10 @@ Firebase is the user-facing layer. The project is `mcmp-firebase`.
 Google Cloud runs the parts that should never be exposed to the browser.
 
 - **Cloud Run** hosts the FastAPI backend (`mcmp-firebase-backend`, region `us-central1`). It is **IAM-only**: the only thing allowed to call it is the frontend's server, using the OIDC token described above. There is no public URL you can curl without credentials.
-- **Secret Manager** holds the real secrets — the Gemini API key, the Google Sheets service-account JSON, and the Sheet ID — and mounts them into the backend as environment variables at runtime.
+- **Secret Manager** holds the real secret — the Gemini API key — and mounts it into the backend as an environment variable at runtime.
 - **Cloud Build** builds the backend container image from the repo (`firebase/backend/Dockerfile`) during deploy (`deploy-backend.sh`).
 - A **service account** (`mcmp-firebase-app-sa@mcmp-firebase`) gives the running backend its identity for reading Firestore.
-- A **Google Sheet** receives user feedback, written by the `/feedback` endpoint via a service account.
+- **Firestore** also receives user feedback, written by the `/feedback` endpoint into the `feedback` collection.
 
 In short: Firebase is the front door; Cloud Run + Secret Manager + Firestore are the locked back office.
 
@@ -71,7 +71,7 @@ At runtime the `ChatEngine` (`src/core/engine.py`) uses that key to call the **G
 | Sign-in (admin) | Firebase Authentication | `/admin` + allowlist |
 | Store the data | Firebase / Firestore | `people`, `events`, … collections |
 | Run the LLM backend | Google Cloud Run (IAM-only) | `firebase/backend/main.py` |
-| Hold secrets | Google Secret Manager | `GEMINI_API_KEY`, `SHEETS_SA_JSON`, `SHEETS_ID` |
+| Hold secrets | Google Secret Manager | `GEMINI_API_KEY` |
 | Build the backend image | Google Cloud Build | `firebase/backend/Dockerfile` |
 | Power the answers | Gemini API (key from Google AI Studio) | `src/core/engine.py` |
 

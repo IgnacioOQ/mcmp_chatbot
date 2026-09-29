@@ -1,7 +1,6 @@
 
 import re
-import json
-from typing import Optional, List, Dict
+from typing import List, Dict
 from pathlib import Path
 from collections import defaultdict
 
@@ -84,7 +83,7 @@ class GraphUtils:
             if any(term in searchable_text for term in query_lower.split()):
                 relevant_nodes.add(node.get('id'))
 
-        if unused := True: # Expand to neighbors
+        if True:  # Expand to neighbors
             current_layer = list(relevant_nodes)
             for _ in range(max_depth):
                 next_layer = set()
@@ -115,7 +114,6 @@ class GraphUtils:
         
         # Helper to get node name
         node_map = {n['id']: n.get('name', n['id']) for n in subgraph['nodes']}
-        node_type_map = {n['id']: n.get('type', '') for n in subgraph['nodes']}
         
         # Describe entities
         lines.append("Institutional Context:")

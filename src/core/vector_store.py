@@ -3,7 +3,7 @@ from chromadb.utils import embedding_functions
 import json
 import os
 import hashlib
-from src.utils.logger import log_info, log_error
+from src.utils.logger import log_info
 
 class VectorStore:
     def __init__(self, db_path="data/vectordb", collection_name="mcmp_events"):

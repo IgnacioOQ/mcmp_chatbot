@@ -1,221 +1,259 @@
+---
+status: active
+type: workflow
+description: Recurring health check for the MCMP Chatbot — static checks, pytest inside the Cloud Run image, the live Gemini stress battery, deploy-build smoke for backend and frontend, and live Firestore data freshness; appends an audit record.
+label: [normative, agent]
+injection: excluded
+volatility: evolving
+scope: project-specific
+execution_model: sequential
+last_checked: '2026-09-29'
+---
+
 # MCMP Chatbot Housekeeping Workflow
-- status: active
-- type: workflow
-- description: Recurring stress-test and health-check protocol for the MCMP Chatbot — runs the Gemini MCP stress battery, the pytest suites, and verifies data freshness; appends a dated audit report.
-- label: [core, agent]
-- injection: excluded
-- volatility: evolving
-- scope: project-specific
-- last_checked: 2026-05-05
-<!-- content -->
-This file is the operational housekeeping protocol for the MCMP Chatbot repository. Run it periodically (suggested cadence: every 2–4 weeks, or after any non-trivial change to `src/core/engine.py`, `src/mcp/`, the system prompt, or the Gemini model/parameters). Its purpose is to detect regressions in the LLM tool-calling behavior, the MCP tool surface, and the data freshness pipeline before they reach users.
 
-The workflow has four concerns: (1) sanity checks on the codebase, (2) the live Gemini stress test that exercises every MCP tool against the real API, (3) a quick health check on the scraped data files, and (4) an append-only audit trail in this file. The stress test is the centerpiece — most regressions in this project surface as wrong tool selection, broken multi-tool chains, or subtle prompt-engineering drift, and only a live battery catches them.
+This file is this repository's instance of `content/templates/HOUSEKEEPING_TEMPLATE.md` in the knowledge base. Run it every 2–4 weeks, before any deploy, and after any non-trivial change to `src/core/engine.py`, `src/mcp/`, the system prompt, the Gemini model/parameters, `firebase/backend/`, or `firebase/frontend/`.
 
-**Execution model:** sequential — each phase has an explicit exit criterion. Phases 2 and 4 require a working `GEMINI_API_KEY`; phases 3 and 5 do not.
+What it protects: the live app at `mcmp-chat.ignacioojea.com` — a Next.js frontend on App Hosting proxying to a FastAPI backend on Cloud Run, which answers through Gemini with MCP tools over Firestore data. Most regressions here are (a) the model choosing the wrong tool or running out of tool calls, which only the live stress battery catches, (b) an image or build that no longer builds from `uv.lock` / `package-lock.json`, and (c) stale Firestore data after a failed scrape.
+
+**Execution model:** sequential — each phase has an exit criterion; the run advances only when the prior phase is green or its drift is recorded.
+
+> **The deterministic checks are bundled in `bin/housekeeping-checks.sh`.** One command, one summary table, `OVERALL: PASS|FAIL`. Its header lists what it covers and what stays an agent step.
 
 **Prerequisites:**
-- Python environment with `requirements.txt` installed.
-- `GEMINI_API_KEY` set in `.env` or `.streamlit/secrets.toml` (the stress test loads `.env` via `python-dotenv`).
-- `WORKLOG.md` and `TODO_WORKFLOW.md` at the repo root for capturing notable events and deferred work.
+- Docker daemon running (OrbStack on the maintainer's Mac). Python steps run inside the backend image because `uv.lock` does not install on every host (`chromadb` → `onnxruntime` has no macOS x86_64 wheel). `HK_PY_MODE=host` forces the local `.venv` instead.
+- `uv` and `uvx` on `PATH`; `npm ci` done in `firebase/frontend/`.
+- `GEMINI_API_KEY` in `.env` (the tests and stress battery load it via `python-dotenv`; with no key the live Gemini tests skip).
+- `gcloud auth application-default login` as the `mcmp-firebase` owner, for the read-only Firestore check in Phase 4.
+- `cps_admin_mcp` connected, for filing follow-ups as tasks (`task.mcmp_chatbot.<area>.<name>`).
+
+---
+
+## Flow
+
+```mermaid
+flowchart TD
+    P1["Phase 1: Context Load"]
+    P2["Phase 2: Static Quality Checks"]
+    P3["Phase 3: Tests + Gemini Stress Battery"]
+    P4["Phase 4: Build, Dependency & Data Health"]
+    P5["Phase 5: Report & Close"]
+    End([end])
+    P1 --> P2 --> P3 --> P4 --> P5 --> End
+```
+
+---
+
+## JSONL Logs
+
+The archive lives at `housekeeping_log.jsonl` at the repo root — append-only, one JSON record per line, oldest first. The schema is the template's `schema_version: 1` contract:
+
+| Field | Type | Notes |
+|:--|:--|:--|
+| `schema_version` | int | `1` |
+| `entry_id` | string | `YYYY-MM-DD`; same-day collisions append `-1`, `-2`, … |
+| `date` | string | ISO run date |
+| `trigger` | string | The Latest Report's `**Trigger:**` line |
+| `metrics` | object | The Latest Report's YAML block as a JSON dict |
+| `body_markdown` | string | The `### Notable` / `### Outstanding` prose only; `""` on a clean run |
+
+Append inline (no helper script):
+
+```bash
+python3 - <<'PY' >> housekeeping_log.jsonl
+import json
+rec = {"schema_version": 1, "entry_id": "YYYY-MM-DD", "date": "YYYY-MM-DD",
+       "trigger": "...", "metrics": {...}, "body_markdown": ""}
+print(json.dumps(rec, ensure_ascii=False))
+PY
+```
+
+Render for review: `jq -r '"## \(.entry_id)\n\n**Trigger:** \(.trigger)\n\n\(.body_markdown)\n"' housekeeping_log.jsonl | tail -200`
 
 ---
 
 ## Phase 1 — Context Load
 
-**Goal:** Load the prior baseline so this run has comparison points.
+1. Read `## Latest Report` below: previous test counts, stress-battery result and latency, Firestore counts, open follow-ups.
+2. Check what changed since that date: `git log --oneline --since=<date>` and open tasks via `cps_query(entity="task", repo="mcmp_chatbot", status="todo")`.
+3. Confirm the prerequisites above (`docker info`, `ls firebase/frontend/node_modules`, key present in `.env`).
 
-1. Read the **Latest Report** section at the bottom of this file. Note the previous run's stress-test pass count, average latency, pytest pass count, and any unresolved follow-ups.
-2. Skim the most recent `WORKLOG.md` entries for changes that might affect this run — model swap, system-prompt edit, new MCP tool, scraper change. The diff vs. last housekeeping run is the contextual frame for interpreting today's results.
-3. Confirm the toolchain is ready:
-   - `python --version` (project assumes 3.11+).
-   - `echo $GEMINI_API_KEY` returns a key, or one exists in `.env` / `.streamlit/secrets.toml`.
-
-**Exit criterion:** Prior baseline loaded; key changes since last run identified; environment confirmed.
+**Exit criterion:** baseline loaded; changes since the last run identified; environment ready.
 
 ---
 
-## Phase 2 — Pytest Suite
+## Phase 2 — Static Quality Checks
 
-**Goal:** Verify the offline test suites still pass before spending live API quota.
+Covered by `bin/housekeeping-checks.sh`:
 
-```bash
-pytest tests/ -v
-```
+| Step | Command | Gate |
+|:--|:--|:--|
+| Python lint | `uvx ruff check --isolated --select F src firebase scripts tests` | pyflakes rules only — correctness, not style |
+| Frontend types | `cd firebase/frontend && npx tsc --noEmit` | zero errors |
+| Frontend lint | `cd firebase/frontend && npm run lint` | zero errors/warnings |
 
-The suite covers: the OpenAI-mocked engine path (`test_engine.py`), MCP server unit tests (`test_mcp.py`), graph correctness (`test_graph_correctness.py`), scraper logic (`test_scraper.py`), vector store (`test_vector_store.py`), and the live Gemini integration tests (`test_gemini.py` — auto-skipped if no `GEMINI_API_KEY`).
+**Remediation:** fix in source. Do not silence with `# noqa` / `eslint-disable` unless the disable is justified in the same change.
 
-**Note:** `test_gemini.py` makes a small number of real API calls but is not the stress battery — it only checks that the engine produces a non-empty response on a few queries. The stress battery in Phase 3 is the substantive check.
-
-**Remediation:**
-- A new failure that didn't exist last run is the priority finding for this housekeeping pass — investigate the cause before continuing.
-- A drop in test count without a documented justification is as suspicious as a new failure.
-
-**Exit criterion:** Pytest exits 0, or every failure has a recorded explanation in this run's report.
+**Exit criterion:** all three clean.
 
 ---
 
-## Phase 3 — Gemini MCP Stress Battery
+## Phase 3 — Tests + Gemini Stress Battery
 
-**Goal:** Verify that every MCP tool fires correctly on representative queries, multi-tool chains work, the fallback cascade works, and the model handles ambiguous and missing-data cases gracefully.
+### Step 1 — pytest (script)
+
+`bin/housekeeping-checks.sh` runs `pytest tests/` inside the freshly built backend image with the repo mounted. Suites: engine (OpenAI-mocked), MCP tools, graph correctness, scraper, vector store, backend endpoints (`test_backend.py`, Firestore and token verification faked), and live Gemini integration (`test_gemini.py`, skipped without a key).
+
+Compare counts with the prior report: a new failure, a new skip, or a smaller total without a stated reason is a finding.
+
+### Step 2 — Gemini stress battery (agent step: live API, spends quota)
 
 ```bash
-python -m tests.stress_test_gemini 2>&1 | tee tests/reports/stress_$(date -u +%Y-%m-%d).log
+mkdir -p tests/reports
+docker build -q -f firebase/backend/Dockerfile -t mcmp-backend:housekeeping .
+docker run --rm -v "$PWD":/repo -w /repo mcmp-backend:housekeeping \
+  python -m tests.stress_test_gemini > tests/reports/stress_$(date -u +%Y-%m-%d).log 2>&1
+docker rmi mcmp-backend:housekeeping
 ```
 
-The harness runs 13 cases covering every tool (`search_people`, `search_research`, `get_events`, `search_graph`, `search_academic_offerings`, `grep_data`, `fuzzy_search`), multi-tool chains, the fallback cascade, missing-name handling, misspelled-name handling (the `misspelled_person_name` case asserts the *corrected* name surfaces, whether via the `search_people` fuzzy fallback or an explicit `fuzzy_search` call), and YYYY-MM-DD date formatting. Each case verifies the expected tools fired and that the response is not an `Error: …` string. The harness exits 0 only if all cases pass.
-
-**Save the full transcript.** The `tee` invocation above captures the run to `tests/reports/stress_YYYY-MM-DD.log`. Create the `tests/reports/` directory the first time. Keep at least the three most recent transcripts; older ones can be deleted.
+13 cases cover every MCP tool (`search_people`, `search_research`, `get_events`, `search_graph`, `search_academic_offerings`, `grep_data`, `fuzzy_search`), multi-tool chains, the fallback cascade, missing and misspelled names, and date formatting. The harness exits 0 only if every case passes. Transcripts are gitignored (`*.log`); keep the three most recent.
 
 **Interpreting results:**
-- **All 13 PASS:** baseline preserved.
-- **One or two transient `503` failures that recover on retry:** acceptable — Google-side spike, the engine's retry block (`engine.py`) handles them. Note the count in the report.
-- **A repeatable `FAIL_TOOLS`:** the model is no longer selecting the expected tool for that query type. Common causes: system-prompt drift, a new tool added without updating the **TOOL SELECTION GUIDE** section in `engine.py`, or a model regression.
-- **A repeatable `FAIL_RESPONSE_ERROR`:** an exception is being swallowed by the engine. Check `logs/` for the underlying cause.
-- **Average latency drift > 25% vs. last run:** investigate. Possible causes: thinking-tokens silently re-enabled (verify with `usage_metadata.thinking_token_count`), AFC chain length increase, model slowdown.
+- One or two transient `429`/`503` that recover on retry — acceptable; note the count.
+- Repeatable `FAIL_TOOLS` — wrong tool chosen: check the TOOL SELECTION GUIDE in `src/core/engine.py` and the tool `description`s in `src/mcp/server.py`.
+- Repeatable `FAIL_RESPONSE_ERROR`, or an empty/`None` answer — the engine swallowed an exception or automatic function calling hit `maximum_remote_calls` with no final text; the live `/chat` (streaming path) then shows an empty answer.
+- Average latency drift > 25% vs. the prior report — investigate (thinking tokens re-enabled, longer tool chains, model slowdown).
 
-**Remediation order:**
-1. Re-run any single failing case standalone to rule out transient issues.
-2. If still failing, check the prompt / tool-selection guide in `src/core/engine.py` and the relevant tool's `description` field in `src/mcp/server.py`.
-3. If the failure is a content-correctness issue (right tool fired, wrong answer), it is most likely a data or graph-edge issue, not a model issue — file it in `TODO_WORKFLOW.md`.
-
-**Exit criterion:** Stress battery passes 12/12, OR every failure is characterized and either fixed or recorded as a follow-up.
+**Exit criterion:** pytest green with counts steady or higher; stress battery 13/13, or every failure characterized and filed.
 
 ---
 
-## Phase 4 — Data Freshness Check
+## Phase 4 — Build, Dependency & Data Health
 
-**Goal:** Detect stale or corrupted scraped data before it produces wrong answers.
+### Step 1 — Script-covered checks
 
-1. Inspect the modification timestamps of the structured data files:
-   ```bash
-   ls -la data/people.json data/research.json data/raw_events.json data/academic_offerings.json data/graph/mcmp_graph.md
-   ```
-   If the most recent of these is older than ~30 days, schedule a scrape:
-   ```bash
-   python scripts/update_dataset.py
-   ```
-2. Sanity-check counts (no schema needs to be assumed — just verify the files are non-empty and JSON-valid):
-   ```bash
-   python -c "import json; [print(f, len(json.load(open(f)))) for f in ['data/people.json','data/research.json','data/raw_events.json','data/academic_offerings.json']]"
-   ```
-   A sudden large drop in the number of entries vs. the prior report is a finding — the scraper may have failed silently. Note that per `README.md`, the dataset is **accumulating** — counts should only grow, never shrink. A shrink is a regression.
-3. Spot-check `data/scraping_logs.json` for the most recent run's `"removed"` field — large numbers there mean the website hid entries during the last scrape, not that they were deleted from our dataset.
+| Step | What | Gate |
+|:--|:--|:--|
+| `uv_lock` | `uv lock --check` — lock matches `pyproject.toml` | gate |
+| `backend_image` | `docker build -f firebase/backend/Dockerfile .` — the exact image Cloud Run runs | gate |
+| `fe_build` | `npm run build` — the build App Hosting runs | gate |
+| `tracked_files` | no `.env`, SA keys, `secrets.toml`, `data/`, `.next/`, logs, `__pycache__` tracked or staged (the repo is public) | gate |
+| `npm_audit` | `npm audit --omit=dev` | info |
 
-**Exit criterion:** All data files are present, JSON-valid, and counts are steady or higher than the prior report.
+The scraper image (`firebase/scraper/Dockerfile`) shares `uv.lock` with the backend image but adds Chromium; it is not built here.
+
+### Step 2 — Live data freshness (agent step, read-only)
+
+Production reads Firestore, not `data/`. Check counts and the last scrape:
+
+```bash
+uv run --quiet --no-project --with google-cloud-firestore python - <<'EOF'
+from google.cloud import firestore
+db = firestore.Client(project="mcmp-firebase")
+for c in ["people", "research", "events", "academic_offerings"]:
+    print(c, db.collection(c).count().get()[0][0].value)
+logs = db.collection("meta").document("scraping_logs").get().to_dict()["data"]
+print("last scrape:", (logs[-1] if isinstance(logs, list) else logs).get("timestamp"))
+EOF
+```
+
+The dataset accumulates, so counts only grow; a drop is a regression. A last scrape older than ~7 days means both refreshers (the cloud routine and the `mcmp-firebase-scraper` Cloud Run Job, Mon/Thu 03:00 UTC) have failed; see `docs/` for their runbooks.
+
+### Step 3 — Documentation freshness
+
+- `README.md` and `docs/MCMPCHAT_*` still name the real endpoints, secrets, and deploy commands.
+- Open tasks for `mcmp_chatbot` that describe finished work are closed.
+
+**Exit criterion:** gates green; data fresh with counts steady or higher; docs match the code.
 
 ---
 
 ## Phase 5 — Report & Close
 
-**Goal:** Leave an auditable trail so the next housekeeping run has a baseline.
+1. Replace `## Latest Report` below with this run's report (template at the bottom).
+2. Append the same run to `housekeeping_log.jsonl` (§ JSONL Logs).
+3. File anything found and not fixed as a task through `cps_admin_mcp` — findings must not live only in this report.
+4. Set `last_checked` in the frontmatter to today (UTC).
 
-1. **Demote the previous report.** Rename the existing `## Latest Report` heading to `## Previous Report`. Older `## Previous Report` blocks stay in place, separated by `---` dividers.
-2. **Append a new `## Latest Report`** using the template at the bottom of this file. Fill every field. Use `n/a` for any phase that did not run rather than deleting the section — report shape stays stable across runs.
-3. **File follow-ups in `TODO_WORKFLOW.md`** for anything that was found and not fixed. Findings must not live only in this report — `TODO_WORKFLOW.md` is the forward-looking entry point for the next agent.
-4. **Bump `last_checked`** in this file's metadata header to today's date (UTC).
-5. **Update `WORKLOG.md`** with a one-paragraph summary if anything notable happened (regression, fix, model swap, scraper failure). A clean run does not need a WORKLOG entry — that's what this report is for.
-
-**Exit criterion:** New `## Latest Report` reflects today's run, deferrals are recorded in `TODO_WORKFLOW.md`, and `last_checked` is updated.
+**Exit criterion:** report and log line written, follow-ups filed, `last_checked` bumped, and `bin/housekeeping-checks.sh` ends `OVERALL: PASS` (its `log_integrity` step validates the new line).
 
 ---
 
 ## Quick Reference — Housekeeping Checklist
 
-```
-[ ] Phase 1: Prior report read; recent WORKLOG entries skimmed; env confirmed
-[ ] Phase 2: pytest tests/ — all green (or failures characterized)
-[ ] Phase 3: stress battery — 13/13 PASS; transcript saved to tests/reports/
-[ ] Phase 4: data files fresh, JSON-valid, counts steady-or-higher
-[ ] Phase 5: Latest Report appended; follow-ups filed; last_checked bumped
+```text
+[ ] bin/housekeeping-checks.sh — OVERALL: PASS
+[ ] Phase 1: baseline read; changes since last run listed; env ready
+[ ] Phase 2: ruff (F), tsc, next lint — clean
+[ ] Phase 3: pytest green, counts steady+; stress battery 13/13, transcript in tests/reports/
+[ ] Phase 4: lock, backend image, next build, tracked files — green; Firestore fresh, counts steady+; docs match
+[ ] Phase 5: Latest Report replaced; log line appended; follow-ups filed; last_checked bumped
 ```
 
 ---
 
 ## Latest Report
 
-**Date:** 2026-05-05
-**Trigger:** First run — bootstrapping the housekeeping workflow immediately after authoring HOUSEKEEPING.md, the model swap to gemini-2.5-flash-lite, and the new stress harness.
-**Operator:** Claude (agent), pair with user
+**Date:** 2026-09-29
+**Trigger:** Pre-deploy — feedback migration off Google Sheets and the legacy mcmp-chatbot project; workflow migrated to the KB template.
 
-### Pytest
-- Suite: 16 passed / 0 failed / 0 skipped (20.42s)
-- Comparison vs. previous: n/a (first run — establishes baseline at 16)
-- Notable failures: none
+```yaml
+lint:          { python_F: 0, frontend: 0 }
+types:         ok
+tests:         { passed: 32, failed: 0, skipped: 0 }
+stress:        { passed: 13, total: 13, avg_latency_s: 3.45, transient_retries: 0 }
+lock:          ok
+backend_image: ok
+fe_build:      ok
+tracked_files: ok
+npm_audit:     4 advisories (1 critical, 2 high, 1 moderate)
+data:          { people: 83, research: 4, events: 151, academic_offerings: 5, last_scrape: 2026-09-28 }
+docs:          ok
+```
 
-### Gemini stress battery
-- Result: 12/12 PASS
-- Average latency: 5.11s  (n/a — first run, baseline)
-- Transient 503/429 retries observed: 0
-- Transcript: tests/reports/stress_2026-05-05.log
-- Tool-selection issues: none — every case fired the expected tool, including multi-tool chains and the fallback cascade (search_people → grep_data on the Bayesianism query).
-- Content-correctness issues: 1 — `graph_org_question` ("Who leads the Chair of Logic and Philosophy of Language?") returns Godehard Link (Professor Emeritus) instead of Hannes Leitgeb. Root cause is **not** the model: it is the missing `data/graph/mcmp_graph.md` file (see Notable events). With the graph empty, the model falls back to `search_people` keyword-matching the unit string, which finds Godehard Link first.
+### Notable
 
-### Data freshness
-- Most recent scrape: 2026-05-05 (mtime on all four JSON files)
-- Entry counts:
-  - people.json: 82 entries (n/a — baseline)
-  - research.json: 4 entries (n/a — baseline)
-  - raw_events.json: 89 entries (n/a — baseline)
-  - academic_offerings.json: 5 entries (n/a — baseline)
-- Counts steady-or-higher: yes — first run, all counts captured as the baseline.
-- **Missing artifact:** `data/graph/mcmp_graph.md` does not exist locally. `data/` is gitignored, so the graph was never tracked. `GraphUtils._load_graph()` silently no-ops when missing (see `src/core/graph_utils.py:18-19`), so `search_graph` runs against an empty graph. README documents this file as authoritative; it must be regenerated.
+- **Stress battery found a live bug, fixed this run.** "Who works on Bayesianism at the MCMP?" returned no answer (`None` / empty stream) on both engine paths, reproduced on untouched `HEAD` (4f7ec9c): the model chains `search_people` → `grep_data` → three parallel `search_people`, exhausting `maximum_remote_calls=3`, so the turn ends on a tool call with no text. Raised to `MAX_TOOL_ROUNDS = 5` (one constant shared by both paths); battery 13/13 afterwards.
+- **Feedback moved from Google Sheets to Firestore** (`feedback` collection, read via token-verified `/api/admin/feedback`), removing the last dependency on the legacy `mcmp-chatbot` GCP project. New `tests/test_backend.py` (3 tests) covers write, listing order, and invalid-token rejection.
+- **Pyflakes cleanup:** 21 findings → 0, including a dead `anthropic` provider branch in `engine.py` that referenced an undefined `Anthropic` (dependency removed earlier, branch left behind).
+- **Workflow migrated to the KB template:** `bin/housekeeping-checks.sh` added; Python checks run inside the backend image because `uv.lock` cannot install on the maintainer's Intel Mac (`onnxruntime` has no macOS x86_64 wheel); archive moved to `housekeeping_log.jsonl`.
+- Test count 16 → 32 since the 2026-05-05 baseline; live Gemini tests ran (prod key in `.env`), none skipped.
 
-### Notable events
-- **Missing graph file** is the load-bearing finding from this run. It is the single root cause of the chair-leadership content-correctness issue. Filed in TODO_WORKFLOW.md as `todo.regenerate_graph` (~15m fix: run `python scripts/update_dataset.py`).
-- Latency on this run (5.11s) was substantially better than the second stress run during the model-swap session (10.24s) — likely a quieter Google-side hour. Future runs should treat 5–10s as the normal range, not the floor.
-- This run had zero transient 503/429 retries; the engine's extended retry block (now matching both codes) was therefore not exercised. The previous session's first stress run did exercise it successfully — coverage exists, just not on this run.
+### Outstanding
 
-### Files modified this run
-- `tests/reports/stress_2026-05-05.log`: new — full stress test transcript saved
-- `tests/reports/`: new directory — created on first run as documented
-- `TODO_WORKFLOW.md`: appended `todo.regenerate_graph` task block
-- `HOUSEKEEPING.md`: this report appended; `last_checked` already 2026-05-05 from authoring
-
-### Follow-ups recorded in TODO_WORKFLOW.md
-- `todo.regenerate_graph` — Rebuild missing `data/graph/mcmp_graph.md` so `search_graph` stops returning empty for chair/supervisor queries.
+- `task.mcmp_chatbot.frontend.next-security-upgrade` — Next.js 14.2 has a critical advisory; the fix needs next@16.
 
 ---
 
 ## Latest Report Template
 
-Copy the block below and fill it in for each housekeeping run. The most recent block is `## Latest Report`; older blocks are renamed to `## Previous Report`.
+A clean run is ~15 lines; drop `### Notable` / `### Outstanding` when there is nothing to say.
 
 ````markdown
 ## Latest Report
 
 **Date:** {{YYYY-MM-DD}}
-**Trigger:** {{Routine cadence | post-model-swap | post-incident | post-merge | etc.}}
-**Operator:** {{human or agent name}}
+**Trigger:** {{routine cadence | pre-deploy | post-change | post-incident}}
 
-### Pytest
-- Suite: {{N passed / M failed / K skipped}} ({{wall-clock seconds}})
-- Comparison vs. previous: {{steady | +N tests | regression — describe}}
-- Notable failures: {{none | list with one-line cause}}
+```yaml
+lint:          { python_F: N, frontend: N }
+types:         ok | N errors
+tests:         { passed: N, failed: N, skipped: N }
+stress:        { passed: N, total: 13, avg_latency_s: X.XX, transient_retries: N }
+lock:          ok | out of sync
+backend_image: ok | <failure cause>
+fe_build:      ok | <failure cause>
+tracked_files: ok | N forbidden
+npm_audit:     ok | N advisories
+data:          { people: N, research: N, events: N, academic_offerings: N, last_scrape: YYYY-MM-DD }
+docs:          ok | N drift items
+```
 
-### Gemini stress battery
-- Result: {{12/12 PASS | N/12 — list failures}}
-- Average latency: {{X.XXs}}  ({{delta vs. previous: +/- Y%}})
-- Transient 503/429 retries observed: {{count}}
-- Transcript: tests/reports/stress_{{YYYY-MM-DD}}.log
-- Tool-selection issues: {{none | tool / case}}
-- Content-correctness issues: {{none | brief description}}
+### Notable
 
-### Data freshness
-- Most recent scrape: {{YYYY-MM-DD}}
-- Entry counts:
-  - people.json: {{N}}  ({{delta vs. previous}})
-  - research.json: {{N}}  ({{delta}})
-  - raw_events.json: {{N}}  ({{delta}})
-  - academic_offerings.json: {{N}}  ({{delta}})
-- Counts steady-or-higher: {{yes | no — describe}}
+{{Omit on clean runs.}}
 
-### Notable events
-- {{Surprises, root-caused issues, decisions made — or "none"}}
+### Outstanding
 
-### Files modified this run
-- {{Path: change | none}}
-
-### Follow-ups recorded in TODO_WORKFLOW.md
-- {{Title — short reason | none}}
+{{Omit when empty; task slugs filed this run.}}
 ````
