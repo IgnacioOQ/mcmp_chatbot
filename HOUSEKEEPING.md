@@ -194,14 +194,14 @@ The dataset accumulates, so counts only grow; a drop is a regression. A last scr
 
 ## Latest Report
 
-**Date:** 2026-09-29
-**Trigger:** Pre-deploy — feedback migration off Google Sheets and the legacy mcmp-chatbot project; workflow migrated to the KB template.
+**Date:** 2026-09-29 (second run)
+**Trigger:** Post-model-swap — Gemini key moved to mcmp-firebase, forcing gemini-3.8-flash.
 
 ```yaml
 lint:          { python_F: 0, frontend: 0 }
 types:         ok
-tests:         { passed: 32, failed: 0, skipped: 0 }
-stress:        { passed: 13, total: 13, avg_latency_s: 3.45, transient_retries: 0 }
+tests:         { passed: 35, failed: 0, skipped: 0 }
+stress:        { passed: 13, total: 13, avg_latency_s: 8.65, transient_retries: 0, model: gemini-3.8-flash }
 lock:          ok
 backend_image: ok
 fe_build:      ok
@@ -213,11 +213,10 @@ docs:          ok
 
 ### Notable
 
-- **Stress battery found a live bug, fixed this run.** "Who works on Bayesianism at the MCMP?" returned no answer (`None` / empty stream) on both engine paths, reproduced on untouched `HEAD` (4f7ec9c): the model chains `search_people` → `grep_data` → three parallel `search_people`, exhausting `maximum_remote_calls=3`, so the turn ends on a tool call with no text. Raised to `MAX_TOOL_ROUNDS = 5` (one constant shared by both paths); battery 13/13 afterwards.
-- **Feedback moved from Google Sheets to Firestore** (`feedback` collection, read via token-verified `/api/admin/feedback`), removing the last dependency on the legacy `mcmp-chatbot` GCP project. New `tests/test_backend.py` (3 tests) covers write, listing order, and invalid-token rejection.
-- **Pyflakes cleanup:** 21 findings → 0, including a dead `anthropic` provider branch in `engine.py` that referenced an undefined `Anthropic` (dependency removed earlier, branch left behind).
-- **Workflow migrated to the KB template:** `bin/housekeeping-checks.sh` added; Python checks run inside the backend image because `uv.lock` cannot install on the maintainer's Intel Mac (`onnxruntime` has no macOS x86_64 wheel); archive moved to `housekeeping_log.jsonl`.
-- Test count 16 → 32 since the 2026-05-05 baseline; live Gemini tests ran (prod key in `.env`), none skipped.
+- **Model swap gemini-2.5-flash → gemini-3.8-flash**, forced by moving the Gemini key from the legacy `mcmp-chatbot` project into `mcmp-firebase`: Google serves 2.5-flash only to projects that already used it ("no longer available to new users").
+- **3.8-flash searches longer.** It takes up to 5 tool rounds on ordinary questions and keeps searching when the data lacks the answer (9 rounds on the PhD-contacts case), so the old cap of 5 ended turns with no text. The engine now forces a final answer with tools disabled when `MAX_TOOL_ROUNDS` (now 10) runs out; streaming falls back to the non-streaming path, since the streaming chat does not expose the tool trail. 3 unit tests added.
+- **Latency 3.45s → 8.65s average** (range 3–19s), the cost of 3.8-flash's longer tool chains.
+- The stray `s` appended to the key in `.env` caused a 401 (OAuth error); fixed from Secret Manager v2.
 
 ### Outstanding
 

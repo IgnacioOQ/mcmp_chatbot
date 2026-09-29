@@ -10,12 +10,13 @@ from datetime import datetime
 
 load_dotenv()
 
-DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
+DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
 
-# Tool-call rounds allowed per turn under automatic function calling. When the
-# cap is reached the turn ends with no text, so it must cover the longest chain
-# the tool guide invites: lookup → grep_data fallback → per-person follow-ups.
-MAX_TOOL_ROUNDS = 5
+# Tool-call rounds allowed per turn under automatic function calling. It bounds
+# cost and latency; a turn that reaches it without text gets a forced final
+# answer (_force_final_answer). gemini-3.8-flash takes up to 5 rounds on
+# ordinary questions but keeps searching when the data lacks the answer.
+MAX_TOOL_ROUNDS = 10
 
 
 class ChatEngine:
@@ -212,19 +213,18 @@ class ChatEngine:
                                 gemini_history.append(
                                     types.Content(role="model", parts=[types.Part.from_text(text=content)])
                                 )
-                    chat = self._gemini_client.chats.create(
-                        model=model_name,
-                        config=types.GenerateContentConfig(
-                            system_instruction=system_instruction,
-                            tools=tools,
-                            temperature=0,
-                            thinking_config=types.ThinkingConfig(thinking_budget=0),
-                            automatic_function_calling=types.AutomaticFunctionCallingConfig(
-                                disable=False,
-                                maximum_remote_calls=MAX_TOOL_ROUNDS,
-                            ),
+                    config = types.GenerateContentConfig(
+                        system_instruction=system_instruction,
+                        tools=tools,
+                        temperature=0,
+                        thinking_config=types.ThinkingConfig(thinking_budget=0),
+                        automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                            disable=False,
+                            maximum_remote_calls=MAX_TOOL_ROUNDS,
                         ),
-                        history=gemini_history,
+                    )
+                    chat = self._gemini_client.chats.create(
+                        model=model_name, config=config, history=gemini_history,
                     )
 
                 with log_latency("llm_api_call"):
@@ -248,11 +248,42 @@ class ChatEngine:
                             raise
                     else:
                         raise last_exc
-                return response.text
+                if response.text:
+                    return response.text
+                return self._force_final_answer(response, model_name, config)
 
         except Exception as e:
             log_error(f"Error generating response: {e}")
             return f"Error: {e}"
+
+    def _force_final_answer(self, response, model_name, config) -> str:
+        """Answer from the tool results gathered so far, with tools disabled.
+
+        Automatic function calling ends the turn on a tool call, with no text,
+        when the model is still searching at MAX_TOOL_ROUNDS (it does this when
+        the data lacks what was asked). Replaying the tool trail with calling
+        switched off guarantees the user gets an answer instead of nothing.
+        """
+        from google.genai import types
+
+        history = list(response.automatic_function_calling_history or [])
+        while history and history[-1].role == "model" and any(
+            p.function_call for p in history[-1].parts or []
+        ):
+            history.pop()
+        history.append(types.Content(role="user", parts=[types.Part.from_text(
+            text="Tool budget exhausted. Answer the original question now using only "
+                 "the tool results above; say what is missing if they don't contain the answer."
+        )]))
+        log_info("Tool budget exhausted without an answer; forcing a final answer without tools.")
+        with log_latency("llm_forced_final_answer"):
+            final = self._gemini_client.models.generate_content(
+                model=model_name,
+                contents=history,
+                config=config.model_copy(update={"tool_config": types.ToolConfig(
+                    function_calling_config=types.FunctionCallingConfig(mode="NONE"))}),
+            )
+        return final.text or ""
 
     def generate_response_stream(self, query: str, use_mcp_tools: bool = False,
                                  model_name: str = DEFAULT_GEMINI_MODEL,
@@ -339,14 +370,23 @@ class ChatEngine:
             yield f"Error: {last_exc}"
             return
 
+        produced = False
         try:
             for chunk in stream:
                 text = getattr(chunk, "text", None)
                 if text:
+                    produced = True
                     yield text
         except Exception as e:
             log_error(f"Error mid-stream: {e}")
             yield f"\n\n[stream interrupted: {e}]"
+            return
+
+        # The streaming chat does not expose the tool trail, so a turn that hit
+        # MAX_TOOL_ROUNDS without text is re-run on the non-streaming path, which
+        # forces a final answer. No status_callback: the UI already showed the tools.
+        if not produced:
+            yield self.generate_response(query, use_mcp_tools, model_name, chat_history)
 
 
 if __name__ == "__main__":
