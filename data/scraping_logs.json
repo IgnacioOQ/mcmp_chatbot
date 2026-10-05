@@ -772,5 +772,48 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-10-05T07:08:04.095412",
+        "changes": {
+            "events": {
+                "added": [
+                    "Talk: Elliot Sober (Stanford)",
+                    "Talk: Cristina Nencha (Bergamo)",
+                    "Talk: Diana Taschetto (Utrecht)",
+                    "Talk: Gabriel Târziu (MCMP)",
+                    "Talk: Hein Duijf (Utrecht)",
+                    "Talk: Ali Gümüşay (LMU)",
+                    "Talk: Boris Kment (Princeton)",
+                    "Talk: Niels Linnemann (Geneva)",
+                    "Talk: Lorenzo Casini (Bologna)",
+                    "Talk: Silvia De Bianchi (Milan)",
+                    "Talk: Thomas Müller (Konstanz) § Hans Briegel (Innsbruck)"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "people": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "apl. Prof. Dr. Alexander Reutlinger"
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            }
+        }
     }
 ]
