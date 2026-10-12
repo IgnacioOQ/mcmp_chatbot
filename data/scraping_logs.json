@@ -815,5 +815,40 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-10-12T07:09:40.821654",
+        "changes": {
+            "events": {
+                "added": [
+                    "Talk: Elliott Sober (Stanford)",
+                    "Talk: Anna-Maria Eder (Heidelberg)"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "people": {
+                "added": [
+                    "Dennis Ossipov",
+                    "Jiaxi Dai"
+                ],
+                "removed": [],
+                "updated": []
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            }
+        }
     }
 ]

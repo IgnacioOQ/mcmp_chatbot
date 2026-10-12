@@ -93,6 +93,8 @@
 | michael_cuffaro | Dr. Michael Cuffaro | Person | Role: Visiting Fellow |
 | christian_list | Prof. Dr. Christian List | Person | Role: Chair & Co-Director |
 | erik_curiel | Dr. Erik Curiel | Person | Role: Research Fellow |
+| dennis_ossipov | Dennis Ossipov | Person | Role: Member |
+| jiaxi_dai | Jiaxi Dai | Person | Role: Member |
 
 ### Edges
 | source | target | relationship | properties |
@@ -147,3 +149,4 @@
 | silvia_milano | christian_list | supervised_by | PhD/Research Supervision |
 | luis_f_bartolo_alegre | martin_fischer | supervised_by | PhD/Research Supervision |
 | luis_f_bartolo_alegre | hannes_leitgeb | supervised_by | PhD/Research Supervision |
+| dennis_ossipov | stephan_hartmann | supervised_by | PhD/Research Supervision |

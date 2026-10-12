@@ -2306,7 +2306,7 @@
     {
         "title": "Talk: Cristina Nencha (Bergamo)",
         "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-cristina-nencha-bergamo-c44dde86.html",
-        "scraped_at": "2026-10-05T07:05:01.690941",
+        "scraped_at": "2026-10-12T07:08:24.525733",
         "talk_title": "Is modality doing any work? A trilemma for Hybrid Modal Accounts of Essence.",
         "abstract": "The modal approach to essence claims that metaphysical necessity explains essence: essential properties are simply necessary ones. Following Kit Fine's famous counterexamples, defenders of the modal view have turned to hybrid accounts. These views combine the classic modal condition with a non-modal filter to isolate genuinely essential properties, aiming to salvage the explanatory priority of modality over essence. To date, the primary obstacle facing hybrid accounts has been the formulation of an adequate non-modal criterion. In this talk I present a new challenge to the hybrid strategy. I formulate a trilemma showing that the modal condition in any hybrid framework becomes either neutralized, redundant, or explanatorily unjustified. Consequently, hybrid accounts fail to grant modality any genuine explanatory role in accounting for essence.",
         "metadata": {
@@ -2476,5 +2476,40 @@
             "wed": "4:00 pm\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t- 7:00 pm"
         },
         "description": "Title: Book symposium \"Projective Simulation in Action ; Quantum-Mechanical Perspectives on the Problem of Agency\"\n\nAbstract: In their recent monograph, Briegel and Müller present an in-depth study of the problem of how agency fits into the material world as described by the sciences and, particularly, by quantum mechanics. The target notion of agency is explicated with a focus on the agency of animals including humans, and specifically as a precondition of, rather than coextensive with, human free will. A novelty of the agency discussion is a focus on memory, which allows agents to be learners, and the framing of agency as an emergent physical phenomenon requiring indeterminism. The mutual interdependence of agency and quantum mechanics is discussed alongside an exposition of the dialectics of the quest for determinism. The introduction of the quantum formalism puts special emphasis on the Heisenberg picture of quantum dynamics, which offers an agency-friendly perspective on the theory. This is affirmed by a critical discussion of QBism as an approach to quantum foundations and of modelling in general. Thus, scientific agents are described as modelling agents. This provides the background for the introduction of the agency model of projective simulation, which is described at length and in formal detail, including applications and the model's quantum extensions. At the end, a novel connection with phenomenology is established. In the context of the current development of and discussion about artificial intelligence, the book thus provides a view of artificial intelligence as artificial agency."
+    },
+    {
+        "title": "Talk: Elliott Sober (Stanford)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-elliott-sober-stanford-0e2e28d4.html",
+        "scraped_at": "2026-10-12T07:08:24.525701",
+        "talk_title": "The Metaphysics of Fitness",
+        "abstract": "Natural selection and fitness are coordinate concepts. Selection occurs precisely when there is variation in fitness. An adequate definition of fitness must explain why selection and drift are different. This entails that fitness cannot be defined as an organism's or a trait's actual degree of reproductive success. In evolutionary theory, the fitness concept is \"fragmented,\" meaning that different biological settings call for different mathematical representations of fitness. It's also true that a single mathematical representation of fitness is multiply realizable, in the sense that the genes, phenotypes, and environments that make one dog more fit than another differ from the genes, and environments that make one daffodil more fit than another. The probabilistic concept of screening-off is key to understanding the conceptual role that fitness plays in evolutionary theory. This essay defends a causal interpretation of natural selection; it opposes the statisticalist thesis that selection is epiphenomenal. Interventionist ideas about causation are used to defend the causal interpretation and a zeroing-out criterion is used to compare the strengths of selection and drift. Selection and drift are better viewed as distinct causal influences on evolution, rather than as two distinct physical processes.",
+        "metadata": {
+            "speaker": "Elliott Sober (Stanford)",
+            "year": 2026,
+            "month": "October",
+            "date": "2026-10-14",
+            "time_start": "4:00 pm",
+            "time_end": "6:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "wed": "4:00 pm\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t- 6:00 pm"
+        },
+        "description": "Title: The Metaphysics of Fitness\n\nAbstract: Natural selection and fitness are coordinate concepts. Selection occurs precisely when there is variation in fitness. An adequate definition of fitness must explain why selection and drift are different. This entails that fitness cannot be defined as an organism's or a trait's actual degree of reproductive success. In evolutionary theory, the fitness concept is \"fragmented,\" meaning that different biological settings call for different mathematical representations of fitness. It's also true that a single mathematical representation of fitness is multiply realizable, in the sense that the genes, phenotypes, and environments that make one dog more fit than another differ from the genes, and environments that make one daffodil more fit than another. The probabilistic concept of screening-off is key to understanding the conceptual role that fitness plays in evolutionary theory. This essay defends a causal interpretation of natural selection; it opposes the statisticalist thesis that selection is epiphenomenal. Interventionist ideas about causation are used to defend the causal interpretation and a zeroing-out criterion is used to compare the strengths of selection and drift. Selection and drift are better viewed as distinct causal influences on evolution, rather than as two distinct physical processes."
+    },
+    {
+        "title": "Talk: Anna-Maria Eder (Heidelberg)",
+        "url": "https://www.philosophie.lmu.de/mcmp/en/latest-news/events-overview/event/talk-anna-maria-eder-heidelberg-eb7d2e95.html",
+        "scraped_at": "2026-10-12T07:08:24.525724",
+        "talk_title": "Experts: Beyond Superiority",
+        "abstract": "Experts' judgments not only enhance knowledge in various domains but also inform everyday decisions, shape policies, advance science, and help educate future generations. Insofar as we are interested in expert judgments, the concept of a cognitive, theoretical, or intellectual expert is relevant. Social epistemologists and philosophers of science hardly agree on what such experts must be particularly good at epistemically. That is, there is little agreement about what their epistemic competence amounts to. However, there is broad agreement that (cognitive) experts are epistemically superior to the majority (most or average agent), whatever the relevant epistemic competence is. On standard characterizations of an expert, this superiority is a defining feature. We argue against such characterizations, expose problems with superiority characterizations, and develop an alternative that focuses on epistemic coverage rather than superiority. On our characterization of an expert, being an expert in a domain at a given time consists of having epistemic competence that covers a relevant part of the competence available in the domain at that time.",
+        "metadata": {
+            "speaker": "Anna-Maria Eder (Heidelberg)",
+            "year": 2026,
+            "month": "October",
+            "date": "2026-10-15",
+            "time_start": "4:00 pm",
+            "location": "Ludwigstr. 31 Ground floor, room 021 80539 München",
+            "thu": "4:00 pm"
+        },
+        "description": "Title: Experts: Beyond Superiority\n\nAbstract: Experts' judgments not only enhance knowledge in various domains but also inform everyday decisions, shape policies, advance science, and help educate future generations. Insofar as we are interested in expert judgments, the concept of a cognitive, theoretical, or intellectual expert is relevant. Social epistemologists and philosophers of science hardly agree on what such experts must be particularly good at epistemically. That is, there is little agreement about what their epistemic competence amounts to. However, there is broad agreement that (cognitive) experts are epistemically superior to the majority (most or average agent), whatever the relevant epistemic competence is. On standard characterizations of an expert, this superiority is a defining feature. We argue against such characterizations, expose problems with superiority characterizations, and develop an alternative that focuses on epistemic coverage rather than superiority. On our characterization of an expert, being an expert in a domain at a given time consists of having epistemic competence that covers a relevant part of the competence available in the domain at that time."
     }
 ]

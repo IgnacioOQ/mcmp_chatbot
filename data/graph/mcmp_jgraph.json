@@ -521,6 +521,18 @@
             "name": "Dr. Erik Curiel",
             "type": "Person",
             "properties": "Role: Research Fellow"
+        },
+        {
+            "id": "dennis_ossipov",
+            "name": "Dennis Ossipov",
+            "type": "Person",
+            "properties": "Role: Member"
+        },
+        {
+            "id": "jiaxi_dai",
+            "name": "Jiaxi Dai",
+            "type": "Person",
+            "properties": "Role: Member"
         }
     ],
     "edges": [
@@ -821,6 +833,12 @@
         {
             "source": "luis_f_bartolo_alegre",
             "target": "hannes_leitgeb",
+            "relationship": "supervised_by",
+            "properties": "PhD/Research Supervision"
+        },
+        {
+            "source": "dennis_ossipov",
+            "target": "stephan_hartmann",
             "relationship": "supervised_by",
             "properties": "PhD/Research Supervision"
         }
