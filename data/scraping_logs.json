@@ -850,5 +850,43 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-10-19T07:11:21.026023",
+        "changes": {
+            "events": {
+                "added": [
+                    "New Work on Conditionals",
+                    "Talk (Work in Progress): Pablo Acuña (UC Chile)"
+                ],
+                "removed": [],
+                "updated": [
+                    "Talk: Stephan Krämer (Hamburg)",
+                    "Universality and Indifference: Is Logic Neutral?",
+                    "Talk (Work in Progress): Max Hellrigel-Holderbaum (FAU)"
+                ]
+            },
+            "people": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Dr. Ron Aboodi"
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            }
+        }
     }
 ]
