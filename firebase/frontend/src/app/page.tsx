@@ -112,7 +112,10 @@ export default function Home() {
           Center for Mathematical Philosophy. Click a calendar day to see that day&apos;s events.
         </p>
 
-        <div className="flex-1 space-y-4 overflow-y-auto rounded-lg border border-green-600 p-4">
+        <div className="flex-1 min-h-[45vh] md:min-h-0 space-y-4 overflow-y-auto rounded-lg border border-green-600 p-4">
+          {messages.length === 0 && (
+            <p className="text-sm text-gray-400 text-center">The conversation will appear here.</p>
+          )}
           {messages.map((m, i) => (
             <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
               {m.role === "assistant" && m.toolCalls && m.toolCalls.length > 0 && (
@@ -165,13 +168,18 @@ export default function Home() {
             e.preventDefault();
             send(input);
           }}
-          className="mt-4 flex gap-2"
+          className="mt-4 mb-[30vh] md:mb-0 flex gap-2"
         >
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            // On phones, wait for the keyboard to open, then bring the input above it.
+            onFocus={(e) => {
+              const el = e.currentTarget;
+              setTimeout(() => el.scrollIntoView({ block: "center", behavior: "smooth" }), 300);
+            }}
             placeholder="What is the next talk about?"
-            className="flex-1 border rounded px-3 py-2"
+            className="flex-1 min-w-0 border-2 border-gray-400 bg-white rounded px-3 py-2 focus:border-brand focus:outline-none"
             disabled={loading}
           />
           <button
