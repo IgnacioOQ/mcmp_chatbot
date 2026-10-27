@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 import CalendarWidget from "@/components/CalendarWidget";
 import EventsThisWeek from "@/components/EventsThisWeek";
 import FeedbackForm from "@/components/FeedbackForm";
-import { Message, TOOL_ICONS } from "@/lib/types";
+import { Message, TOOL_ICONS, statusFor } from "@/lib/types";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -71,6 +71,18 @@ export default function Home() {
               ...m,
               toolCalls: [...(m.toolCalls ?? []), { name: ev.name ?? "", args: ev.args ?? {} }],
             }));
+          } else if (ev.type === "tool_done") {
+            // Mark the most recent still-running call of that tool as finished.
+            updateLast((m) => {
+              const calls = (m.toolCalls ?? []).slice();
+              for (let k = calls.length - 1; k >= 0; k--) {
+                if (calls[k].name === ev.name && !calls[k].done) {
+                  calls[k] = { ...calls[k], done: true };
+                  break;
+                }
+              }
+              return { ...m, toolCalls: calls };
+            });
           } else if (ev.type === "token") {
             updateLast((m) => ({ ...m, content: m.content + (ev.text ?? "") }));
           } else if (ev.type === "error") {
@@ -152,7 +164,7 @@ export default function Home() {
                       </ReactMarkdown>
                     </div>
                   ) : (
-                    <span className="text-gray-500">Leopold is thinking…</span>
+                    <span className="text-gray-500">{statusFor(m)}</span>
                   )
                 ) : (
                   m.content

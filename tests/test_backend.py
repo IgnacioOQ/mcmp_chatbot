@@ -1,6 +1,9 @@
+import asyncio
 import importlib.util
+import json
 import os
 import sys
+import threading
 
 import pytest
 from fastapi.testclient import TestClient
@@ -90,3 +93,59 @@ def test_admin_feedback_rejects_invalid_token(db, client, monkeypatch):
     r = client.post("/admin/feedback", json={"id_token": "forged"})
     assert r.status_code == 401
     assert "secret" not in r.text
+
+
+class _FakeEngine:
+    """Runs one tool, then blocks until released before streaming the answer —
+    like Gemini, which returns no text until the tool result has been read."""
+
+    def __init__(self):
+        self.release = threading.Event()
+
+    def generate_response_stream(self, query, status_callback=None, tool_done_callback=None, **kwargs):
+        status_callback("get_events", {"date_range": "upcoming"})
+        tool_done_callback("get_events")
+        assert self.release.wait(5), "test never released the answer"
+        yield "Next talk"
+        yield " is Monday."
+
+
+def _events(lines):
+    return [json.loads(line) for line in lines if line]
+
+
+def test_chat_streams_tool_events_before_answer_is_ready(monkeypatch):
+    engine = _FakeEngine()
+    monkeypatch.setattr(backend_main, "_get_engine", lambda: engine)
+    stream = backend_main.chat(backend_main.ChatRequest(message="next talk?")).body_iterator
+
+    async def read(n):
+        return [json.loads(await asyncio.wait_for(stream.__anext__(), 2)) for _ in range(n)]
+
+    async def scenario():
+        # Tool events must arrive while the answer is still pending.
+        early = await read(2)
+        engine.release.set()
+        return early, [json.loads(chunk) async for chunk in stream]
+
+    early, rest = asyncio.run(scenario())
+    assert early == [
+        {"type": "tool_call", "name": "get_events", "args": {"date_range": "upcoming"}},
+        {"type": "tool_done", "name": "get_events"},
+    ]
+    assert rest == [
+        {"type": "token", "text": "Next talk"},
+        {"type": "token", "text": " is Monday."},
+        {"type": "done"},
+    ]
+
+
+def test_chat_reports_engine_failure_as_error_event(monkeypatch, client):
+    class _Broken:
+        def generate_response_stream(self, *args, **kwargs):
+            raise RuntimeError("gemini down")
+            yield  # pragma: no cover — makes this a generator
+
+    monkeypatch.setattr(backend_main, "_get_engine", lambda: _Broken())
+    resp = client.post("/chat", json={"message": "hi"})
+    assert _events(resp.text.splitlines()) == [{"type": "error", "message": "gemini down"}]

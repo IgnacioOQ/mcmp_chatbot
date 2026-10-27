@@ -288,7 +288,8 @@ class ChatEngine:
     def generate_response_stream(self, query: str, use_mcp_tools: bool = False,
                                  model_name: str = DEFAULT_GEMINI_MODEL,
                                  chat_history: list = None,
-                                 status_callback=None):
+                                 status_callback=None,
+                                 tool_done_callback=None):
         """
         Streaming variant of generate_response — yields text chunks as the
         model produces them. Only the Gemini provider is supported; the SDK
@@ -298,6 +299,10 @@ class ChatEngine:
         Yields strings; the caller is responsible for joining them. On a
         transient 429/503 the call to establish the stream is retried; once
         iteration starts, errors propagate.
+
+        status_callback(tool_name, args) fires when a tool starts and
+        tool_done_callback(tool_name) when it returns — both from inside the
+        stream iteration, i.e. before the next text chunk is yielded.
         """
         if self.provider != "gemini":
             # Fallback: non-streaming providers yield the full text in one chunk.
@@ -316,7 +321,7 @@ class ChatEngine:
         tools = []
         if use_mcp_tools and self.mcp_server:
             if status_callback:
-                tools = self.mcp_server.get_instrumented_tools(status_callback)
+                tools = self.mcp_server.get_instrumented_tools(status_callback, tool_done_callback)
             else:
                 tools = list(self.mcp_server.tools.values())
 

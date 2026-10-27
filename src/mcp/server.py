@@ -324,11 +324,12 @@ class MCPServer:
         except Exception as e:
             return {"error": str(e)}
 
-    def get_instrumented_tools(self, status_callback) -> list:
+    def get_instrumented_tools(self, status_callback, done_callback=None) -> list:
         """
         Returns wrapped versions of the tool functions that fire status_callback
-        before executing. Used by the Gemini automatic_function_calling path,
-        where the SDK calls the raw Python functions directly.
+        before executing and, if given, done_callback(tool_name) after it returns
+        (or raises). Used by the Gemini automatic_function_calling path, where the
+        SDK calls the raw Python functions directly.
         """
         import functools
         instrumented = []
@@ -339,12 +340,19 @@ class MCPServer:
                     status_callback(_name, kwargs)
                 except Exception:
                     pass
-                # Per-request dedupe — see call_tool() for rationale.
-                cache_key = (_name, self._freeze_args(kwargs))
-                if cache_key in self._call_cache:
-                    return self._call_cache[cache_key]
-                result = _fn(*args, **kwargs)
-                self._call_cache[cache_key] = result
-                return result
+                try:
+                    # Per-request dedupe — see call_tool() for rationale.
+                    cache_key = (_name, self._freeze_args(kwargs))
+                    if cache_key in self._call_cache:
+                        return self._call_cache[cache_key]
+                    result = _fn(*args, **kwargs)
+                    self._call_cache[cache_key] = result
+                    return result
+                finally:
+                    if done_callback:
+                        try:
+                            done_callback(_name)
+                        except Exception:
+                            pass
             instrumented.append(_wrapper)
         return instrumented

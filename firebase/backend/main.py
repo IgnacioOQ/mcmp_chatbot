@@ -9,6 +9,8 @@ v1: /chat is a blocking POST (no SSE streaming) — see FIREBASE_MIGRATION_PLAN.
 """
 import json
 import os
+import queue
+import threading
 from datetime import datetime, timedelta
 
 from fastapi import FastAPI
@@ -67,42 +69,46 @@ def chat(req: ChatRequest):
 
     Emits one event per line as the turn unfolds so the UI can show progress in
     real time instead of waiting for the whole answer:
-      {"type": "tool_call", "name": ..., "args": ...}  — each time a tool fires
+      {"type": "tool_call", "name": ..., "args": ...}  — a tool starts
+      {"type": "tool_done", "name": ...}               — that tool returned
       {"type": "token", "text": ...}                   — answer chunks as they stream
       {"type": "done"}                                 — turn complete
       {"type": "error", "message": ...}                — failure mid-turn
 
-    The instrumented tools fire `status_callback` synchronously while the model
-    runs them (before the answer text streams), so draining the pending tool
-    events before each token keeps the wire order matching execution order.
+    The engine runs tools inside the Gemini stream iteration and yields nothing
+    until answer text arrives, so a generator that only writes between yields
+    would hold every tool event back until the answer is ready. The turn
+    therefore runs in a worker thread that puts each event on a queue the moment
+    it happens; the response reads the queue, so events reach the client live
+    and in execution order. Clients must ignore event types they don't know.
     """
     engine = _get_engine()
+    events: queue.Queue = queue.Queue()
+    _END = object()
 
-    def event_stream():
-        pending: list[dict] = []
-
-        def _callback(tool_name, args):
-            pending.append({"type": "tool_call", "name": tool_name, "args": args or {}})
-
-        def _drain():
-            while pending:
-                yield json.dumps(pending.pop(0)) + "\n"
-
+    def _run_turn():
         try:
             for chunk in engine.generate_response_stream(
                 req.message,
                 use_mcp_tools=True,
                 model_name=DEFAULT_GEMINI_MODEL,
                 chat_history=req.history,
-                status_callback=_callback,
+                status_callback=lambda name, args: events.put(
+                    {"type": "tool_call", "name": name, "args": args or {}}),
+                tool_done_callback=lambda name: events.put({"type": "tool_done", "name": name}),
             ):
-                yield from _drain()
                 if chunk:
-                    yield json.dumps({"type": "token", "text": chunk}) + "\n"
-            yield from _drain()
-            yield json.dumps({"type": "done"}) + "\n"
+                    events.put({"type": "token", "text": chunk})
+            events.put({"type": "done"})
         except Exception as e:  # noqa: BLE001 — surface any turn failure to the client
-            yield json.dumps({"type": "error", "message": str(e)}) + "\n"
+            events.put({"type": "error", "message": str(e)})
+        finally:
+            events.put(_END)
+
+    def event_stream():
+        threading.Thread(target=_run_turn, daemon=True).start()
+        while (ev := events.get()) is not _END:
+            yield json.dumps(ev) + "\n"
 
     return StreamingResponse(
         event_stream(),

@@ -221,3 +221,20 @@ def test_fuzzy_search_high_threshold_filters_out(patch_all):
     # A near-impossible threshold should drop every candidate.
     results = fuzzy_search("Sternkenberg", database="people", threshold=0.99)
     assert results == []
+
+
+def test_instrumented_tools_report_start_and_done():
+    from src.mcp.server import MCPServer
+    server = MCPServer()
+    server.tools = {"ok": lambda x: x * 2, "boom": lambda: 1 / 0}
+    log = []
+    ok, boom = server.get_instrumented_tools(
+        lambda name, args: log.append(("start", name)),
+        lambda name: log.append(("done", name)),
+    )
+    assert ok(x=2) == 4
+    assert ok(x=2) == 4  # served from the per-request cache, still reported
+    with pytest.raises(ZeroDivisionError):
+        boom()
+    assert log == [("start", "ok"), ("done", "ok"), ("start", "ok"), ("done", "ok"),
+                   ("start", "boom"), ("done", "boom")]

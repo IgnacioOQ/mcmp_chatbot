@@ -102,7 +102,7 @@ Covered by `bin/housekeeping-checks.sh`:
 
 ### Step 1 — pytest (script)
 
-`bin/housekeeping-checks.sh` runs `pytest tests/` inside the freshly built backend image with the repo mounted. Suites: engine (OpenAI-mocked), MCP tools, graph correctness, scraper, vector store, backend endpoints (`test_backend.py`, Firestore and token verification faked), and live Gemini integration (`test_gemini.py`, skipped without a key).
+`bin/housekeeping-checks.sh` runs `pytest tests/` inside the freshly built backend image with the repo mounted. Suites: engine (OpenAI-mocked), MCP tools, graph correctness, scraper, vector store, backend endpoints (`test_backend.py`, Firestore and token verification faked; includes the `/chat` NDJSON contract: `tool_call`/`tool_done` events must reach the client before the answer text is ready), and live Gemini integration (`test_gemini.py`, skipped without a key).
 
 Compare counts with the prior report: a new failure, a new skip, or a smaller total without a stated reason is a finding.
 
