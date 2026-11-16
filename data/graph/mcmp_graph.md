@@ -17,7 +17,7 @@
 | david_colaco | Dr. David Colaco | Person | Role: Postdoctoral Fellow |
 | wouter_cohen | Wouter Cohen | Person | Role: Postdoctoral Researcher |
 | felix_rohls | Felix Rohls, M.A. | Person | Role: Doctoral Student |
-| gabriel_trziu | Dr. Gabriel Târziu | Person | Role: Postdoctoral Researcher |
+| gabriel_trziu | Dr. Gabriel Târziu | Person | Role: Postdoctoral Fellow |
 | rodrigo_mena_gonzlez | Rodrigo Mena González | Person | Role: Doctoral Fellow |
 | martin_fischer | PD Dr. Martin Fischer | Person | Role: Member |
 | junyan_feng | Junyan Feng, M.A. | Person | Role: Member |

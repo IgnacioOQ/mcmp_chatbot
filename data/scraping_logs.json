@@ -931,5 +931,50 @@
                 ]
             }
         }
+    },
+    {
+        "timestamp": "2026-11-16T07:08:11.084919",
+        "changes": {
+            "events": {
+                "added": [
+                    "Rationality, Ethics, and Society: A Workshop in Honour of Martin Rechenauer",
+                    "Workshop on Autonomy and Its Limits"
+                ],
+                "removed": [],
+                "updated": [
+                    "Talk: Pablo Dopico (Konstanz)",
+                    "Universality and Indifference: Is Logic Neutral?",
+                    "Talk: Thomas Schmidt (Berlin)",
+                    "Talk (Work in Progress): Gino Elia (Stonybrook)",
+                    "Talk: Hein Duijf (Utrecht)",
+                    "Talk: Niels Linnemann (Geneva)",
+                    "Talk: Lorenzo Casini (Bologna)"
+                ]
+            },
+            "people": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Dr. Gabriel Târziu",
+                    "Simone Salzano, M.A.",
+                    "PD Dr. habil. Jürgen Landes",
+                    "Lilian von Bressensdorf"
+                ]
+            },
+            "research": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "Mathematical Philosophy"
+                ]
+            },
+            "general": {
+                "added": [],
+                "removed": [],
+                "updated": [
+                    "General: News and events"
+                ]
+            }
+        }
     }
 ]
